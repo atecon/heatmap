@@ -4,3 +4,6 @@ session.inp
 *.gdtb
 *.gbin
 *.dta
+
+# Add folder "jack"
+jack/
