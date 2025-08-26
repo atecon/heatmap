@@ -4,7 +4,7 @@ set assert stop
 
 # Load libraries
 include assertion.gfn
-include "./src/{{PKG_NAME}}.inp"
+include "./src/heatmap.inp"
 
 
 
