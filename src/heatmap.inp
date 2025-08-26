@@ -62,8 +62,8 @@ function bundle default_opts (void)
     # labels
     ret.title = ""
     ret.do_labels = FALSE
-    ret.xlabel = ""
-    ret.ylabel = ""
+    string ret.xlabel = ""
+    string ret.ylabel = ""
     ret.xtics = ""
     ret.ytics = ""
     ret.printvals = -1
@@ -76,6 +76,17 @@ function bundle default_opts (void)
 
     return ret
 end function
+
+function void print_palette (const bundle self)
+    /* Function to print the color palette settings. */
+
+    printf "set cbrange [%g:%g]\n", self.min_limit, self.max_limit
+    if !self.native
+        printf "%s\n", makepalette(self.min_limit, self.max_limit, self.zerowhite,
+                                   self.coldest, self.hottest)
+    endif
+end function
+
 
 function string makepalette (scalar m,
                              scalar M,
@@ -160,25 +171,26 @@ function void fix_column_vector_case (matrix *mat)
     endif
 end function
 
-
-function bundle contour_plot (const bundle self)
-    /* Main function for creating a contour plot */
-
-    scalar self.ncols_mat = cols(self.mat)
-    scalar self.nrows_mat = rows(self.mat)
-    scalar N = rows(self.mat)  # TODO: get rid of later
-
-
-    return variable
-end function
-
 function scalar get_limit (const scalar val, const scalar fallback)
     # Helper function to get min/max with fallback
     return ok(val) ? val : fallback
 end function
 
 
-function bundle heatmap_plot (const bundle self)
+function bundle contour_plot (bundle self)
+    /* Main function for creating a contour plot */
+
+    scalar self.ncols_mat = cols(self.mat)
+    scalar self.nrows_mat = rows(self.mat)
+    scalar N = rows(self.mat)  # TODO: get rid of later
+
+    write_gnuplot_contour(self)
+
+    return variable
+end function
+
+
+function bundle heatmap_plot (bundle self)
     /* Main function for creating a heatmap plot */
 
     if self.ncols_mat == 1
@@ -187,26 +199,29 @@ function bundle heatmap_plot (const bundle self)
     endif
 
     if self.do_labels
-        rn = stock_labels(self.mat, FALSE)
-        strings cn = stock_labels(self.mat, 1)
-        N = nelem(rn)   # TODO: get rid of later
+        strings self.row_names = stock_labels(self.mat, FALSE)
+        strings self.column_names = stock_labels(self.mat, 1)
+        N = nelem(self.row_names)   # TODO: get rid of later
     else
         scalar N = rows(self.mat)   # TODO: get rid of later
     endif
 
+
     # TODO: improve naming of variables
-    scalar m = get_limit(self.limits[1], min(self.mat))
-    scalar M = get_limit(self.limits[2], max(self.mat))
+    scalar self.min_limit = get_limit(self.limits[1], min(self.mat))
+    scalar self.max_limit = get_limit(self.limits[2], max(self.mat))
 
     if self.native
         self.zerowhite = FALSE
     endif
 
     if self.printvals >= 0
-        scalar decimale_places = self.printvals
+        scalar self.decimale_places = self.printvals
     else
         self.printvals = 0
     endif
+
+    write_gnuplot_heatmap(self)
 
     return variable
 end function
@@ -222,6 +237,22 @@ function string write_gnuplot_heatmap (const bundle self)
     outfile --tempfile=fn
         print_enhanced(self.valfs)
         print_title(self.actual_title, self.titlefs)
+        printf "unset key\n"
+        print_palette(self)
+        print_tics_nomirror(self.ticfs)
+        print_xrange(self.ncols_mat)
+
+        if self.do_labels
+            print_xtics(column_names, self.ncols_mat)
+            print_ytics(row_names, self.nrows_mat)
+            print_xtics_rotation(N)
+        endif
+
+        # The original parameter "xtics" and "ytics" were never documented.
+        # I actually think the original code did never work
+        #print_custom_xtics_ytics
+
+
 
     return variable
 end function
@@ -237,11 +268,104 @@ function string write_gnuplot_contour (const bundle self)
     outfile --tempfile=fn
         print_enhanced(self.valfs)
         print_title(self.actual_title, self.titlefs)
+        printf "unset key\n"
+        printf "set contour base\n"
+        printf "unset surface\n"
+        printf "set view map\n"
+        print_tics_nomirror(self.ticfs)
+        print_xrange(self.ncols_mat)
 
-
+        if self.do_labels
+            print_xtics(column_names, self.ncols_mat)
+            print_ytics(row_names, self.nrows_mat)
+            print_xtics_rotation(N)
+        endif
+        #print_custom_xtics_ytics
 
     return variable
 end function
+
+# TODO: not sure whether this actually works
+function void print_custom_xtics_ytics (const string xtics, const string ytics)
+    /* Print custom x and y tics for gnuplot */
+
+    if strlen(xtics) > 0
+        printf "set xtics %s\n", xtics
+    endif
+
+    if strlen(ytics) > 0
+        printf "set ytics %s\n", ytics
+    endif
+end function
+
+
+
+function void print_xtics_rotation (scalar N)
+    # Prints the gnuplot command to rotate x-axis tics based on N
+    scalar angle = N > 9 ? (N > 20 ? 90 : 45) : 0
+    printf "set xtics rotate by %d right\n", angle
+end function
+
+function void print_ytics (strings row_names, scalar nrows_mat)
+    # Prints the y-axis tic labels for a plot in gnuplot format.
+
+    printf "set ytics ("
+    loop i = 1..nrows_mat
+        s = row_names[i]
+        printf("'%s' %d", s, nrows_mat - i)
+        if i < nrows_mat
+            printf ", "
+        endif
+    endloop
+    printf ") out\n"
+end function
+
+
+function void print_xtics (strings column_names, scalar ncols_mat)
+#'
+#' Prints the x-axis tic labels for a plot in gnuplot format.
+#'
+#' @param column_names        A string array containing the column names to be used as tic labels.
+#' @param ncols_mat A scalar indicating the number of columns (i.e., number of tics).
+#'
+#' The function generates and prints the gnuplot 'set xtics' command, formatting the tic labels
+#' according to the provided column names and their positions. If there is only one column,
+#' it prints a single tic; otherwise, it prints all tics separated by commas.
+
+    printf "set xtics ("
+    if ncols_mat == 1
+        printf("'%s' %d", column_names[1], 1)
+    else
+        loop i = 1..ncols_mat
+            s = column_names[i]
+            printf("'%s' %d", s, i-1)
+            if i < ncols_mat
+                printf ", "
+            endif
+        endloop
+    endif
+    printf ") out\n"
+end function
+
+
+function void print_xrange (scalar ncols_mat)
+    /* Print gnuplot set xrange command for columns */
+    scalar subtract = 0.5
+    printf "set xrange [-0.5:%4.1f]\n", ncols_mat-subtract
+end function
+
+
+function void print_tics_nomirror (const scalar ticfs)
+    /* Print 'set tics nomirror' with optional font size */
+
+    printf "set tics nomirror "
+    if ok(ticfs)
+        printf "font \",%d\"\n", ticfs
+    else
+        printf "\n"
+    endif
+end function
+
 
 
 function void print_title (const string title,
@@ -301,65 +425,6 @@ function void heatmap (const matrix mat,
     string fn = ""
     set force_decpoint on
     outfile --tempfile=fn
-
-
-        printf "set title '%s' ", actual_title
-        if ok(self.titlefs)
-            printf "font \",%d\"\n", self.titlefs
-        else
-            printf "\n"
-        endif
-
-        printf "unset key\n"
-
-        if do_contour
-            printf "set contour base\n"
-            printf "unset surface\n"
-            printf "set view map\n"
-        else
-            printf "set cbrange [%g:%g]\n", m, M
-            if !native
-                printf "%s\n", makepalette(m, M, self.zerowhite, self.coldest, self.hottest)
-            endif
-        endif
-
-        printf "set tics nomirror "
-        if ok(self.ticfs)
-            printf "font \",%d\"\n", self.ticfs
-        else
-            printf "\n"
-        endif
-
-        printf "set xrange [-0.5:%4.1f]\n", ncols_mat-0.5
-
-        if do_labels
-            printf "set xtics ("
-            if ncols_mat == 1
-                printf("'%s' %d", cn[1], 1)
-            else
-                loop i = 1..ncols_mat
-                    s = cn[i]
-                    printf("'%s' %d", s, i-1)
-                    if i < ncols_mat
-                        printf ", "
-                    endif
-                endloop
-            endif
-            printf ") out\n"
-
-            printf "set ytics ("
-            loop i = 1..N
-                s = rn[i]
-                printf("'%s' %d", s , N - i)
-                if i < N
-                    printf ", "
-                endif
-            endloop
-            printf ") out\n"
-
-            angle = N > 9 ? (N > 20 ? 90 : 45) : 0
-            printf "set xtics rotate by %d right\n", angle
-        endif
 
         if strlen(self.xtics) > 0
             printf "set xtics %s\n", self.xtics
