@@ -225,8 +225,9 @@ function bundle heatmap_plot (bundle self)
         self.printvals = 0
     endif
 
-    string buffer = write_gnuplot_heatmap(self)
-    gnuplot --input="@buffer" --output="@dest"
+    string buffer_file = write_gnuplot_heatmap(self)
+    #print readfile("@buffer_file")
+    gnuplot --input="@buffer_file" --output="@dest"
     print_creation_message(self)
 
     return variable
@@ -237,10 +238,10 @@ function string write_gnuplot_heatmap (const bundle self)
     /* Function writing the actual gnuplot commands for heatmap */
 
     # Prepare the gnuplot script
-    string buffer = ""
+    string buffer_file = ""
     set force_decpoint on
 
-    outfile --tempfile=buffer
+    outfile --tempfile=buffer_file
         print_enhanced(self.valfs)
         print_title(self.actual_title, self.titlefs)
         printf "unset key\n"
@@ -271,7 +272,7 @@ function string write_gnuplot_heatmap (const bundle self)
     end outfile
     set force_decpoint off
 
-    return buffer
+    return buffer_file
 end function
 
 
@@ -279,10 +280,10 @@ function string write_gnuplot_contour (const bundle self)
     /* Function writing the actual gnuplot commands for contour plot */
 
     # Prepare the gnuplot script
-    string buffer = ""
+    string buffer_file = ""
     set force_decpoint on
 
-    outfile --tempfile=buffer
+    outfile --tempfile=buffer_file
         print_enhanced(self.valfs)
         print_title(self.actual_title, self.titlefs)
         printf "unset key\n"
@@ -313,7 +314,7 @@ function string write_gnuplot_contour (const bundle self)
     end outfile
     set force_decpoint off
 
-    return buffer
+    return buffer_file
 end function
 
 
@@ -387,7 +388,7 @@ end function
 
 
 
-function void print_add_grid(bool do_contour)
+function void print_add_grid (bool do_contour)
     /* This function prints the gnuplot commands to add grid lines to the plot. */
 
     if do_contour
@@ -546,7 +547,7 @@ function void heatmap (const matrix mat,
 
     bundle self = empty
     if exists(opts)
-        bundle self.opts = self + default_opts()
+        bundle self = opts +default_opts()
     else
         bundle self = default_opts()
     endif
@@ -618,6 +619,7 @@ function void heatmap_func (string func,
 
     heatmap(M, opts)
 end function
+
 
 function void heatmap_GUI (matrix mat "Matrix to plot",
                            string title[null] "Title",
