@@ -49,7 +49,7 @@ function bundle default_opts (void)
     ret.dest = "display"
     ret.quiet = 0
     ret.fparam = {}
-    ret.max_color_levels = 0
+    ret.clevels = 0
     ret.add_grid = 0
 
     # colours
@@ -185,8 +185,7 @@ function void contour_plot (bundle self)
     scalar N = rows(self.mat)  # TODO: get rid of later
     string dest = self.dest
 
-    write_gnuplot_contour(self)
-    string buffer = write_gnuplot_heatmap(self)
+    string buffer = write_gnuplot_contour(self)
     gnuplot --input="@buffer" --output="@dest"
     print_creation_message(self)
 end function
@@ -227,6 +226,7 @@ function void heatmap_plot (bundle self)
     #print readfile("@buffer_file")
     gnuplot --input="@buffer_file" --output="@dest"
     print_creation_message(self)
+
 end function
 
 
@@ -302,7 +302,7 @@ function string write_gnuplot_contour (const bundle self)
         if self.add_grid
             print_add_grid(TRUE)
         endif
-        print_contour_linetypes(self.max_color_levels)
+        print_contour_linetypes(self.clevels)
         print_matrix_data(self.mat)
         print_splot_matrix_lines()
 
@@ -362,24 +362,24 @@ end function
 
 
 
-function void print_contour_linetypes(scalar max_color_levels)
+function void print_contour_linetypes(scalar clevels)
     # Print gnuplot linetype settings for contour plot levels
 
-    max_color_levels = ceil(max_color_levels)
-    max_color_levels = xmin(max_color_levels, 64)
-    lw = max_color_levels > 12 ? 1 : 2
+    clevels = ceil(clevels)
+    clevels = xmin(clevels, 64)
+    lw = clevels > 12 ? 1 : 2
 
     if $version < 20232
-        strings lcols = strsplit(sprintf("%06d", zeros(max_color_levels,1)))
+        strings lcols = strsplit(sprintf("%06d", zeros(clevels,1)))
     else
-        strings lcols = rgbmix("red", "blue", seq(0,max_color_levels-1)/(max_color_levels-1))
+        strings lcols = rgbmix("red", "blue", seq(0,clevels-1)/(clevels-1))
     endif
 
-    loop i = 1..max_color_levels
+    loop i = 1..clevels
         printf "set linetype %d lc \"#%s\" dt solid lw %d\n", 100+i, lcols[i], lw
     endloop
 
-    printf "set cntrparam bspline levels %d firstlinetype 101\n", max_color_levels
+    printf "set cntrparam bspline levels %d firstlinetype 101\n", clevels
 end function
 
 
@@ -550,7 +550,7 @@ function void heatmap (const matrix mat,
 
     ### Process options
     string self.name_mat = argname(mat)
-    scalar self.do_contour = self.max_color_levels > 0
+    scalar self.do_contour = self.clevels > 0
     ncols_mat = cols(mat)
     nrows_mat = rows(mat)
 
@@ -563,9 +563,9 @@ function void heatmap (const matrix mat,
     string self.actual_title = strlen(self.title) > 0 ? self.title : argname(mat)
 
     if self.do_contour == TRUE
-        bundle self = contour_plot(self)
+        contour_plot(self)
     else
-        bundle self = heatmap_plot(self)
+        heatmap_plot(self)
     endif
 end function
 
@@ -630,7 +630,7 @@ function void heatmap_GUI (matrix mat "Matrix to plot",
       int decimal_places[0:6:0] "Decimals")
     bundle opts = defbundle("do_labels", do_labels)
     if contour
-        self.max_color_levels = 8
+        self.clevels = 8
     endif
 
     self.title = exists(title) ? title : "  "
