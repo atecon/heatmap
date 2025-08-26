@@ -172,6 +172,11 @@ function bundle contour_plot (const bundle self)
     return variable
 end function
 
+function scalar get_limit (const scalar val, const scalar fallback)
+    # Helper function to get min/max with fallback
+    return ok(val) ? val : fallback
+end function
+
 
 function bundle heatmap_plot (const bundle self)
     /* Main function for creating a heatmap plot */
@@ -187,6 +192,23 @@ function bundle heatmap_plot (const bundle self)
         N = nelem(rn)   # TODO: get rid of later
     else
         scalar N = rows(self.mat)   # TODO: get rid of later
+    endif
+
+    scalar m = get_limit(self.limits[1], min(self.mat))
+    scalar M = get_limit(self.limits[2], max(self.mat))
+
+    native = self.native
+    zw = self.zerowhite
+
+    if native
+        zw = FALSE
+    endif
+
+    if self.printvals >= 0
+        pv = 1
+        dec = self.printvals
+    else
+        pv = 0
     endif
 
 
@@ -222,6 +244,7 @@ function void heatmap (const matrix mat,
     matrix self.mat = mat
     scalar self.ncols_mat = cols(self.mat)
     scalar self.nrows_mat = rows(self.mat)
+    string self.actual_title = strlen(self.title) > 0 ? self.title : argname(mat)
 
     if do_contour == TRUE
         bundle self = contour_plot(self)
@@ -229,17 +252,7 @@ function void heatmap (const matrix mat,
         bundle self = heatmap_plot(self)
     endif
 
-    do_labels = self.do_labels && !do_contour
-    if do_labels
-        rn = stock_labels(mat, 0)
-        strings cn = stock_labels(mat, 1)
-        N = nelem(rn)
-    else
-        N = rows(mat)
-    endif
 
-    string actual_title = strlen(self.title) > 0 ? self.title : argname(mat)
-    string dest = self.dest
 
     if !do_contour
         scalar m = self.limits[1]
