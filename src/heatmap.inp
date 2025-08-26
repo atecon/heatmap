@@ -172,27 +172,26 @@ function void heatmap (const matrix mat,
     endif
 
     ### Process options
-    CONTOUR = opts.max_color_levels > 0
+    scalar do_contour = opts.max_color_levels > 0
+    ncols_mat = cols(mat)
+    nrows_mat = rows(mat)
 
-    c = cols(mat)
-
-    if CONTOUR
-        r = rows(mat)
-        if xmin(r,c) == 1
+    if do_contour
+        if xmin(nrows_mat, ncols_mat) == 1
             funcerr "Cannot do a contour plot of a vector"
         endif
     else
 
-        if c == 1
+        if ncols_mat == 1
             fix_column_vector_case(&mat)
-            c = 3
+            ncols_mat = 3
             col_fixed = 1
         else
             col_fixed = 0
         endif
     endif
 
-    do_labels = opts.do_labels && !CONTOUR
+    do_labels = opts.do_labels && !do_contour
     if do_labels
         rn = stock_labels(mat, 0)
         strings cn = stock_labels(mat, 1)
@@ -204,7 +203,7 @@ function void heatmap (const matrix mat,
     string actual_title = strlen(opts.title) > 0 ? opts.title : argname(mat)
     string dest = opts.dest
 
-    if !CONTOUR
+    if !do_contour
         scalar m = opts.limits[1]
         m = ok(m) ? m : min(mat)
         scalar M = opts.limits[2]
@@ -243,7 +242,7 @@ function void heatmap (const matrix mat,
 
         printf "unset key\n"
 
-        if CONTOUR
+        if do_contour
             printf "set contour base\n"
             printf "unset surface\n"
             printf "set view map\n"
@@ -261,17 +260,17 @@ function void heatmap (const matrix mat,
             printf "\n"
         endif
 
-        printf "set xrange [-0.5:%4.1f]\n", c-0.5
+        printf "set xrange [-0.5:%4.1f]\n", ncols_mat-0.5
 
         if do_labels
             printf "set xtics ("
-            if c == 1
+            if ncols_mat == 1
                 printf("'%s' %d", cn[1], 1)
             else
-                loop i = 1 .. c --quiet
+                loop i = 1 .. ncols_mat --quiet
                     s = cn[i]
                     printf("'%s' %d", s, i-1)
-                    if i < c
+                    if i < ncols_mat
                         printf ", "
                     endif
                 endloop
@@ -324,7 +323,7 @@ function void heatmap (const matrix mat,
         printf "set autoscale fix\n"
 
         if opts.add_grid
-            if CONTOUR
+            if do_contour
                 printf "set add_grid lw 0.5 lt -1 lc \"#dddddd\"\n"
             else
                 printf "set x2tics 1 format '' scale 0,0.001\n"
@@ -335,7 +334,7 @@ function void heatmap (const matrix mat,
             endif
         endif
 
-        if CONTOUR
+        if do_contour
             # line colours
             max_color_levels = ceil(opts.max_color_levels)
             max_color_levels = xmin(max_color_levels, 64)
@@ -362,7 +361,7 @@ function void heatmap (const matrix mat,
         printf "%12.5g", mat
         printf "EOD\n\n"
 
-        if CONTOUR
+        if do_contour
             printf "splot $data matrix with lines"
         else
             printf "plot $data matrix with image"
@@ -383,7 +382,7 @@ function void heatmap (const matrix mat,
 
     if !opts.quiet
         mname = argname(mat)
-        ptype = CONTOUR ? "contour plot" : "heatmap"
+        ptype = do_contour ? "contour plot" : "heatmap"
         if strlen(mname) == 0
             printf "%s created\n", ptype
         else
