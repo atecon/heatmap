@@ -72,7 +72,7 @@ function bundle default_opts (void)
     ret.titlefs = NA
     ret.ticfs = NA
     ret.labelfs = NA
-    ret.valfs = NA
+    ret.valfs = NA  # font size for matrix values
 
     return ret
 end function
@@ -208,11 +208,62 @@ function bundle heatmap_plot (const bundle self)
         self.printvals = 0
     endif
 
+    return variable
+end function
+
+
+function string write_gnuplot_heatmap (const bundle self)
+    /* Function writing the actual gnuplot commands for heatmap */
+
+    # Prepare the gnuplot script
+    string fn = ""
+    set force_decpoint on
+
+    outfile --tempfile=fn
+        print_enhanced(self.valfs)
+        print_title(self.actual_title, self.titlefs)
 
     return variable
 end function
 
 
+function string write_gnuplot_contour (const bundle self)
+    /* Function writing the actual gnuplot commands for contour plot */
+
+    # Prepare the gnuplot script
+    string fn = ""
+    set force_decpoint on
+
+    outfile --tempfile=fn
+        print_enhanced(self.valfs)
+        print_title(self.actual_title, self.titlefs)
+
+
+
+    return variable
+end function
+
+
+function void print_title (const string title,
+                           const scalar fontsize)
+    /* code description
+    return: type, description */
+
+    printf "set title '%s' ", title
+    if ok(fontsize)
+        printf "font \",%d\"\n", fontsize
+    else
+        printf "\n"
+    endif
+end function
+
+
+function void print_enhanced (const scalar valfs)
+    /* Print enhanced terminal option if valfs (valfs) is set  */
+    if ok(valfs)
+        printf "set termoption enhanced\n"
+    endif
+end function
 
 
 
@@ -251,9 +302,6 @@ function void heatmap (const matrix mat,
     set force_decpoint on
     outfile --tempfile=fn
 
-        if ok(self.valfs)
-            printf "set termoption enhanced\n"
-        endif
 
         printf "set title '%s' ", actual_title
         if ok(self.titlefs)
