@@ -1,5 +1,7 @@
 function strings stock_labels (const matrix X,
                                bool do_cols)
+    /* Get stock labels for matrix dimensions */
+
     strings ret = do_cols ? cnameget(X) : rnameget(X)
     if nelem(ret) == 0
         if do_cols
@@ -10,7 +12,7 @@ function strings stock_labels (const matrix X,
             string pref = "row"
         endif
         ret = array(dim)
-        loop i = 1 .. dim --quiet
+        loop i = 1..dim
             ret[i] = sprintf("%s %02d", pref, i)
         endloop
     endif
@@ -28,7 +30,7 @@ function string tics (scalar x0,
     t = seq(ini,fin) * scale
     k = nelem(t)
     dx = (x1 - x0) / (n - 1)
-    loop i = 1 .. k
+    loop i = 1..k
         pos = (t[i] - x0) / dx
         ret = ret ~ sprintf("\"%.4g\" %g ", t[i], pos)
         if i == k
@@ -159,15 +161,39 @@ function void fix_column_vector_case (matrix *mat)
 end function
 
 
+function bundle contour_plot (const bundle self)
+    /* Main function for creating a contour plot */
+
+    scalar self.ncols_mat = cols(self.mat)
+    scalar self.nrows_mat = rows(self.mat)
+    scalar N = rows(self.mat)  # TODO: get rid of later
 
 
-
-function bundle contourplot (const bundle self)
-    /* code description
-    return: type, description */
-    code
     return variable
 end function
+
+
+function bundle heatmap_plot (const bundle self)
+    /* Main function for creating a heatmap plot */
+
+    if self.ncols_mat == 1
+        fix_column_vector_case(&self.mat)
+        self.ncols_mat = cols(self.mat)
+    endif
+
+    if self.do_labels
+        rn = stock_labels(self.mat, FALSE)
+        strings cn = stock_labels(self.mat, 1)
+        N = nelem(rn)   # TODO: get rid of later
+    else
+        scalar N = rows(self.mat)   # TODO: get rid of later
+    endif
+
+
+    return variable
+end function
+
+
 
 
 
@@ -193,23 +219,14 @@ function void heatmap (const matrix mat,
     errorif(do_contour == TRUE && xmin(nrows_mat, ncols_mat) == 1,
             "Cannot do a contour plot of a vector")
 
-    # TODO: add a branch here for
-    # a) contour plot
-    # b) heatmap
-    # c) 3d plot (later to come)
+    matrix self.mat = mat
+    scalar self.ncols_mat = cols(self.mat)
+    scalar self.nrows_mat = rows(self.mat)
 
     if do_contour == TRUE
-        bundle self =
-
-
-    if do_contour == FALSE
-        if ncols_mat == 1
-            fix_column_vector_case(&mat)
-            ncols_mat = cols(mat)
-            #col_fixed = 1   # Not used anywhere
-        #else
-            #col_fixed = 0
-        endif
+        bundle self = contour_plot(self)
+    else
+        bundle self = heatmap_plot(self)
     endif
 
     do_labels = self.do_labels && !do_contour
@@ -288,7 +305,7 @@ function void heatmap (const matrix mat,
             if ncols_mat == 1
                 printf("'%s' %d", cn[1], 1)
             else
-                loop i = 1 .. ncols_mat --quiet
+                loop i = 1..ncols_mat
                     s = cn[i]
                     printf("'%s' %d", s, i-1)
                     if i < ncols_mat
@@ -299,7 +316,7 @@ function void heatmap (const matrix mat,
             printf ") out\n"
 
             printf "set ytics ("
-            loop i = 1 .. N --quiet
+            loop i = 1..N
                 s = rn[i]
                 printf("'%s' %d", s , N - i)
                 if i < N
@@ -367,7 +384,7 @@ function void heatmap (const matrix mat,
                 strings lcols = rgbmix("red", "blue", seq(0,max_color_levels-1)/(max_color_levels-1))
             endif
 
-            loop i = 1 .. max_color_levels
+            loop i = 1..max_color_levels
                 printf "set linetype %d lc \"#%s\" dt solid lw %d\n", 100+i, lcols[i], lw
             endloop
 
@@ -436,9 +453,9 @@ function void heatmap_func (string func,
     has_param = inbundle(opts, "fparam")
 
     scalar x = x0
-    loop j = 1 .. res
+    loop j = 1..res
         scalar y = y1
-        loop i = 1 .. res
+        loop i = 1..res
             if has_param
                 M[i,j] = feval(func, x, y, self.fparam)
             else
