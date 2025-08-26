@@ -183,8 +183,12 @@ function bundle contour_plot (bundle self)
     scalar self.ncols_mat = cols(self.mat)
     scalar self.nrows_mat = rows(self.mat)
     scalar N = rows(self.mat)  # TODO: get rid of later
+    string dest = self.dest
 
     write_gnuplot_contour(self)
+    string buffer = write_gnuplot_heatmap(self)
+    gnuplot --input="@buffer" --output="@dest"
+    print_creation_message(self)
 
     return variable
 end function
@@ -205,7 +209,7 @@ function bundle heatmap_plot (bundle self)
     else
         scalar N = rows(self.mat)   # TODO: get rid of later
     endif
-
+    string dest = self.dest
 
     # TODO: improve naming of variables
     scalar self.min_limit = get_limit(self.limits[1], min(self.mat))
@@ -221,7 +225,9 @@ function bundle heatmap_plot (bundle self)
         self.printvals = 0
     endif
 
-    write_gnuplot_heatmap(self)
+    string buffer = write_gnuplot_heatmap(self)
+    gnuplot --input="@buffer" --output="@dest"
+    print_creation_message(self)
 
     return variable
 end function
@@ -231,10 +237,10 @@ function string write_gnuplot_heatmap (const bundle self)
     /* Function writing the actual gnuplot commands for heatmap */
 
     # Prepare the gnuplot script
-    string fn = ""
+    string buffer = ""
     set force_decpoint on
 
-    outfile --tempfile=fn
+    outfile --tempfile=buffer
         print_enhanced(self.valfs)
         print_title(self.actual_title, self.titlefs)
         printf "unset key\n"
@@ -258,8 +264,14 @@ function string write_gnuplot_heatmap (const bundle self)
         if self.add_grid
             print_add_grid(FALSE)
         endif
+        print_matrix_data(self.mat)
+        print_plot_matrix_image(self.printvals, self.valfs)
 
-    return variable
+        printf "\n"
+    end outfile
+    set force_decpoint off
+
+    return buffer
 end function
 
 
@@ -267,10 +279,10 @@ function string write_gnuplot_contour (const bundle self)
     /* Function writing the actual gnuplot commands for contour plot */
 
     # Prepare the gnuplot script
-    string fn = ""
+    string buffer = ""
     set force_decpoint on
 
-    outfile --tempfile=fn
+    outfile --tempfile=buffer
         print_enhanced(self.valfs)
         print_title(self.actual_title, self.titlefs)
         printf "unset key\n"
@@ -293,9 +305,86 @@ function string write_gnuplot_contour (const bundle self)
         if self.add_grid
             print_add_grid(TRUE)
         endif
+        print_contour_linetypes(self.max_color_levels)
+        print_matrix_data(self.mat)
+        print_splot_matrix_lines()
 
-    return variable
+        printf "\n"
+    end outfile
+    set force_decpoint off
+
+    return buffer
 end function
+
+
+function void print_creation_message (const bundle self)
+    /* Prints a message indicating the plot was created. */
+    if !self.quiet
+        string ptype = self.do_contour ? "contour plot" : "heatmap"
+        if strlen(self.name_mat) == 0
+            printf "%s created\n", ptype
+        else
+            printf "%s for %s created\n", ptype, self.name_mat
+        endif
+    endif
+end function
+
+
+function void print_splot_matrix_lines(void)
+    /* Print the gnuplot command for splotting the matrix with lines */
+    printf "splot $data matrix with lines\n"
+end function
+
+
+function void print_plot_matrix_image(scalar printvals, scalar valfs)
+    /* Print the gnuplot command for plotting the matrix as an image */
+
+    printf "plot $data matrix with image"
+    if printvals
+        printf ", $data matrix using 1:2:"
+        if ok(valfs)
+            printf "(sprintf(\"{/=%d \%.%df}\",$3)) with labels\n", valfs, printvals
+        else
+            printf "(sprintf(\"\%.%df\",$3)) with labels\n", printvals
+        endif
+    endif
+    printf "\n"
+end function
+
+function void print_matrix_data(const matrix mat)
+    # Print matrix data for gnuplot in the required format
+
+    matrix m = mreverse(mat)
+    cnameset(m, "")
+    rnameset(m, "")
+
+    printf "$data << EOD\n"
+    printf "%12.5g", m
+    printf "EOD\n\n"
+end function
+
+
+
+function void print_contour_linetypes(scalar max_color_levels)
+    # Print gnuplot linetype settings for contour plot levels
+
+    max_color_levels = ceil(max_color_levels)
+    max_color_levels = xmin(max_color_levels, 64)
+    lw = max_color_levels > 12 ? 1 : 2
+
+    if $version < 20232
+        strings lcols = strsplit(sprintf("%06d", zeros(max_color_levels,1)))
+    else
+        strings lcols = rgbmix("red", "blue", seq(0,max_color_levels-1)/(max_color_levels-1))
+    endif
+
+    loop i = 1..max_color_levels
+        printf "set linetype %d lc \"#%s\" dt solid lw %d\n", 100+i, lcols[i], lw
+    endloop
+
+    printf "set cntrparam bspline levels %d firstlinetype 101\n", max_color_levels
+end function
+
 
 
 function void print_add_grid(bool do_contour)
@@ -455,6 +544,7 @@ function void heatmap (const matrix mat,
                        bundle opts[null])
     /* Main function */
 
+    bundle self = empty
     if exists(opts)
         bundle self.opts = self + default_opts()
     else
@@ -462,11 +552,12 @@ function void heatmap (const matrix mat,
     endif
 
     ### Process options
-    scalar do_contour = self.max_color_levels > 0
+    string self.name_mat = argname(mat)
+    scalar self.do_contour = self.max_color_levels > 0
     ncols_mat = cols(mat)
     nrows_mat = rows(mat)
 
-    errorif(do_contour == TRUE && xmin(nrows_mat, ncols_mat) == 1,
+    errorif(self.do_contour == TRUE && xmin(nrows_mat, ncols_mat) == 1,
             "Cannot do a contour plot of a vector")
 
     matrix self.mat = mat
@@ -474,87 +565,13 @@ function void heatmap (const matrix mat,
     scalar self.nrows_mat = rows(self.mat)
     string self.actual_title = strlen(self.title) > 0 ? self.title : argname(mat)
 
-    if do_contour == TRUE
+    if self.do_contour == TRUE
         bundle self = contour_plot(self)
     else
         bundle self = heatmap_plot(self)
     endif
-
-
-    ### Prepare the gnuplot script
-    string fn = ""
-    set force_decpoint on
-    outfile --tempfile=fn
-
-
-        if self.add_grid
-            if do_contour
-                printf "set add_grid lw 0.5 lt -1 lc \"#dddddd\"\n"
-            else
-                printf "set x2tics 1 format '' scale 0,0.001\n"
-                printf "set y2tics 1 format '' scale 0,0.001\n"
-                printf "set mx2tics 2\nset my2tics 2\n"
-                printf "set link x2\nset link y2\n"
-                printf "set add_grid front mx2tics my2tics lw 2 lt -1 lc rgb 'white'\n"
-            endif
-        endif
-
-        if do_contour
-            # line colours
-            max_color_levels = ceil(self.max_color_levels)
-            max_color_levels = xmin(max_color_levels, 64)
-            lw = max_color_levels > 12 ? 1 : 2
-
-            if $version < 20232
-                strings lcols = strsplit(sprintf("%06d", zeros(max_color_levels,1)))
-            else
-                strings lcols = rgbmix("red", "blue", seq(0,max_color_levels-1)/(max_color_levels-1))
-            endif
-
-            loop i = 1..max_color_levels
-                printf "set linetype %d lc \"#%s\" dt solid lw %d\n", 100+i, lcols[i], lw
-            endloop
-
-            printf "set cntrparam bspline levels %d firstlinetype 101\n", max_color_levels
-        endif
-
-        mat = mreverse(mat)
-        cnameset(mat, "")
-        rnameset(mat, "")
-
-        printf "$data << EOD\n"
-        printf "%12.5g", mat
-        printf "EOD\n\n"
-
-        if do_contour
-            printf "splot $data matrix with lines"
-        else
-            printf "plot $data matrix with image"
-            if self.printvals
-                printf ", $data matrix using 1:2:"
-                if ok(self.valfs)
-                    printf "(sprintf(\"{/=%d \%.%df}\",$3)) with labels\n", self.valfs, decimal_places
-                else
-                    printf "(sprintf(\"\%.%df\",$3)) with labels\n", decimal_places
-                endif
-            endif
-        endif
-        printf "\n"
-    end outfile
-    set force_decpoint off
-
-    gnuplot --input="@fn" --output="@dest"
-
-    if !self.quiet
-        mname = argname(mat)
-        ptype = do_contour ? "contour plot" : "heatmap"
-        if strlen(mname) == 0
-            printf "%s created\n", ptype
-        else
-            printf "%s for %s created\n", ptype, mname
-        endif
-    endif
 end function
+
 
 function void heatmap_func (string func,
                             scalar res[8::],
