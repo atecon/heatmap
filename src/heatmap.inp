@@ -47,7 +47,7 @@ function bundle default_opts (void)
     ret.dest = "display"
     ret.quiet = 0
     ret.fparam = {}
-    ret.clevels = 0
+    ret.max_color_levels_contour = 0
     ret.grid = 0
 
     # colours
@@ -161,10 +161,10 @@ function void fix_column_vector_case (matrix *mat)
     endif
 end function
 
-# public functions
-
 function void heatmap (matrix mat,
                        bundle opts[null])
+    /* Main function */
+
     if exists(opts)
         opts = opts + default_opts()
     else
@@ -172,8 +172,7 @@ function void heatmap (matrix mat,
     endif
 
     ### Process options
-
-    CONTOUR = opts.clevels > 0
+    CONTOUR = opts.max_color_levels_contour > 0
 
     c = cols(mat)
 
@@ -338,21 +337,21 @@ function void heatmap (matrix mat,
 
         if CONTOUR
             # line colours
-            clevels = ceil(opts.clevels)
-            clevels = xmin(clevels, 64)
-            lw = clevels > 12 ? 1 : 2
+            max_color_levels_contour = ceil(opts.max_color_levels_contour)
+            max_color_levels_contour = xmin(max_color_levels_contour, 64)
+            lw = max_color_levels_contour > 12 ? 1 : 2
 
             if $version < 20232
-                strings lcols = strsplit(sprintf("%06d", zeros(clevels,1)))
+                strings lcols = strsplit(sprintf("%06d", zeros(max_color_levels_contour,1)))
             else
-                strings lcols = rgbmix("red", "blue", seq(0,clevels-1)/(clevels-1))
+                strings lcols = rgbmix("red", "blue", seq(0,max_color_levels_contour-1)/(max_color_levels_contour-1))
             endif
 
-            loop i = 1 .. clevels
+            loop i = 1 .. max_color_levels_contour
                 printf "set linetype %d lc \"#%s\" dt solid lw %d\n", 100+i, lcols[i], lw
             endloop
 
-            printf "set cntrparam bspline levels %d firstlinetype 101\n", clevels
+            printf "set cntrparam bspline levels %d firstlinetype 101\n", max_color_levels_contour
         endif
 
         mat = mreverse(mat)
@@ -452,7 +451,7 @@ function void heatmap_GUI (matrix mat "Matrix to plot",
       int dec[0:6:0] "Decimals")
     bundle opts = defbundle("do_labels", do_labels)
     if contour
-        opts.clevels = 8
+        opts.max_color_levels_contour = 8
     endif
 
     opts.title = exists(title) ? title : "  "
