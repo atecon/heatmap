@@ -1,4 +1,4 @@
-PKG = {{PKG_NAME}}
+PKG = heatmap
 
 $(PKG).gfn: $(PKG).inp $(PKG).spec $(PKG)_sample.inp
 	gretlcli --makepkg $(PKG).inp
