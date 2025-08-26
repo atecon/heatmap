@@ -176,12 +176,10 @@ function void heatmap (const matrix mat,
     ncols_mat = cols(mat)
     nrows_mat = rows(mat)
 
-    if do_contour
-        if xmin(nrows_mat, ncols_mat) == 1
-            funcerr "Cannot do a contour plot of a vector"
-        endif
-    else
+    errorif(do_contour == TRUE && xmin(nrows_mat, ncols_mat) == 1,
+            "Cannot do a contour plot of a vector")
 
+    if do_contour == FALSE
         if ncols_mat == 1
             fix_column_vector_case(&mat)
             ncols_mat = 3
