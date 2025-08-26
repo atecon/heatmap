@@ -177,7 +177,7 @@ function scalar get_limit (const scalar val, const scalar fallback)
 end function
 
 
-function bundle contour_plot (bundle self)
+function void contour_plot (bundle self)
     /* Main function for creating a contour plot */
 
     scalar self.ncols_mat = cols(self.mat)
@@ -189,12 +189,10 @@ function bundle contour_plot (bundle self)
     string buffer = write_gnuplot_heatmap(self)
     gnuplot --input="@buffer" --output="@dest"
     print_creation_message(self)
-
-    return variable
 end function
 
 
-function bundle heatmap_plot (bundle self)
+function void heatmap_plot (bundle self)
     /* Main function for creating a heatmap plot */
 
     if self.ncols_mat == 1
@@ -229,8 +227,6 @@ function bundle heatmap_plot (bundle self)
     #print readfile("@buffer_file")
     gnuplot --input="@buffer_file" --output="@dest"
     print_creation_message(self)
-
-    return variable
 end function
 
 
