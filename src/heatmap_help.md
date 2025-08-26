@@ -72,53 +72,53 @@ As for the options bundle, the active keys are:
 
 ## general parameters
 
-- dest: string, the output file name. The default value is "display",
+- `dest`: string, the output file name. The default value is "display",
   which causes the plot to appear on screen
-- quiet: boolean, don't print a completion message (default = FALSE)
-- fparam: matrix, used in conjunction with the heatmap_func (see above)
-- max_color_levels: scalar, max number of levels for contour plots (see below)
-- add_grid: boolean, plot a grid (white for heatmaps, see below for
+- `quiet`: boolean, don't print a completion message (default = FALSE)
+- `fparam`: matrix, used in conjunction with the heatmap_func (see above)
+- `max_color_levels`: scalar, max number of levels for contour plots (see below)
+- `add_grid`: boolean, plot a grid (white for heatmaps, see below for
   contour plots)
 
 ## colours
 
-- native: boolean, use the native gnuplot palette; the default is
+- `native`: boolean, use the native gnuplot palette; the default is
   FALSE for heatmap and TRUE for heatmap_func
-- limits: matrix. A 2-element vector for controlling the minimum and
+- `limits`: matrix. A 2-element vector for controlling the minimum and
   maximum values for the colour palette. If either is set to NA, the
   min and max (respectively) of the input matrix will be used. This
   can be useful, for example, when plotting correlation matrices.
-- coldest: string, colour for the minimum of the plotted values. This
+- `coldest`: string, colour for the minimum of the plotted values. This
   setting is active if the 'native' option is 0. It has to be in a
   format recognised by gnuplot, eg "black" or "#0000cc" (default =
   "blue")
-- hottest: string, colour for the maximum of the plotted values. This
+- `hottest`: string, colour for the maximum of the plotted values. This
   setting is active if the 'native' option is 0. It has to be in a
   format recognised by gnuplot, eg "white" or "#aa88ed" (default =
   "red")
-- zerowhite: boolean, useful for the cases when it is important to
+- `zerowhite`: boolean, useful for the cases when it is important to
   separate positive and negative values: if enabled, will colour 0
   entries as white (default = 0). This setting is active only if the
   'native' option is 0.
 
 ## strings and labels
 
-- title: string, the plot title
-- do_labels: boolean, decorate the plot with x and y labels (default:
+- `title`: string, the plot title
+- `do_labels`: boolean, decorate the plot with x and y labels (default:
   false). If set to 1, the plot will use the row and column labels of
   the matrix, if present.
-- printvals: an integer, controlling whether to print the matrix
+- `printvals`: an integer, controlling whether to print the matrix
   values in the plot. If negative, nothing is printed. If positive, it
   controls the number of decimals. (default = -1)
-- xlabel: string, optional x-axis title
-- ylabel: string, optional y-axis title
+- `xlabel`: string, optional x-axis title
+- `ylabel`: string, optional y-axis title
 
 ## font sizes
 
-- labelfs: font size for the x- and y-titles (default = 14)
-- ticfs: font size fot the tic marks (default = 14)
-- titlefs: font size for the plot title (default = 14)
-- valfs: font size for the matrix values (default = 14)
+- `labelfs`: font size for the x- and y-titles (default = 14)
+- `ticfs`: font size for the tic marks (default = 14)
+- `titlefs`: font size for the plot title (default = 14)
+- `valfs`: font size for the matrix values (default = 14)
 
 # CONTOUR PLOTS
 
@@ -141,6 +141,7 @@ the `add_grid` boolean key may be used for plotting a 2-dimensional dotted
 grid.
 
 # CHANGELOG
+* 1.9 -> 2.0: add support for creating 3D-plot; partly new syntax
 
 * 1.8 -> 1.9: introduce adjustable font sizes (see the "correlations" example for a demonstration).
 * 1.7 -> 1.8: extend the "grid" switch to heatmaps. Also, amend the "correlations" example to show the new feature.
