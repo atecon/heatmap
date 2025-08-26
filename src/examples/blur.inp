@@ -1,0 +1,16 @@
+set verbose off
+include heatmap.gfn
+set seed 908070
+clear
+
+# blurring
+
+junk = mnormal(30, 30)
+
+loop for (a = 0; a <=1; a+=0.25)
+    matrix smooth = mshape(a, 3, 3)
+    smooth[2,2] = 1
+    # blur some random junk
+    blur = conv2d(junk, smooth)
+    heatmap(blur, _(title=sprintf("a = %g", a)))
+endloop

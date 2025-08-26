@@ -1,0 +1,27 @@
+set verbose off
+include heatmap.gfn
+clear
+
+### Plotting the Mandelbrot set
+
+# Note: don't expect this to be an efficient implementation:
+# if I had wanted speed, I'd have used a completely different
+# approach. I just want to showcase the "heatmap_func" function
+
+function scalar mandelbrot(scalar real, scalar imag)
+    matrix c = complex(real, imag)
+    z = c
+    i = 0
+    loop 24
+        z = z*z + c
+        az = abs(z)
+        if az > 2
+            break
+        endif
+        i++
+    endloop
+    return i
+end function
+
+heatmap_func("mandelbrot", 512, -2.5, 1, -1.5, 1.5,
+	     _(native=0, hottest="black", coldest="white"))

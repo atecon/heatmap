@@ -1,0 +1,23 @@
+set verbose off
+include heatmap.gfn
+
+# crude reproduction of the "corr" command plot
+
+open rac3d.gdt
+list X = SEX .. CHCOND2
+
+# plot correlation heatmap via the native "corr" command
+corr X --plot=display   
+
+# do something similar using "heatmap"
+M = mcorr({X})
+rnameset(M, varnames(X))
+cnameset(M, varnames(X))
+opts = _(zerowhite=TRUE, do_labels=TRUE, grid=TRUE,
+	 limits={-1,1}, printvals=1, title="Correlation matrix")
+heatmap(M, opts)
+
+# same as above, but with some tweaking of the font sizes
+opts += _(titlefs=32, ticfs=10, valfs=8)
+heatmap(M, opts)
+

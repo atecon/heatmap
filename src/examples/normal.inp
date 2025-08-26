@@ -1,0 +1,19 @@
+set verbose off
+include heatmap.gfn
+clear 
+
+### passing parameter to a function: bivariate normal density
+
+mxy = {1,0}        # mean vector
+vechS = {1,-0.5,1} # covariance matrix
+par = mxy ~ vechS
+
+function scalar ndens(scalar x, scalar y, matrix p)
+    # may be optimised by precomputing the inverse and log
+    # determinant, but hey, it's just an example
+    d = {x;y} - vec(p[1:2])
+    S = unvech(vec(p[3:5]))
+    return -0.5* ldet(S) + 0.5 * exp(-d'invpd(S)*d)
+end function
+
+heatmap_func("ndens", 100, -3, 3, -3, 3, _(fparam=par))

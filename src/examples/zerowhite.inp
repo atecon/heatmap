@@ -1,0 +1,20 @@
+set verbose off
+include heatmap.gfn
+clear
+
+### zerowhite option with different matrices
+
+scalar n = 64
+s = seq(1, n)
+A = mnormal(n,n) + (s .- s')
+
+bundle opts
+opts.zerowhite = TRUE
+
+heatmap(A, opts + defbundle("title", "All"))
+heatmap(A .> 0 ? A : 0, opts + defbundle("title", "Positive only"))
+heatmap(A .< 0 ? A : 0, opts + defbundle("title", "Negative only"))
+
+# with custom hot/cold combination
+
+heatmap(A, opts + _(hottest="magenta", coldest="cyan"))
