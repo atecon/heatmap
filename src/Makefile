@@ -1,12 +1,17 @@
 PKG = heatmap
+INP = heatmap.inp
 
-$(PKG).gfn: $(PKG).inp $(PKG).spec $(PKG)_sample.inp
-	gretlcli --makepkg $(PKG).inp
+$(PKG).gfn : $(INP) $(PKG).spec $(PKG)_help.md gui_help.md
+	gretlcli -m $(INP)
 
+$(PKG).zip : $(PKG).gfn examples
+	echo makepkg $(PKG).zip | gretlcli -b -
 
-install: $(PKG).gfn
-	echo pkg install $(PKG).gfn --local | gretlcli -b -
-	cat $(PKG)_help.md | tee ../README.md
+install : $(PKG).zip
+	echo "install ./$(PKG).zip --local" | gretlcli -b -
 
-clean:
-	rm -f $(PKG).gfn
+clean :
+	rm -rf *~ $(PKG).gfn $(PKG).zip session.inp examples/*~
+
+tarball : clean
+	tar -cvzf ../heatmap.tar.gz *
