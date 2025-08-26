@@ -1,9 +1,0 @@
-clear
-set verbose off
-include {{PKG_NAME}}.gfn
-
-open mccullagh.gdt --quiet
-
-list x = Months Acc
-bundle model = kmeans(x, 2)
-print model
