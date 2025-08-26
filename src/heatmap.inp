@@ -47,8 +47,8 @@ function bundle default_opts (void)
     ret.dest = "display"
     ret.quiet = 0
     ret.fparam = {}
-    ret.max_color_levels_contour = 0
-    ret.grid = 0
+    ret.max_color_levels = 0
+    ret.add_grid = 0
 
     # colours
     ret.native = 0
@@ -161,7 +161,7 @@ function void fix_column_vector_case (matrix *mat)
     endif
 end function
 
-function void heatmap (matrix mat,
+function void heatmap (const matrix mat,
                        bundle opts[null])
     /* Main function */
 
@@ -172,7 +172,7 @@ function void heatmap (matrix mat,
     endif
 
     ### Process options
-    CONTOUR = opts.max_color_levels_contour > 0
+    CONTOUR = opts.max_color_levels > 0
 
     c = cols(mat)
 
@@ -323,35 +323,35 @@ function void heatmap (matrix mat,
 
         printf "set autoscale fix\n"
 
-        if opts.grid
+        if opts.add_grid
             if CONTOUR
-                printf "set grid lw 0.5 lt -1 lc \"#dddddd\"\n"
+                printf "set add_grid lw 0.5 lt -1 lc \"#dddddd\"\n"
             else
                 printf "set x2tics 1 format '' scale 0,0.001\n"
                 printf "set y2tics 1 format '' scale 0,0.001\n"
                 printf "set mx2tics 2\nset my2tics 2\n"
                 printf "set link x2\nset link y2\n"
-                printf "set grid front mx2tics my2tics lw 2 lt -1 lc rgb 'white'\n"
+                printf "set add_grid front mx2tics my2tics lw 2 lt -1 lc rgb 'white'\n"
             endif
         endif
 
         if CONTOUR
             # line colours
-            max_color_levels_contour = ceil(opts.max_color_levels_contour)
-            max_color_levels_contour = xmin(max_color_levels_contour, 64)
-            lw = max_color_levels_contour > 12 ? 1 : 2
+            max_color_levels = ceil(opts.max_color_levels)
+            max_color_levels = xmin(max_color_levels, 64)
+            lw = max_color_levels > 12 ? 1 : 2
 
             if $version < 20232
-                strings lcols = strsplit(sprintf("%06d", zeros(max_color_levels_contour,1)))
+                strings lcols = strsplit(sprintf("%06d", zeros(max_color_levels,1)))
             else
-                strings lcols = rgbmix("red", "blue", seq(0,max_color_levels_contour-1)/(max_color_levels_contour-1))
+                strings lcols = rgbmix("red", "blue", seq(0,max_color_levels-1)/(max_color_levels-1))
             endif
 
-            loop i = 1 .. max_color_levels_contour
+            loop i = 1 .. max_color_levels
                 printf "set linetype %d lc \"#%s\" dt solid lw %d\n", 100+i, lcols[i], lw
             endloop
 
-            printf "set cntrparam bspline levels %d firstlinetype 101\n", max_color_levels_contour
+            printf "set cntrparam bspline levels %d firstlinetype 101\n", max_color_levels
         endif
 
         mat = mreverse(mat)
@@ -451,7 +451,7 @@ function void heatmap_GUI (matrix mat "Matrix to plot",
       int dec[0:6:0] "Decimals")
     bundle opts = defbundle("do_labels", do_labels)
     if contour
-        opts.max_color_levels_contour = 8
+        opts.max_color_levels = 8
     endif
 
     opts.title = exists(title) ? title : "  "
