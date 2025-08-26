@@ -80,7 +80,7 @@ As for the options bundle, the active keys are:
 - grid: boolean, plot a grid (white for heatmaps, see below for
   contour plots)
 
-## colours 
+## colours
 
 - native: boolean, use the native gnuplot palette; the default is
   FALSE for heatmap and TRUE for heatmap_func
@@ -134,7 +134,7 @@ blue (lower z) to red (higher).
 
 Some options have no effects with contour plots, namely: "do_labels",
 "printvals", "native", "limits", "coldest", "hottest" and
-"zerowhite". 
+"zerowhite".
 
 Conversely, the "clevels" setting is mandatory, for obvious reasons;
 the "grid" boolean key may be used for plotting a 2-dimensional dotted
@@ -150,5 +150,6 @@ grid.
 * 1.3 -> 1.4: fix the zerowhite options when the matrix to plot has only positive or negative values; fix the column vector case.
 * 1.21 -> 1.3: bugfix: comply with the version requirements for real (avoid _() in favour of defbundle()) and fix the "zerowhite" option when the matrix contains small numbers.
 * 1.2 -> 1.21: bugfix: same as previous fix, done properly this time for earlier versions of gretl.
-* 1.1 -> 1.2: bugfix: enforce decimal point when writing to gnuplot, so we don't have an error when running localised versions of gretl. 
+* 1.1 -> 1.2: bugfix: enforce decimal point when writing to gnuplot, so we don't have an error when running localised versions of gretl.
 * 1.0 -> 1.1: introduce 'builtin' and 'quiet' options, produce a completion message and provide a GUI interface
+
