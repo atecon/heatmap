@@ -21,7 +21,7 @@ Arguments:
 - opts: bundle, optional (see below)
 
 This function produces a heatmap or contour plot of a matrix,
-depending on whether the `max_color_levels` optional parameter is set (see
+depending on whether the `clevels` optional parameter is set (see
 below).
 
 ## heatmap_func(func, res, x0, x1, y0, y1, opts)
@@ -76,8 +76,8 @@ As for the options bundle, the active keys are:
   which causes the plot to appear on screen
 - `quiet`: boolean, don't print a completion message (default = FALSE)
 - `fparam`: matrix, used in conjunction with the heatmap_func (see above)
-- `max_color_levels`: scalar, max number of levels for contour plots (see below)
-- `add_grid`: boolean, plot a grid (white for heatmaps, see below for
+- `clevels`: scalar, max number of levels for contour plots (see below)
+- `grid`: boolean, plot a grid (white for heatmaps, see below for
   contour plots)
 
 ## colours
@@ -123,11 +123,11 @@ As for the options bundle, the active keys are:
 # CONTOUR PLOTS
 
 Starting from version 1.7, a contour plot can be produced instead of a
-heatmap. This happens if the `max_color_levels` scalar in the option bundle is
+heatmap. This happens if the `clevels` scalar in the option bundle is
 set to a value between 1 and 32. The number itself refers to the
 number of points on the z-axis that gnuplot will use for plotting the
 contour lines. Note that there is no predictable relationship between
-the `max_color_levels` setting and the number of contour lines you're going to
+the `clevels` setting and the number of contour lines you're going to
 get, but in most cases, with higher numbers you should see more
 lines. With gretl 2023c or later, contour lines will be coloured from
 blue (lower z) to red (higher).
@@ -136,12 +136,12 @@ Some options have no effects with contour plots, namely: "do_labels",
 "printvals", "native", "limits", "coldest", "hottest" and
 "zerowhite".
 
-Conversely, the `max_color_levels` setting is mandatory, for obvious reasons;
-the `add_grid` boolean key may be used for plotting a 2-dimensional dotted
+Conversely, the `clevels` setting is mandatory, for obvious reasons;
+the `grid` boolean key may be used for plotting a 2-dimensional dotted
 grid.
 
 # CHANGELOG
-* 1.9 -> 2.0: add support for creating 3D-plot; partly new syntax
+* 1.9 -> 2.0: add support for creating 3D-plot
 
 * 1.8 -> 1.9: introduce adjustable font sizes (see the "correlations" example for a demonstration).
 * 1.7 -> 1.8: extend the "grid" switch to heatmaps. Also, amend the "correlations" example to show the new feature.

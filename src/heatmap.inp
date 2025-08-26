@@ -50,7 +50,7 @@ function bundle default_opts (void)
     ret.quiet = 0
     ret.fparam = {}
     ret.clevels = 0
-    ret.add_grid = 0
+    ret.grid = 0
 
     # colours
     ret.native = 0
@@ -258,7 +258,7 @@ function string write_gnuplot_heatmap (const bundle self)
         print_xlabel(self.xlabel, self.labelfs)
         print_ylabel(self.ylabel, self.labelfs)
         print_autoscale_fix()
-        if self.add_grid
+        if self.grid
             print_add_grid(FALSE)
         endif
         print_matrix_data(self.mat)
@@ -299,7 +299,7 @@ function string write_gnuplot_contour (const bundle self)
         print_xlabel(self.xlabel, self.labelfs)
         print_ylabel(self.ylabel, self.labelfs)
         print_autoscale_fix()
-        if self.add_grid
+        if self.grid
             print_add_grid(TRUE)
         endif
         print_contour_linetypes(self.clevels)
@@ -388,13 +388,13 @@ function void print_add_grid (bool do_contour)
     /* This function prints the gnuplot commands to add grid lines to the plot. */
 
     if do_contour
-        printf "set add_grid lw 0.5 lt -1 lc \"#dddddd\"\n"
+        printf "set grid lw 0.5 lt -1 lc \"#dddddd\"\n"
     else
         printf "set x2tics 1 format '' scale 0,0.001\n"
         printf "set y2tics 1 format '' scale 0,0.001\n"
         printf "set mx2tics 2\nset my2tics 2\n"
         printf "set link x2\nset link y2\n"
-        printf "set add_grid front mx2tics my2tics lw 2 lt -1 lc rgb 'white'\n"
+        printf "set grid front mx2tics my2tics lw 2 lt -1 lc rgb 'white'\n"
     endif
 end function
 
@@ -577,30 +577,32 @@ function void heatmap_func (string func,
                             scalar y0,
                             scalar y1,
                             bundle xopts[null])
-    matrix M = mshape(NA, res, res)
-    dx = (x1 - x0)/(res-1)
-    dy = (y1 - y0)/(res-1)
+    /* This function produces a heatmap plot of a two-variable function,
+       with resolution given by the scalar res. */
 
-    opts = defbundle("do_labels", FALSE, "quiet", TRUE)
-    self.native = 1
+    matrix mat = mshape(NA, res, res)
+    scalar dx = (x1 - x0)/(res-1)
+    scalar dy = (y1 - y0)/(res-1)
+    bundle self = defbundle("do_labels", FALSE, "quiet", TRUE)
+    scalar self.native = 1
+    scalar has_param = inbundle(self, "fparam")
+    scalar x = x0
+
     if exists(xopts)
-        opts = opts + xopts
+        self = self + xopts
         if inbundle (xopts, "native")
             # explicit takes precedence
             self.native = xopts.native
         endif
     endif
 
-    has_param = inbundle(opts, "fparam")
-
-    scalar x = x0
     loop j = 1..res
         scalar y = y1
         loop i = 1..res
             if has_param
-                M[i,j] = feval(func, x, y, self.fparam)
+                mat[i,j] = feval(func, x, y, self.fparam)
             else
-                M[i,j] = feval(func, x, y)
+                mat[i,j] = feval(func, x, y)
             endif
             y -= dy
         endloop
@@ -609,11 +611,11 @@ function void heatmap_func (string func,
 
     self.xtics = tics(x0, x1, res)
     self.ytics = tics(y0, y1, res)
-    if !inbundle(opts, "title")
+    if !inbundle(self, "title")
         self.title = func ~ "(x,y)"
     endif
 
-    heatmap(M, opts)
+    heatmap(mat, self)
 end function
 
 
@@ -623,26 +625,27 @@ function void heatmap_GUI (matrix mat "Matrix to plot",
                            bool contour[0] "Contour plot",
                            int palette[1:4:1] "Palette" {"native", "zerowhite", "BW", "custom"},
                            string coldest[null] "Coldest color (for use with custom palette)",
-      string hottest[null] "Hottest color (for use with custom palette)",
-      scalar minimum[NA] "Lower limit for palette",
-      scalar maximum[NA] "Upper limit for palette",
-      bool pv[0] "Print values",
-      int decimal_places[0:6:0] "Decimals")
+                           string hottest[null] "Hottest color (for use with custom palette)",
+                           scalar minimum[NA] "Lower limit for palette",
+                           scalar maximum[NA] "Upper limit for palette",
+                           bool pv[0] "Print values",
+                           int decimal_places[0:6:0] "Decimals")
+    /* GUI function */
+
     bundle opts = defbundle("do_labels", do_labels)
     if contour
-        self.clevels = 8
+        scalar self.clevels = 8
     endif
 
-    self.title = exists(title) ? title : "  "
-    self.quiet = TRUE
-    self.dest = "display"
+    string self.title = exists(title) ? title : "  "
+    scalar self.quiet = TRUE
+    string self.dest = "display"
 
     if ok(minimum) || ok(maximum)
         self.limits = {minimum, maximum}
     endif
 
     # set up some sensible colour schemes
-
     self.native = FALSE
     if palette == 1
         self.native = TRUE
