@@ -1,0 +1,154 @@
+# DESCRIPTION
+
+This package is intended for producing heatmap or contour plots:
+Heatmaps are 2-dimensional plots where you have a rectangular array of
+"tiles" whose colours carry the relevant information; contour plots
+draw lines where the information is displayed by joining points with
+the same value.
+
+The package offers 2 public functions; both feature a limited degree
+of customisability via an "options" bundle (discussed later).
+
+Moreover, a menu entry can be added under the "View" menu, which
+offers a simplified interface to the "heatmap" function.
+
+# AVAILABLE FUNCTIONS
+
+## heatmap(X, opts)
+
+Arguments:
+- X: matrix, required
+- opts: bundle, optional (see below)
+
+This function produces a heatmap or contour plot of a matrix,
+depending on whether the "clevels" optional parameter is set (see
+below).
+
+## heatmap_func(func, res, x0, x1, y0, y1, opts)
+
+Arguments:
+- func: string
+- res: scalar
+- x0, x1: two scalars
+- y0, y1: two scalars
+- opts: bundle, optional
+
+This function produces a heatmap plot of a two-variable function, with
+resolution given by the scalar res.
+
+The function to plot is evaluated on a rectangular mesh where *x* goes
+from x0 to x1 and *y* goes from y0 to x1. Note: reasonable values for
+the "res" parameter go from 50 to 400, but it really depends on the
+context.
+
+The function must be passed via the argument "func", which should
+contain a string such that "func(x,y)" evaluates to a scalar. For
+example, the native function "atan2" should work OK. To plot the
+arc tangent function in the region x=±1, y=±1, use the line
+
+```
+heatmap_func("atan2", 40, -1, 1, -1, 1)
+```
+
+Optionally, a third parameter of matrix type can be passed to "func",
+by including it into the options bundle under the key "fparam". For
+example, the following code can be used for plotting the function
+z = x^2 + 2*y^2 - 3*x*y
+
+```
+function scalar myfunc(scalar x, scalar y, matrix a)
+	scalar ret = a[1] * x^2 + a[2] * y^2 + a[3] * x*y
+	return ret
+end function
+
+bundle opts = null
+opts.fparam = {1,2,-3}
+heatmap_func("myfunc", 40, -1, 1, -1, 1, opts)
+```
+
+# OPTIONS
+
+As for the options bundle, the active keys are:
+
+## general parameters
+
+- dest: string, the output file name. The default value is "display",
+  which causes the plot to appear on screen
+- quiet: boolean, don't print a completion message (default = FALSE)
+- fparam: matrix, used in conjunction with the heatmap_func (see above)
+- clevels: scalar, max number of levels for contour plots (see below)
+- grid: boolean, plot a grid (white for heatmaps, see below for
+  contour plots)
+
+## colours 
+
+- native: boolean, use the native gnuplot palette; the default is
+  FALSE for heatmap and TRUE for heatmap_func
+- limits: matrix. A 2-element vector for controlling the minimum and
+  maximum values for the colour palette. If either is set to NA, the
+  min and max (respectively) of the input matrix will be used. This
+  can be useful, for example, when plotting correlation matrices.
+- coldest: string, colour for the minimum of the plotted values. This
+  setting is active if the 'native' option is 0. It has to be in a
+  format recognised by gnuplot, eg "black" or "#0000cc" (default =
+  "blue")
+- hottest: string, colour for the maximum of the plotted values. This
+  setting is active if the 'native' option is 0. It has to be in a
+  format recognised by gnuplot, eg "white" or "#aa88ed" (default =
+  "red")
+- zerowhite: boolean, useful for the cases when it is important to
+  separate positive and negative values: if enabled, will colour 0
+  entries as white (default = 0). This setting is active only if the
+  'native' option is 0.
+
+## strings and labels
+
+- title: string, the plot title
+- do_labels: boolean, decorate the plot with x and y labels (default:
+  false). If set to 1, the plot will use the row and column labels of
+  the matrix, if present.
+- printvals: an integer, controlling whether to print the matrix
+  values in the plot. If negative, nothing is printed. If positive, it
+  controls the number of decimals. (default = -1)
+- xlabel: string, optional x-axis title
+- ylabel: string, optional y-axis title
+
+## font sizes
+
+- labelfs: font size for the x- and y-titles (default = 14)
+- ticfs: font size fot the tic marks (default = 14)
+- titlefs: font size for the plot title (default = 14)
+- valfs: font size for the matrix values (default = 14)
+
+# CONTOUR PLOTS
+
+Starting from version 1.7, a contour plot can be produced instead of a
+heatmap. This happens if the "clevels" scalar in the option bundle is
+set to a value between 1 and 32. The number itself refers to the
+number of points on the z-axis that gnuplot will use for plotting the
+contour lines. Note that there is no predictable relationship between
+the "clevels" setting and the number of contour lines you're going to
+get, but in most cases, with higher numbers you should see more
+lines. With gretl 2023c or later, contour lines will be coloured from
+blue (lower z) to red (higher).
+
+Some options have no effects with contour plots, namely: "do_labels",
+"printvals", "native", "limits", "coldest", "hottest" and
+"zerowhite". 
+
+Conversely, the "clevels" setting is mandatory, for obvious reasons;
+the "grid" boolean key may be used for plotting a 2-dimensional dotted
+grid.
+
+# CHANGELOG
+
+* 1.8 -> 1.9: introduce adjustable font sizes (see the "correlations" example for a demonstration).
+* 1.7 -> 1.8: extend the "grid" switch to heatmaps. Also, amend the "correlations" example to show the new feature.
+* 1.6 -> 1.7: contour plots; "xlabel" and "ylabel" options.
+* 1.5 -> 1.6: introduce the "limits" option. Enable "hottest" and "coldest" settings with "zerowhite". Switch to markdown for help.
+* 1.4 -> 1.5: introduce the "printvals" option. (Internal) remove outdated "outfile" syntax.
+* 1.3 -> 1.4: fix the zerowhite options when the matrix to plot has only positive or negative values; fix the column vector case.
+* 1.21 -> 1.3: bugfix: comply with the version requirements for real (avoid _() in favour of defbundle()) and fix the "zerowhite" option when the matrix contains small numbers.
+* 1.2 -> 1.21: bugfix: same as previous fix, done properly this time for earlier versions of gretl.
+* 1.1 -> 1.2: bugfix: enforce decimal point when writing to gnuplot, so we don't have an error when running localised versions of gretl. 
+* 1.0 -> 1.1: introduce 'builtin' and 'quiet' options, produce a completion message and provide a GUI interface

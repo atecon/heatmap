@@ -1,0 +1,494 @@
+function strings stock_labels (const matrix X,
+                               bool do_cols)
+    strings ret = do_cols ? cnameget(X) : rnameget(X)
+    if nelem(ret) == 0
+        if do_cols
+            scalar dim = cols(X)
+            string pref = "col"
+        else
+            scalar dim = rows(X)
+            string pref = "row"
+        endif
+        ret = array(dim)
+        loop i = 1 .. dim --quiet
+            ret[i] = sprintf("%s %02d", pref, i)
+        endloop
+    endif
+    return ret
+end function
+
+function string tics (scalar x0,
+                      scalar x1,
+                      scalar n)
+    ret = "( "
+    pwr = floor(log10((x1-x0)/2))
+    scale = 10^pwr
+    ini = ceil(x0/scale)
+    fin = floor(x1/scale)
+    t = seq(ini,fin) * scale
+    k = nelem(t)
+    dx = (x1 - x0) / (n - 1)
+    loop i = 1 .. k
+        pos = (t[i] - x0) / dx
+        ret = ret ~ sprintf("\"%.4g\" %g ", t[i], pos)
+        if i == k
+            ret = ret ~ ")"
+        else
+            ret = ret ~ ", "
+        endif
+    endloop
+    return ret
+end function
+
+function bundle default_opts (void)
+    bundle ret
+
+    # general
+    ret.dest = "display"
+    ret.quiet = 0
+    ret.fparam = {}
+    ret.clevels = 0
+    ret.grid = 0
+
+    # colours
+    ret.native = 0
+    ret.limits = {NA,NA}
+    ret.coldest = "blue"
+    ret.hottest = "red"
+    ret.zerowhite = FALSE
+
+    # labels
+    ret.title = ""
+    ret.do_labels = FALSE
+    ret.xlabel = ""
+    ret.ylabel = ""
+    ret.xtics = ""
+    ret.ytics = ""
+    ret.printvals = -1
+
+    # font size values
+    ret.titlefs = NA
+    ret.ticfs = NA
+    ret.labelfs = NA
+    ret.valfs = NA
+
+    return ret
+end function
+
+function string makepalette (scalar m,
+                             scalar M,
+                             bool zw,
+                             string cold,
+                             string hot)
+    if zw
+        # special cases first
+        if m >= 0
+            # reds only
+            ret = sprintf("set palette defined (0 'white', %g '%s')", M, hot)
+        elif M <= 0
+            # blues only
+            ret = sprintf("set palette defined (%g '%s', 0 'white')", m, cold)
+        else
+            scale = M - m
+            small = 0.05 * scale
+            actm = xmin(m, -small)
+            actM = xmax(M, small)
+            range = actM - actm
+            ret = sprintf("set palette defined (0 '%s', %g 'white', %g 'white', %g '%s')", cold, -(small+actm)/range, (small-actm)/range, (actM-actm)/range, hot)
+        endif
+    else
+        # simple
+        range = (M - m)
+        ret = sprintf("set palette defined (%g '%s', %g '%s')", m/range, cold, M/range, hot)
+    endif
+
+    return ret
+end function
+
+function scalar is_hex (string c)
+    scalar ret = (c[1] == "#") && (strlen(c) == 7)
+    if ret
+        scalar x = NA
+        scalar n = sscanf(c[2:strlen(c)], "%x", x)
+        ret = (n == 1)
+    endif
+    return ret
+end function
+
+function scalar colchk (string coldest,
+                        string hottest)
+    scalar err = !is_hex(coldest)
+
+    if err
+        strings colours = strsplit(readfile("@gretldir/data/gnuplot/gpcolors.txt"))
+        matrix tmp = instrings(colours, coldest)
+        scalar err = nelem(tmp) == 0
+    endif
+
+    if !err
+        err = !is_hex(hottest)
+        if err
+            if !exists(colours)
+                strings colours = strsplit(readfile("@gretldir/data/gnuplot/gpcolors.txt"))
+            endif
+            matrix tmp = instrings(colours, hottest)
+            scalar err = nelem(tmp) == 0
+        endif
+        err *= 2
+    endif
+
+    return err
+end function
+
+function void fix_column_vector_case (matrix *mat)
+    # this function "fixes" the column vector case by
+    # turning the input matrix in a 3-column matrix with
+    # NAs at the sides
+
+    rlab = rnameget(mat)
+    clab = cnameget(mat)
+    if nelem(clab) == 1
+        strings newlabs = defarray(" ", clab[1], " ")
+    else
+        strings newlabs = array(0)
+    endif
+
+    mat = NA ~ mat ~ NA
+    cnameset(mat, newlabs)
+
+    if nelem(rlab)
+        rnameset(mat, rlab)
+    endif
+end function
+
+# public functions
+
+function void heatmap (matrix mat,
+                       bundle opts[null])
+    if exists(opts)
+        opts = opts + default_opts()
+    else
+        opts = default_opts()
+    endif
+
+    ### Process options
+
+    CONTOUR = opts.clevels > 0
+
+    c = cols(mat)
+
+    if CONTOUR
+        r = rows(mat)
+        if xmin(r,c) == 1
+            funcerr "Cannot do a contour plot of a vector"
+        endif
+    else
+
+        if c == 1
+            fix_column_vector_case(&mat)
+            c = 3
+            col_fixed = 1
+        else
+            col_fixed = 0
+        endif
+    endif
+
+    do_labels = opts.do_labels && !CONTOUR
+    if do_labels
+        rn = stock_labels(mat, 0)
+        strings cn = stock_labels(mat, 1)
+        N = nelem(rn)
+    else
+        N = rows(mat)
+    endif
+
+    string actual_title = strlen(opts.title) > 0 ? opts.title : argname(mat)
+    string dest = opts.dest
+
+    if !CONTOUR
+        scalar m = opts.limits[1]
+        m = ok(m) ? m : min(mat)
+        scalar M = opts.limits[2]
+        M = ok(M) ? M : max(mat)
+
+        native = opts.native
+        zw = opts.zerowhite
+
+        if native
+            zw = FALSE
+        endif
+
+        if opts.printvals >= 0
+            pv = 1
+            dec = opts.printvals
+        else
+            pv = 0
+        endif
+    endif
+
+    ### Prepare the gnuplot script
+    string fn = ""
+    set force_decpoint on
+    outfile --tempfile=fn
+
+        if ok(opts.valfs)
+            printf "set termoption enhanced\n"
+        endif
+
+        printf "set title '%s' ", actual_title
+        if ok(opts.titlefs)
+            printf "font \",%d\"\n", opts.titlefs
+        else
+            printf "\n"
+        endif
+
+        printf "unset key\n"
+
+        if CONTOUR
+            printf "set contour base\n"
+            printf "unset surface\n"
+            printf "set view map\n"
+        else
+            printf "set cbrange [%g:%g]\n", m, M
+            if !native
+                printf "%s\n", makepalette(m, M, opts.zerowhite, opts.coldest, opts.hottest)
+            endif
+        endif
+
+        printf "set tics nomirror "
+        if ok(opts.ticfs)
+            printf "font \",%d\"\n", opts.ticfs
+        else
+            printf "\n"
+        endif
+
+        printf "set xrange [-0.5:%4.1f]\n", c-0.5
+
+        if do_labels
+            printf "set xtics ("
+            if c == 1
+                printf("'%s' %d", cn[1], 1)
+            else
+                loop i = 1 .. c --quiet
+                    s = cn[i]
+                    printf("'%s' %d", s, i-1)
+                    if i < c
+                        printf ", "
+                    endif
+                endloop
+            endif
+            printf ") out\n"
+
+            printf "set ytics ("
+            loop i = 1 .. N --quiet
+                s = rn[i]
+                printf("'%s' %d", s , N - i)
+                if i < N
+                    printf ", "
+                endif
+            endloop
+            printf ") out\n"
+
+            angle = N > 9 ? (N > 20 ? 90 : 45) : 0
+            printf "set xtics rotate by %d right\n", angle
+        endif
+
+        if strlen(opts.xtics) > 0
+            printf "set xtics %s\n", opts.xtics
+        endif
+
+        if strlen(opts.ytics) > 0
+            printf "set ytics %s\n", opts.ytics
+        endif
+
+        if strlen(opts.xlabel) > 0
+            axislab = strsub(opts.xlabel, "\"", "'")
+            printf "set xlabel \"%s\" ", axislab
+            if ok(opts.labelfs)
+                printf "font \",%d\"\n", opts.labelfs
+            else
+                printf "\n"
+            endif
+
+        endif
+
+        if strlen(opts.ylabel) > 0
+            axislab = strsub(opts.ylabel, "\"", "'")
+            printf "set ylabel \"%s\" ", axislab
+            if ok(opts.labelfs)
+                printf "font \",%d\"\n", opts.labelfs
+            else
+                printf "\n"
+            endif
+        endif
+
+        printf "set autoscale fix\n"
+
+        if opts.grid
+            if CONTOUR
+                printf "set grid lw 0.5 lt -1 lc \"#dddddd\"\n"
+            else
+                printf "set x2tics 1 format '' scale 0,0.001\n"
+                printf "set y2tics 1 format '' scale 0,0.001\n"
+                printf "set mx2tics 2\nset my2tics 2\n"
+                printf "set link x2\nset link y2\n"
+                printf "set grid front mx2tics my2tics lw 2 lt -1 lc rgb 'white'\n"
+            endif
+        endif
+
+        if CONTOUR
+            # line colours
+            clevels = ceil(opts.clevels)
+            clevels = xmin(clevels, 64)
+            lw = clevels > 12 ? 1 : 2
+
+            if $version < 20232
+                strings lcols = strsplit(sprintf("%06d", zeros(clevels,1)))
+            else
+                strings lcols = rgbmix("red", "blue", seq(0,clevels-1)/(clevels-1))
+            endif
+
+            loop i = 1 .. clevels
+                printf "set linetype %d lc \"#%s\" dt solid lw %d\n", 100+i, lcols[i], lw
+            endloop
+
+            printf "set cntrparam bspline levels %d firstlinetype 101\n", clevels
+        endif
+
+        mat = mreverse(mat)
+        cnameset(mat, "")
+        rnameset(mat, "")
+
+        printf "$data << EOD\n"
+        printf "%12.5g", mat
+        printf "EOD\n\n"
+
+        if CONTOUR
+            printf "splot $data matrix with lines"
+        else
+            printf "plot $data matrix with image"
+            if pv
+                printf ", $data matrix using 1:2:"
+                if ok(opts.valfs)
+                    printf "(sprintf(\"{/=%d \%.%df}\",$3)) with labels\n", opts.valfs, dec
+                else
+                    printf "(sprintf(\"\%.%df\",$3)) with labels\n", dec
+                endif
+            endif
+        endif
+        printf "\n"
+    end outfile
+    set force_decpoint off
+
+    gnuplot --input="@fn" --output="@dest"
+
+    if !opts.quiet
+        mname = argname(mat)
+        ptype = CONTOUR ? "contour plot" : "heatmap"
+        if strlen(mname) == 0
+            printf "%s created\n", ptype
+        else
+            printf "%s for %s created\n", ptype, mname
+        endif
+    endif
+end function
+
+function void heatmap_func (string func,
+                            scalar res[8::],
+                            scalar x0,
+                            scalar x1,
+                            scalar y0,
+                            scalar y1,
+                            bundle xopts[null])
+    matrix M = mshape(NA, res, res)
+    dx = (x1 - x0)/(res-1)
+    dy = (y1 - y0)/(res-1)
+
+    opts = defbundle("do_labels", FALSE, "quiet", TRUE)
+    opts.native = 1
+    if exists(xopts)
+        opts = opts + xopts
+        if inbundle (xopts, "native")
+            # explicit takes precedence
+            opts.native = xopts.native
+        endif
+    endif
+
+    has_param = inbundle(opts, "fparam")
+
+    scalar x = x0
+    loop j = 1 .. res
+        scalar y = y1
+        loop i = 1 .. res
+            if has_param
+                M[i,j] = feval(func, x, y, opts.fparam)
+            else
+                M[i,j] = feval(func, x, y)
+            endif
+            y -= dy
+        endloop
+        x += dx
+    endloop
+
+    opts.xtics = tics(x0, x1, res)
+    opts.ytics = tics(y0, y1, res)
+    if !inbundle(opts, "title")
+        opts.title = func ~ "(x,y)"
+    endif
+
+    heatmap(M, opts)
+end function
+
+function void heatmap_GUI (matrix mat "Matrix to plot",
+                           string title[null] "Title",
+                           bool do_labels[0] "Add side labels",
+                           bool contour[0] "Contour plot",
+                           int palette[1:4:1] "Palette" {"native", "zerowhite", "BW", "custom"},
+                           string coldest[null] "Coldest color (for use with custom palette)",
+      string hottest[null] "Hottest color (for use with custom palette)",
+      scalar minimum[NA] "Lower limit for palette",
+      scalar maximum[NA] "Upper limit for palette",
+      bool pv[0] "Print values",
+      int dec[0:6:0] "Decimals")
+    bundle opts = defbundle("do_labels", do_labels)
+    if contour
+        opts.clevels = 8
+    endif
+
+    opts.title = exists(title) ? title : "  "
+    opts.quiet = TRUE
+    opts.dest = "display"
+
+    if ok(minimum) || ok(maximum)
+        opts.limits = {minimum, maximum}
+    endif
+
+    # set up some sensible colour schemes
+
+    opts.native = FALSE
+    if palette == 1
+        opts.native = TRUE
+    elif palette == 2
+        opts.zerowhite = TRUE
+    elif palette == 3
+        opts.coldest="black"
+        opts.hottest="white"
+    elif palette == 4
+        if !(exists(coldest) && exists(hottest))
+            print "With a custom color scheme you must specify the 'hot' and 'cold' colors\n"
+            print "Reverting to the builtin palette\n"
+            opts.native = TRUE
+        else
+            err = colchk(coldest, hottest)
+            errorif(err == 1, "Color " ~ coldest ~ " is invalid")
+            errorif(err == 2, "Color " ~ hottest ~ " is invalid")
+            opts = defbundle("coldest", coldest, "hottest", hottest) + opts
+        endif
+    endif
+
+    if pv
+        opts.printvals = dec
+    endif
+
+    heatmap(mat, opts)
+end function
