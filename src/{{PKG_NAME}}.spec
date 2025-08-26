@@ -1,0 +1,15 @@
+author = Artur Tarassow
+email = atecon@posteo.de
+version = 0.1
+date = YYYY-MM-DD
+description = TBA
+tags = C13 C52
+min-version = 202XX
+public = TBA
+help = {{PKG_NAME}}_help.md
+sample-script = {{PKG_NAME}}_sample.inp
+# gui-main = OPTIONAL
+# label = OPTIONAL
+# menu-attachment = MAINWIN/Model/LinearModels
+# depends = OPTIONAL
+# provider = OPTIONAL

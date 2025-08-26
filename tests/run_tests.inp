@@ -1,0 +1,14 @@
+set verbose off
+clear
+set assert stop
+
+# Load libraries
+include assertion.gfn
+include "./src/{{PKG_NAME}}.inp"
+
+
+
+
+
+print "Finished all tests successfully."
+quit
