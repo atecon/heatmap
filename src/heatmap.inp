@@ -543,7 +543,7 @@ function void heatmap (const matrix mat,
 
     bundle self = empty
     if exists(opts)
-        bundle self = opts +default_opts()
+        bundle self = opts + default_opts()
     else
         bundle self = default_opts()
     endif
