@@ -252,7 +252,12 @@ function string write_gnuplot_heatmap (const bundle self)
         # I actually think the original code did never work
         #print_custom_xtics_ytics
 
-
+        print_xlabel(self.xlabel, self.labelfs)
+        print_ylabel(self.ylabel, self.labelfs)
+        print_autoscale_fix()
+        if self.add_grid
+            print_add_grid(FALSE)
+        endif
 
     return variable
 end function
@@ -282,8 +287,31 @@ function string write_gnuplot_contour (const bundle self)
         endif
         #print_custom_xtics_ytics
 
+        print_xlabel(self.xlabel, self.labelfs)
+        print_ylabel(self.ylabel, self.labelfs)
+        print_autoscale_fix()
+        if self.add_grid
+            print_add_grid(TRUE)
+        endif
+
     return variable
 end function
+
+
+function void print_add_grid(bool do_contour)
+    /* This function prints the gnuplot commands to add grid lines to the plot. */
+
+    if do_contour
+        printf "set add_grid lw 0.5 lt -1 lc \"#dddddd\"\n"
+    else
+        printf "set x2tics 1 format '' scale 0,0.001\n"
+        printf "set y2tics 1 format '' scale 0,0.001\n"
+        printf "set mx2tics 2\nset my2tics 2\n"
+        printf "set link x2\nset link y2\n"
+        printf "set add_grid front mx2tics my2tics lw 2 lt -1 lc rgb 'white'\n"
+    endif
+end function
+
 
 # TODO: not sure whether this actually works
 function void print_custom_xtics_ytics (const string xtics, const string ytics)
@@ -298,7 +326,10 @@ function void print_custom_xtics_ytics (const string xtics, const string ytics)
     endif
 end function
 
-
+function void print_autoscale_fix (void)
+    /* Print the gnuplot command to set autoscale fix */
+    printf "set autoscale fix\n"
+end function
 
 function void print_xtics_rotation (scalar N)
     # Prints the gnuplot command to rotate x-axis tics based on N
@@ -366,6 +397,35 @@ function void print_tics_nomirror (const scalar ticfs)
     endif
 end function
 
+function void print_ylabel (const string ylabel, const scalar labelfs)
+    /* Print the gnuplot set ylabel command with optional font size */
+
+    if strlen(ylabel) > 0
+        string axislab = strsub(ylabel, "\"", "'")
+        printf "set ylabel \"%s\" ", axislab
+        if ok(labelfs)
+            printf "font \",%d\"\n", labelfs
+        else
+            printf "\n"
+        endif
+    endif
+end function
+
+
+
+function void print_xlabel (const string xlabel, const scalar labelfs)
+    /* Print the gnuplot set xlabel command with optional font size */
+
+    if strlen(xlabel) > 0
+        string axislab = strsub(xlabel, "\"", "'")
+        printf "set xlabel \"%s\" ", axislab
+        if ok(labelfs)
+            printf "font \",%d\"\n", labelfs
+        else
+            printf "\n"
+        endif
+    endif
+end function
 
 
 function void print_title (const string title,
@@ -426,36 +486,6 @@ function void heatmap (const matrix mat,
     set force_decpoint on
     outfile --tempfile=fn
 
-        if strlen(self.xtics) > 0
-            printf "set xtics %s\n", self.xtics
-        endif
-
-        if strlen(self.ytics) > 0
-            printf "set ytics %s\n", self.ytics
-        endif
-
-        if strlen(self.xlabel) > 0
-            axislab = strsub(self.xlabel, "\"", "'")
-            printf "set xlabel \"%s\" ", axislab
-            if ok(self.labelfs)
-                printf "font \",%d\"\n", self.labelfs
-            else
-                printf "\n"
-            endif
-
-        endif
-
-        if strlen(self.ylabel) > 0
-            axislab = strsub(self.ylabel, "\"", "'")
-            printf "set ylabel \"%s\" ", axislab
-            if ok(self.labelfs)
-                printf "font \",%d\"\n", self.labelfs
-            else
-                printf "\n"
-            endif
-        endif
-
-        printf "set autoscale fix\n"
 
         if self.add_grid
             if do_contour
