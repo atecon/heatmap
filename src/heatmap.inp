@@ -147,11 +147,8 @@ function void fix_column_vector_case (matrix *mat)
 
     rlab = rnameget(mat)
     clab = cnameget(mat)
-    if nelem(clab) == 1
-        strings newlabs = defarray(" ", clab[1], " ")
-    else
-        strings newlabs = array(0)
-    endif
+    strings newlabs = array(0)
+    strings newlabs = nelem(clab) == 1 ? defarray(" ", clab[1], " ") : newlabs
 
     mat = NA ~ mat ~ NA
     cnameset(mat, newlabs)
