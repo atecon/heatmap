@@ -158,35 +158,61 @@ function void fix_column_vector_case (matrix *mat)
     endif
 end function
 
+
+
+
+
+function bundle contourplot (const bundle self)
+    /* code description
+    return: type, description */
+    code
+    return variable
+end function
+
+
+
+
+
+
+
 function void heatmap (const matrix mat,
                        bundle opts[null])
     /* Main function */
 
     if exists(opts)
-        opts = opts + default_opts()
+        bundle self.opts = self + default_opts()
     else
-        opts = default_opts()
+        bundle self = default_opts()
     endif
 
     ### Process options
-    scalar do_contour = opts.max_color_levels > 0
+    scalar do_contour = self.max_color_levels > 0
     ncols_mat = cols(mat)
     nrows_mat = rows(mat)
 
     errorif(do_contour == TRUE && xmin(nrows_mat, ncols_mat) == 1,
             "Cannot do a contour plot of a vector")
 
+    # TODO: add a branch here for
+    # a) contour plot
+    # b) heatmap
+    # c) 3d plot (later to come)
+
+    if do_contour == TRUE
+        bundle self =
+
+
     if do_contour == FALSE
         if ncols_mat == 1
             fix_column_vector_case(&mat)
-            ncols_mat = 3
-            col_fixed = 1
-        else
-            col_fixed = 0
+            ncols_mat = cols(mat)
+            #col_fixed = 1   # Not used anywhere
+        #else
+            #col_fixed = 0
         endif
     endif
 
-    do_labels = opts.do_labels && !do_contour
+    do_labels = self.do_labels && !do_contour
     if do_labels
         rn = stock_labels(mat, 0)
         strings cn = stock_labels(mat, 1)
@@ -195,25 +221,25 @@ function void heatmap (const matrix mat,
         N = rows(mat)
     endif
 
-    string actual_title = strlen(opts.title) > 0 ? opts.title : argname(mat)
-    string dest = opts.dest
+    string actual_title = strlen(self.title) > 0 ? self.title : argname(mat)
+    string dest = self.dest
 
     if !do_contour
-        scalar m = opts.limits[1]
+        scalar m = self.limits[1]
         m = ok(m) ? m : min(mat)
-        scalar M = opts.limits[2]
+        scalar M = self.limits[2]
         M = ok(M) ? M : max(mat)
 
-        native = opts.native
-        zw = opts.zerowhite
+        native = self.native
+        zw = self.zerowhite
 
         if native
             zw = FALSE
         endif
 
-        if opts.printvals >= 0
+        if self.printvals >= 0
             pv = 1
-            dec = opts.printvals
+            dec = self.printvals
         else
             pv = 0
         endif
@@ -224,13 +250,13 @@ function void heatmap (const matrix mat,
     set force_decpoint on
     outfile --tempfile=fn
 
-        if ok(opts.valfs)
+        if ok(self.valfs)
             printf "set termoption enhanced\n"
         endif
 
         printf "set title '%s' ", actual_title
-        if ok(opts.titlefs)
-            printf "font \",%d\"\n", opts.titlefs
+        if ok(self.titlefs)
+            printf "font \",%d\"\n", self.titlefs
         else
             printf "\n"
         endif
@@ -244,13 +270,13 @@ function void heatmap (const matrix mat,
         else
             printf "set cbrange [%g:%g]\n", m, M
             if !native
-                printf "%s\n", makepalette(m, M, opts.zerowhite, opts.coldest, opts.hottest)
+                printf "%s\n", makepalette(m, M, self.zerowhite, self.coldest, self.hottest)
             endif
         endif
 
         printf "set tics nomirror "
-        if ok(opts.ticfs)
-            printf "font \",%d\"\n", opts.ticfs
+        if ok(self.ticfs)
+            printf "font \",%d\"\n", self.ticfs
         else
             printf "\n"
         endif
@@ -286,30 +312,30 @@ function void heatmap (const matrix mat,
             printf "set xtics rotate by %d right\n", angle
         endif
 
-        if strlen(opts.xtics) > 0
-            printf "set xtics %s\n", opts.xtics
+        if strlen(self.xtics) > 0
+            printf "set xtics %s\n", self.xtics
         endif
 
-        if strlen(opts.ytics) > 0
-            printf "set ytics %s\n", opts.ytics
+        if strlen(self.ytics) > 0
+            printf "set ytics %s\n", self.ytics
         endif
 
-        if strlen(opts.xlabel) > 0
-            axislab = strsub(opts.xlabel, "\"", "'")
+        if strlen(self.xlabel) > 0
+            axislab = strsub(self.xlabel, "\"", "'")
             printf "set xlabel \"%s\" ", axislab
-            if ok(opts.labelfs)
-                printf "font \",%d\"\n", opts.labelfs
+            if ok(self.labelfs)
+                printf "font \",%d\"\n", self.labelfs
             else
                 printf "\n"
             endif
 
         endif
 
-        if strlen(opts.ylabel) > 0
-            axislab = strsub(opts.ylabel, "\"", "'")
+        if strlen(self.ylabel) > 0
+            axislab = strsub(self.ylabel, "\"", "'")
             printf "set ylabel \"%s\" ", axislab
-            if ok(opts.labelfs)
-                printf "font \",%d\"\n", opts.labelfs
+            if ok(self.labelfs)
+                printf "font \",%d\"\n", self.labelfs
             else
                 printf "\n"
             endif
@@ -317,7 +343,7 @@ function void heatmap (const matrix mat,
 
         printf "set autoscale fix\n"
 
-        if opts.add_grid
+        if self.add_grid
             if do_contour
                 printf "set add_grid lw 0.5 lt -1 lc \"#dddddd\"\n"
             else
@@ -331,7 +357,7 @@ function void heatmap (const matrix mat,
 
         if do_contour
             # line colours
-            max_color_levels = ceil(opts.max_color_levels)
+            max_color_levels = ceil(self.max_color_levels)
             max_color_levels = xmin(max_color_levels, 64)
             lw = max_color_levels > 12 ? 1 : 2
 
@@ -362,8 +388,8 @@ function void heatmap (const matrix mat,
             printf "plot $data matrix with image"
             if pv
                 printf ", $data matrix using 1:2:"
-                if ok(opts.valfs)
-                    printf "(sprintf(\"{/=%d \%.%df}\",$3)) with labels\n", opts.valfs, dec
+                if ok(self.valfs)
+                    printf "(sprintf(\"{/=%d \%.%df}\",$3)) with labels\n", self.valfs, dec
                 else
                     printf "(sprintf(\"\%.%df\",$3)) with labels\n", dec
                 endif
@@ -375,7 +401,7 @@ function void heatmap (const matrix mat,
 
     gnuplot --input="@fn" --output="@dest"
 
-    if !opts.quiet
+    if !self.quiet
         mname = argname(mat)
         ptype = do_contour ? "contour plot" : "heatmap"
         if strlen(mname) == 0
@@ -398,12 +424,12 @@ function void heatmap_func (string func,
     dy = (y1 - y0)/(res-1)
 
     opts = defbundle("do_labels", FALSE, "quiet", TRUE)
-    opts.native = 1
+    self.native = 1
     if exists(xopts)
         opts = opts + xopts
         if inbundle (xopts, "native")
             # explicit takes precedence
-            opts.native = xopts.native
+            self.native = xopts.native
         endif
     endif
 
@@ -414,7 +440,7 @@ function void heatmap_func (string func,
         scalar y = y1
         loop i = 1 .. res
             if has_param
-                M[i,j] = feval(func, x, y, opts.fparam)
+                M[i,j] = feval(func, x, y, self.fparam)
             else
                 M[i,j] = feval(func, x, y)
             endif
@@ -423,10 +449,10 @@ function void heatmap_func (string func,
         x += dx
     endloop
 
-    opts.xtics = tics(x0, x1, res)
-    opts.ytics = tics(y0, y1, res)
+    self.xtics = tics(x0, x1, res)
+    self.ytics = tics(y0, y1, res)
     if !inbundle(opts, "title")
-        opts.title = func ~ "(x,y)"
+        self.title = func ~ "(x,y)"
     endif
 
     heatmap(M, opts)
@@ -445,32 +471,32 @@ function void heatmap_GUI (matrix mat "Matrix to plot",
       int dec[0:6:0] "Decimals")
     bundle opts = defbundle("do_labels", do_labels)
     if contour
-        opts.max_color_levels = 8
+        self.max_color_levels = 8
     endif
 
-    opts.title = exists(title) ? title : "  "
-    opts.quiet = TRUE
-    opts.dest = "display"
+    self.title = exists(title) ? title : "  "
+    self.quiet = TRUE
+    self.dest = "display"
 
     if ok(minimum) || ok(maximum)
-        opts.limits = {minimum, maximum}
+        self.limits = {minimum, maximum}
     endif
 
     # set up some sensible colour schemes
 
-    opts.native = FALSE
+    self.native = FALSE
     if palette == 1
-        opts.native = TRUE
+        self.native = TRUE
     elif palette == 2
-        opts.zerowhite = TRUE
+        self.zerowhite = TRUE
     elif palette == 3
-        opts.coldest="black"
-        opts.hottest="white"
+        self.coldest="black"
+        self.hottest="white"
     elif palette == 4
         if !(exists(coldest) && exists(hottest))
             print "With a custom color scheme you must specify the 'hot' and 'cold' colors\n"
             print "Reverting to the builtin palette\n"
-            opts.native = TRUE
+            self.native = TRUE
         else
             err = colchk(coldest, hottest)
             errorif(err == 1, "Color " ~ coldest ~ " is invalid")
@@ -480,7 +506,7 @@ function void heatmap_GUI (matrix mat "Matrix to plot",
     endif
 
     if pv
-        opts.printvals = dec
+        self.printvals = dec
     endif
 
     heatmap(mat, opts)
