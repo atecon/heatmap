@@ -194,30 +194,23 @@ function bundle heatmap_plot (const bundle self)
         scalar N = rows(self.mat)   # TODO: get rid of later
     endif
 
+    # TODO: improve naming of variables
     scalar m = get_limit(self.limits[1], min(self.mat))
     scalar M = get_limit(self.limits[2], max(self.mat))
 
-    native = self.native
-    zw = self.zerowhite
-
-    if native
-        zw = FALSE
+    if self.native
+        self.zerowhite = FALSE
     endif
 
     if self.printvals >= 0
-        pv = 1
-        dec = self.printvals
+        scalar decimale_places = self.printvals
     else
-        pv = 0
+        self.printvals = 0
     endif
 
 
     return variable
 end function
-
-
-
-
 
 
 
@@ -252,28 +245,6 @@ function void heatmap (const matrix mat,
         bundle self = heatmap_plot(self)
     endif
 
-
-
-    if !do_contour
-        scalar m = self.limits[1]
-        m = ok(m) ? m : min(mat)
-        scalar M = self.limits[2]
-        M = ok(M) ? M : max(mat)
-
-        native = self.native
-        zw = self.zerowhite
-
-        if native
-            zw = FALSE
-        endif
-
-        if self.printvals >= 0
-            pv = 1
-            dec = self.printvals
-        else
-            pv = 0
-        endif
-    endif
 
     ### Prepare the gnuplot script
     string fn = ""
@@ -416,12 +387,12 @@ function void heatmap (const matrix mat,
             printf "splot $data matrix with lines"
         else
             printf "plot $data matrix with image"
-            if pv
+            if self.printvals
                 printf ", $data matrix using 1:2:"
                 if ok(self.valfs)
-                    printf "(sprintf(\"{/=%d \%.%df}\",$3)) with labels\n", self.valfs, dec
+                    printf "(sprintf(\"{/=%d \%.%df}\",$3)) with labels\n", self.valfs, decimal_places
                 else
-                    printf "(sprintf(\"\%.%df\",$3)) with labels\n", dec
+                    printf "(sprintf(\"\%.%df\",$3)) with labels\n", decimal_places
                 endif
             endif
         endif
@@ -498,7 +469,7 @@ function void heatmap_GUI (matrix mat "Matrix to plot",
       scalar minimum[NA] "Lower limit for palette",
       scalar maximum[NA] "Upper limit for palette",
       bool pv[0] "Print values",
-      int dec[0:6:0] "Decimals")
+      int decimal_places[0:6:0] "Decimals")
     bundle opts = defbundle("do_labels", do_labels)
     if contour
         self.max_color_levels = 8
@@ -536,7 +507,7 @@ function void heatmap_GUI (matrix mat "Matrix to plot",
     endif
 
     if pv
-        self.printvals = dec
+        self.printvals = decimal_places
     endif
 
     heatmap(mat, opts)
