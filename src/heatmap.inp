@@ -249,8 +249,14 @@ function void create_heatmap_plot (bundle self)
     /* Main function for creating a heatmap plot */
 
     if self.ncols_mat == 1
-        fix_column_vector_case(&self.mat)
-        self.ncols_mat = cols(self.mat)
+        #fix_column_vector_case(&self.mat)
+        matrix self.mat = fix_column_vector_case(self.mat)
+        scalar self.ncols_mat = cols(self.mat)
+    endif
+    if self.nrows_mat == 1 && self.input_type != "matrix"
+        # add an NA row above and below so the image has visible height
+        matrix self.mat = NA ~ self.mat ~ NA
+        self.nrows_mat = rows(self.mat)
     endif
 
     if self.do_labels
@@ -277,10 +283,10 @@ function void create_heatmap_plot (bundle self)
     endif
 
     string buffer_file = write_gnuplot_heatmap(self)
-    #print readfile("@buffer_file")
+    #print readfile("@buffer_file") # for debugging only
+
     gnuplot --input="@buffer_file" --output="@dest"
     print_creation_message(self)
-
 end function
 
 
