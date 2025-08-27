@@ -100,6 +100,8 @@ function string makepalette (scalar m,
                              bool zw,
                              string cold,
                              string hot)
+    /* Create a color palette definition for gnuplot. */
+    
     if zw
         # special cases first
         if m >= 0
