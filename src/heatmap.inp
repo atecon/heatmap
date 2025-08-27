@@ -131,12 +131,15 @@ function string makepalette (scalar m,
 end function
 
 function scalar is_hex (string c)
+    /* Check if a string is a valid hex color code. */
+    
     scalar ret = (c[1] == "#") && (strlen(c) == 7)
     if ret
         scalar x = NA
         scalar n = sscanf(c[2:strlen(c)], "%x", x)
         ret = (n == 1)
     endif
+    
     return ret
 end function
 
