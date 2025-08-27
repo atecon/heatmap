@@ -66,6 +66,24 @@ opts.fparam = {1,2,-3}
 heatmap_func("myfunc", 40, -1, 1, -1, 1, opts)
 ```
 
+## contour_plot(X, opts[null], clevels[::8])
+
+Arguments:
+- X: matrix, required
+- opts: bundle, optional
+- clevels: scalar, optional (default = 8)
+
+A small convenience wrapper that forces creation of a contour plot by setting the `clevels` option and delegating to heatmap(). If `clevels` is omitted the wrapper uses a sensible default (8).
+
+## heatmap_plot(Input, opts[null])
+
+Arguments:
+- Input: numeric, required - accepts a matrix, a single series, or a list of series (time-series)
+- opts: bundle, optional
+
+A convenience wrapper for producing heatmaps from the common data shapes encountered in Gretl workflows. If a **matrix** is provided it is used as-is. For **time-series datasets** a single series or a list of series is accepted and converted internally to a matrix (columns are series, rows are observations). For **panel datasets** a panel series is accepted and the wrapper will reshape it so that each unit becomes a column and time runs along rows. **Cross-sectional** series are not supported by this wrapper. After conversion the call is forwarded to heatmap().
+
+
 # OPTIONS
 
 As for the options bundle, the active keys are:
@@ -120,17 +138,18 @@ As for the options bundle, the active keys are:
 - `titlefs`: font size for the plot title (default = 14)
 - `valfs`: font size for the matrix values (default = 14)
 
+## date options
+
+When passing a time series or a list of time series to the `heatmap_plot()` function, you can specify the date format and rotation for the x-axis labels using the `date_format` and `date_rotate` options in the options bundle.
+
+- `date_format`: string, the format for the x-axis date labels (default "%Y-%m")
+- `date_rotate`: scalar, the rotation angle for the x-axis date labels (default 45)
+- `date_offset_x`: scalar, the x-axis offset for the date labels (default -3.5)
+- `date_offset_y`: scalar, the y-axis offset for the date labels (default -1.4)
+
 # CONTOUR PLOTS
 
-Starting from version 1.7, a contour plot can be produced instead of a
-heatmap. This happens if the `clevels` scalar in the option bundle is
-set to a value between 1 and 32. The number itself refers to the
-number of points on the z-axis that gnuplot will use for plotting the
-contour lines. Note that there is no predictable relationship between
-the `clevels` setting and the number of contour lines you're going to
-get, but in most cases, with higher numbers you should see more
-lines. With gretl 2023c or later, contour lines will be coloured from
-blue (lower z) to red (higher).
+Starting from version 1.7, a contour plot can be produced instead of a heatmap. This happens if the `clevels` scalar in the option bundle is set to a value between 1 and 32. The number itself refers to the number of points on the z-axis that gnuplot will use for plotting the contour lines. Note that there is no predictable relationship between the `clevels` setting and the number of contour lines you're going to get, but in most cases, with higher numbers you should see more lines. With gretl 2023c or later, contour lines will be coloured  from blue (lower z) to red (higher).
 
 Some options have no effects with contour plots, namely: "do_labels",
 "printvals", "native", "limits", "coldest", "hottest" and
@@ -140,9 +159,9 @@ Conversely, the `clevels` setting is mandatory, for obvious reasons;
 the `grid` boolean key may be used for plotting a 2-dimensional dotted
 grid.
 
-# CHANGELOG
-* 1.9 -> 2.0: add support for creating 3D-plot
 
+# CHANGELOG
+* 1.9 -> 2.0: add support for creating 3D-plot; add new wrapper functions `contour_plot()` and `heatmap_plot()`.
 * 1.8 -> 1.9: introduce adjustable font sizes (see the "correlations" example for a demonstration).
 * 1.7 -> 1.8: extend the "grid" switch to heatmaps. Also, amend the "correlations" example to show the new feature.
 * 1.6 -> 1.7: contour plots; "xlabel" and "ylabel" options.
