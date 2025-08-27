@@ -29,6 +29,7 @@ function string tics (const scalar x0,
     if x1 == x0
         return ""
     endif
+
     pwr = floor(log10((x1-x0)/2))
     scale = 10^pwr
     ini = ceil(x0/scale)
@@ -36,6 +37,7 @@ function string tics (const scalar x0,
     t = seq(ini,fin) * scale
     k = nelem(t)
     dx = (x1 - x0) / (n - 1)
+
     loop i = 1..k
         pos = (t[i] - x0) / dx
         ret = ret ~ sprintf("\"%.4g\" %g ", t[i], pos)
@@ -198,7 +200,7 @@ function scalar get_limit (const scalar val, const scalar fallback)
 end function
 
 
-function void contour_plot (bundle self)
+function void create_contour_plot (bundle self)
     /* Main function for creating a contour plot */
 
     scalar self.ncols_mat = cols(self.mat)
@@ -212,7 +214,7 @@ function void contour_plot (bundle self)
 end function
 
 
-function void heatmap_plot (bundle self)
+function void create_heatmap_plot (bundle self)
     /* Main function for creating a heatmap plot */
 
     if self.ncols_mat == 1
@@ -590,9 +592,9 @@ function void heatmap (const matrix mat,
     string self.actual_title = strlen(self.title) > 0 ? self.title : argname(mat)
 
     if self.do_contour == TRUE
-        contour_plot(self)
+        create_contour_plot(self)
     else
-        heatmap_plot(self)
+        create_heatmap_plot(self)
     endif
 end function
 
