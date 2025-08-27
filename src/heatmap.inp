@@ -698,7 +698,7 @@ function void heatmap_plot (const numeric Input, bundle opts[null])
             mat = {Input}
         else
             # If data_type is of type panel (data_type=3): Accept series only
-            errorif(data_type == 3 && !self.input_type == "series",
+            errorif(data_type == 3 && self.input_type != "series",
                     "Panel data must be a series")
             mat = {Input}
 
@@ -716,7 +716,7 @@ function void heatmap_plot (const numeric Input, bundle opts[null])
     # Retrieve variable names
     if self.input_type == "list"
         strings self.varnames = varnames(Input)
-    elif self.input_type == "series"
+    else
         strings self.varnames = defarray(argname(Input))
     endif
 
