@@ -161,7 +161,7 @@ grid.
 
 
 # CHANGELOG
-* 1.9 -> 2.0: add support for creating 3D-plot; add new wrapper functions `contour_plot()` and `heatmap_plot()`.
+* 1.9 -> 2.0: add support for creating 3D-plot; add new wrapper functions `contour_plot()` and `heatmap_plot()`; new dependency on `string_utils.gfn` (using `struniq()`).
 * 1.8 -> 1.9: introduce adjustable font sizes (see the "correlations" example for a demonstration).
 * 1.7 -> 1.8: extend the "grid" switch to heatmaps. Also, amend the "correlations" example to show the new feature.
 * 1.6 -> 1.7: contour plots; "xlabel" and "ylabel" options.
