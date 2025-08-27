@@ -73,6 +73,7 @@ function bundle default_opts (void)
 
     # labels
     ret.title = ""
+    strings ret.varnames = array(0)
     ret.do_labels = FALSE
     string ret.xlabel = ""
     string ret.ylabel = ""
