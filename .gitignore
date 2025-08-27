@@ -4,6 +4,8 @@ session.inp
 *.gdtb
 *.gbin
 *.dta
+*.png
+*.eps
 
 # Add folder "jack"
 jack/
