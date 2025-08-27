@@ -78,6 +78,11 @@ function bundle default_opts (void)
     ret.xtics = ""
     ret.ytics = ""
     ret.printvals = -1
+    # Date tics
+    string ret.date_format = "%Y-%m"
+    scalar ret.date_rotate = 45
+    scalar ret.date_offset_x = -3.5
+    scalar ret.date_offset_y = -1.4
 
     # font size values
     ret.titlefs = NA
