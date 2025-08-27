@@ -62,6 +62,7 @@ function bundle default_opts (void)
     ret.fparam = {}
     ret.clevels = 0
     ret.grid = 0
+    ret.input_type = "matrix"
 
     # colours
     ret.native = 0
