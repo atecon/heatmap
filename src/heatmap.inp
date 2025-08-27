@@ -833,7 +833,8 @@ function void print_datetics (const series obsdate,
     /* Print gnuplot commands to set x-axis tics from an ISO8601 integer series.
        fmt: optional format string using %Y, %m, %d. */
 
-    scalar n = nobs(obsdate)
+    matrix dates = values(obsdate)  # values() needed for panel data
+    scalar n = nobs(dates)
     # choose at most ~10 labels to avoid clutter
     scalar maxlabels = 10
     scalar step = n > maxlabels ? ceil(n / maxlabels) : 1
@@ -842,7 +843,7 @@ function void print_datetics (const series obsdate,
     scalar first = 1
     loop i = 1..n
         if i == 1 || i == n || ((i-1) % step == 0)
-            scalar val = obsdate[i]
+            scalar val = dates[i]
             # assume ISO date as integer YYYYMMDD (or YYYYMM)
             scalar year = floor(val/10000)
             scalar month = floor((val - year*10000) / 100)
