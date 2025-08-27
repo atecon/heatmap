@@ -238,7 +238,6 @@ function void create_contour_plot (bundle self)
 
     scalar self.ncols_mat = cols(self.mat)
     scalar self.nrows_mat = rows(self.mat)
-    scalar N = rows(self.mat)  # TODO: get rid of later
     string dest = self.dest
 
     string buffer = write_gnuplot_contour(self)
@@ -264,13 +263,9 @@ function void create_heatmap_plot (bundle self)
     if self.do_labels
         strings self.row_names = stock_labels(self.mat, FALSE)
         strings self.column_names = stock_labels(self.mat, 1)
-        N = nelem(self.row_names)   # TODO: get rid of later
-    else
-        scalar N = rows(self.mat)   # TODO: get rid of later
     endif
     string dest = self.dest
 
-    # TODO: improve naming of variables
     scalar self.min_limit = get_limit(self.limits[1], min(self.mat))
     scalar self.max_limit = get_limit(self.limits[2], max(self.mat))
 
@@ -306,7 +301,7 @@ function string write_gnuplot_heatmap (const bundle self)
         print_tics_nomirror(self.ticfs)
         print_xrange(self.ncols_mat)
 
-        # TODO: neds further testing
+        # Currently not needed
         #if self.nrows_mat == 1 && self.input_type != "matrix"
         #    #print_yrange(self.nrows_mat)
         #endif
@@ -475,9 +470,10 @@ function void print_add_grid (bool do_contour)
 end function
 
 
-# TODO: not sure whether this actually works
+# Currently not needed
+/*
 function void print_custom_xtics_ytics (const string xtics, const string ytics)
-    /* Print custom x and y tics for gnuplot */
+    # Print custom x and y tics for gnuplot
 
     if strlen(xtics) > 0
         printf "set xtics %s\n", xtics
@@ -487,6 +483,7 @@ function void print_custom_xtics_ytics (const string xtics, const string ytics)
         printf "set ytics %s\n", ytics
     endif
 end function
+*/
 
 function void print_autoscale_fix (void)
     /* Print the gnuplot command to set autoscale fix */
