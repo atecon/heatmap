@@ -1,8 +1,8 @@
-author = Riccardo "Jack" Lucchetti
+author = Riccardo "Jack" Lucchetti and Artur Tarassow
 email = r.lucchetti@univpm.it
-version = 1.9
-date = 2025-02-08
-description = heatmap and contour plots
+version = 2.0
+date = 2025-08-29
+description = Heatmap and contour plots
 tags = C10
 min-version = 2021a
 
@@ -10,6 +10,7 @@ data-requirement = no-data-ok
 gui-main = heatmap_GUI
 gui-help = gui_help.md
 data-files = examples
+depends = string_utils
 
 label = Heatmap
 menu-attachment = MAINWIN/View
