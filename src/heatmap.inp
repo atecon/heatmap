@@ -650,7 +650,7 @@ function void heatmap (const matrix mat,
     matrix self.mat = mat
     scalar self.ncols_mat = cols(self.mat)
     scalar self.nrows_mat = rows(self.mat)
-    string self.actual_title = strlen(self.title) > 0 ? self.title : argname(mat)
+    string self.actual_title = set_title(self)
 
     if self.do_contour == TRUE
         create_contour_plot(self)
@@ -864,4 +864,24 @@ function void print_datetics (const series obsdate,
     endloop
     printf ") out rotate by %g offset %g,%g font ',%g'\n",
         self.date_rotate, self.date_offset_x, self.date_offset_y, self.labelfs
+end function
+
+
+function string set_title (const bundle self)
+    /* Set the title for the heatmap */
+
+    string ret = ""
+    if strlen(self.title) > 0
+        ret = self.title
+    else
+        strings vnames = self.varnames
+        loop foreach i vnames
+            ret += sprintf("%s", vnames[i])
+            if i < nelem(vnames)
+                ret += ", "
+            endif
+        endloop
+    endif
+
+    return ret
 end function
