@@ -37,7 +37,7 @@ This function produces a heatmap plot of a two-variable function, with
 resolution given by the scalar res.
 
 The function to plot is evaluated on a rectangular mesh where *x* goes
-from x0 to x1 and *y* goes from y0 to x1. Note: reasonable values for
+from x0 to x1 and *y* goes from y0 to y1. Note: reasonable values for
 the "res" parameter go from 50 to 400, but it really depends on the
 context.
 
