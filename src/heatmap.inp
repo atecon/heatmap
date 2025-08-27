@@ -1,6 +1,3 @@
-include string_utils.gfn  # TODO: remove later
-
-
 function strings stock_labels (const matrix X,
                                bool do_cols)
     /* Get stock labels for matrix dimensions */

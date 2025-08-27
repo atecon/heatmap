@@ -5,6 +5,7 @@ date = 2025-08-29
 description = Heatmap and contour plots
 tags = C10
 min-version = 2021a
+public = heatmap heatmap_func heatmap_GUI heatmap_plot contour_plot
 
 data-requirement = no-data-ok
 gui-main = heatmap_GUI
@@ -14,7 +15,6 @@ depends = string_utils
 
 label = Heatmap
 menu-attachment = MAINWIN/View
-public = heatmap heatmap_func heatmap_GUI
 no-print = heatmap_func heatmap_GUI
 help = heatmap_help.md
 sample-script = heatmap_sample.inp
