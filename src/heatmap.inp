@@ -305,15 +305,23 @@ function string write_gnuplot_heatmap (const bundle self)
         print_tics_nomirror(self.ticfs)
         print_xrange(self.ncols_mat)
 
-        if self.do_labels
-            print_xtics(column_names, self.ncols_mat)
-            print_ytics(row_names, self.nrows_mat)
-            print_xtics_rotation(N)
-        endif
+        # TODO: neds further testing
+        #if self.nrows_mat == 1 && self.input_type != "matrix"
+        #    #print_yrange(self.nrows_mat)
+        #endif
 
+        if self.do_labels && self.input_type == "matrix"
+            print_xtics(column_names, self.ncols_mat, self.ticfs)
+            print_ytics(row_names, self.nrows_mat, self.ticfs)
+            print_xtics_rotation(N)
+        elif self.input_type != "matrix" # either series or list
+            print_datetics(self.obsdate, self)
+            print_ytics(self.varnames, nelem(self.varnames), self.ticfs)
+        endif
         # The original parameter "xtics" and "ytics" were never documented.
         # I actually think the original code did never work
         #print_custom_xtics_ytics
+
 
         print_xlabel(self.xlabel, self.labelfs)
         print_ylabel(self.ylabel, self.labelfs)
@@ -323,9 +331,9 @@ function string write_gnuplot_heatmap (const bundle self)
         endif
         print_matrix_data(self.mat)
         print_plot_matrix_image(self.printvals, self.valfs)
-
         printf "\n"
     end outfile
+
     set force_decpoint off
 
     return buffer_file
