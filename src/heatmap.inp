@@ -358,8 +358,8 @@ function string write_gnuplot_contour (const bundle self)
         print_xrange(self.ncols_mat)
 
         if self.do_labels
-            print_xtics(column_names, self.ncols_mat)
-            print_ytics(row_names, self.nrows_mat)
+            print_xtics(column_names, self.ncols_mat, self.ticfs)
+            print_ytics(row_names, self.nrows_mat, self.ticfs)
             print_xtics_rotation(N)
         endif
         #print_custom_xtics_ytics
@@ -491,7 +491,7 @@ function void print_xtics_rotation (scalar N)
     printf "set xtics rotate by %d right\n", angle
 end function
 
-function void print_ytics (strings row_names, scalar nrows_mat)
+function void print_ytics (strings row_names, scalar nrows_mat, const scalar fontsize)
     # Prints the y-axis tic labels for a plot in gnuplot format.
 
     printf "set ytics ("
@@ -502,11 +502,11 @@ function void print_ytics (strings row_names, scalar nrows_mat)
             printf ", "
         endif
     endloop
-    printf ") out\n"
+    printf ") out font \",%g\"\n", fontsize
 end function
 
 
-function void print_xtics (strings column_names, scalar ncols_mat)
+function void print_xtics (strings column_names, scalar ncols_mat, const scalar fontsize)
 #'
 #' Prints the x-axis tic labels for a plot in gnuplot format.
 #'
@@ -535,7 +535,7 @@ function void print_xtics (strings column_names, scalar ncols_mat)
             endif
         endloop
     endif
-    printf ") out\n"
+    printf ") out font \",%g\"\n", fontsize
 end function
 
 
@@ -543,6 +543,12 @@ function void print_xrange (scalar ncols_mat)
     /* Print gnuplot set xrange command for columns */
     scalar subtract = 0.5
     printf "set xrange [-0.5:%4.1f]\n", ncols_mat-subtract
+end function
+
+function void print_yrange (scalar nrows_mat)
+    /* Print gnuplot set yrange command for rows */
+    scalar subtract = 0.5
+    printf "set yrange [%4.1f:%4.1f]\n", -subtract, nrows_mat-subtract
 end function
 
 
@@ -641,6 +647,70 @@ function void heatmap (const matrix mat,
     else
         create_heatmap_plot(self)
     endif
+end function
+
+
+function void contour_plot (const matrix mat, bundle opts[null], scalar clevels[::8])
+    /* Create a contour plot: ensure clevels is set (default 8) and call heatmap().
+       Convenience public wrapper for heatmap(). */
+
+    bundle myopts = exists(opts) ? opts + default_opts() : default_opts()
+
+    if ok(clevels)
+        myopts.clevels = clevels
+    elif !inbundle(myopts, "clevels") || myopts.clevels == 0
+        myopts.clevels = 8
+    endif
+
+    heatmap(mat, myopts)
+end function
+
+
+function void heatmap_plot (const numeric Input, bundle opts[null])
+    /* Create a standard heatmap: accept matrix, series (time/panel) or a list of time-series;
+       force clevels=0 and call heatmap(). */
+
+    bundle self = exists(opts) ? opts + default_opts() : default_opts()
+    scalar self.clevels = 0
+    string self.input_type = typename(Input)
+    scalar data_type = $datatype
+    matrix mat = {}
+
+    if self.input_type == "matrix"
+        mat = Input
+    else  # series or list are passed
+        errorif(data_type == 1,
+                "Cross-sectional series are not supported for heatmap_plot()")
+
+        # If data_type is time-series (data_type=2): Accept series and list
+        if data_type == 2
+            # single time series or list accepted
+            mat = {Input}
+        else
+            # If data_type is of type panel (data_type=3): Accept series only
+            errorif(data_type == 3 && !self.input_type == "series",
+                    "Panel data must be a series")
+            mat = {Input}
+
+            # panel series:
+            # Each column refers to a cross-sectional unit; row refers to time dim.
+            scalar num_periods = $pd
+            scalar n_units = $nobs / num_periods
+            mat = mshape({Input}, num_periods, n_units)
+        endif
+
+        mat = transp(mat)
+        series self.obsdate = $obsdate
+    endif
+
+    # Retrieve variable names
+    if self.input_type == "list"
+        strings self.varnames = varnames(Input)
+    elif self.input_type == "series"
+        strings self.varnames = defarray(argname(Input))
+    endif
+
+    heatmap(mat, self)
 end function
 
 
@@ -746,4 +816,42 @@ function void heatmap_GUI (matrix mat "Matrix to plot",
     endif
 
     heatmap(mat, opts)
+end function
+
+function void print_datetics (const series obsdate,
+                              const bundle self)
+    /* Print gnuplot commands to set x-axis tics from an ISO8601 integer series.
+       fmt: optional format string using %Y, %m, %d. */
+
+    scalar n = nobs(obsdate)
+    # choose at most ~10 labels to avoid clutter
+    scalar maxlabels = 10
+    scalar step = n > maxlabels ? ceil(n / maxlabels) : 1
+
+    printf "set xtics ("
+    scalar first = 1
+    loop i = 1..n
+        if i == 1 || i == n || ((i-1) % step == 0)
+            scalar val = obsdate[i]
+            # assume ISO date as integer YYYYMMDD (or YYYYMM)
+            scalar year = floor(val/10000)
+            scalar month = floor((val - year*10000) / 100)
+            scalar day = val - year*10000 - month*100
+
+            string lab = self.date_format
+            lab = strsub(lab, "%Y", sprintf("%04d", year))
+            lab = strsub(lab, "%m", sprintf("%02d", month))
+            lab = strsub(lab, "%d", sprintf("%02d", day))
+
+            if first
+                printf("'%s' %d", lab, i-1)
+                first = 0
+            else
+                printf(", '%s' %d", lab, i-1)
+            endif
+        endif
+
+    endloop
+    printf ") out rotate by %g offset %g,%g font ',%g'\n",
+        self.date_rotate, self.date_offset_x, self.date_offset_y, self.labelfs
 end function
