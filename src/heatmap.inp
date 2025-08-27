@@ -1,3 +1,6 @@
+include string_utils.gfn  # TODO: remove later
+
+
 function strings stock_labels (const matrix X,
                                bool do_cols)
     /* Get stock labels for matrix dimensions */
@@ -291,7 +294,6 @@ function void create_heatmap_plot (bundle self)
     print_creation_message(self)
 end function
 
-
 function string write_gnuplot_heatmap (const bundle self)
     /* Function writing the actual gnuplot commands for heatmap */
 
@@ -319,7 +321,7 @@ function string write_gnuplot_heatmap (const bundle self)
         elif self.input_type != "matrix" # either series or list
             print_datetics(self.obsdate, self)
             if $datatype == 2 # time-series
-            print_ytics(self.varnames, nelem(self.varnames), self.ticfs)
+                print_ytics(self.varnames, nelem(self.varnames), self.ticfs)
             elif $datatype == 3 # panel
                 catch markers --to-array=Markers
                 if !$error
@@ -331,7 +333,6 @@ function string write_gnuplot_heatmap (const bundle self)
         # The original parameter "xtics" and "ytics" were never documented.
         # I actually think the original code did never work
         #print_custom_xtics_ytics
-
 
         print_xlabel(self.xlabel, self.labelfs)
         print_ylabel(self.ylabel, self.labelfs)
