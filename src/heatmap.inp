@@ -25,6 +25,10 @@ function string tics (const scalar x0,
     /* Generate tic marks for a given range and number of ticks. */
 
     ret = "( "
+    # Guard against degenerate interval
+    if x1 == x0
+        return ""
+    endif
     pwr = floor(log10((x1-x0)/2))
     scale = 10^pwr
     ini = ceil(x0/scale)
@@ -41,6 +45,7 @@ function string tics (const scalar x0,
             ret = ret ~ ", "
         endif
     endloop
+
     return ret
 end function
 
