@@ -119,7 +119,12 @@ function string makepalette (scalar m,
     else
         # simple
         range = (M - m)
+        # avoid division by zero when limits are equal
+        if range == 0
+            ret = sprintf("set palette defined (0 '%s', 1 '%s')", cold, hot)
+        else
         ret = sprintf("set palette defined (%g '%s', %g '%s')", m/range, cold, M/range, hot)
+        endif
     endif
 
     return ret
