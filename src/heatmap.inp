@@ -50,6 +50,8 @@ function string tics (const scalar x0,
 end function
 
 function bundle default_opts (void)
+    /* Function to create a bundle of default options for heatmap plotting. */
+    
     bundle ret
 
     # general
