@@ -19,9 +19,11 @@ function strings stock_labels (const matrix X,
     return ret
 end function
 
-function string tics (scalar x0,
-                      scalar x1,
-                      scalar n)
+function string tics (const scalar x0,
+                      const scalar x1,
+                      const scalar n)
+    /* Generate tic marks for a given range and number of ticks. */
+
     ret = "( "
     pwr = floor(log10((x1-x0)/2))
     scale = 10^pwr
