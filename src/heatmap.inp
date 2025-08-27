@@ -78,6 +78,7 @@ function bundle default_opts (void)
     ret.xtics = ""
     ret.ytics = ""
     ret.printvals = -1
+
     # Date tics
     string ret.date_format = "%Y-%m"
     scalar ret.date_rotate = 45
@@ -181,13 +182,18 @@ function scalar colchk (string coldest,
     return err
 end function
 
+/* CURRENTLY FAILS WITH:
+The symbol 'BMEMB' is not valid in this context
+Syntax error
+*** error in function create_heatmap_plot, line 4
+*/
+/*
 function void fix_column_vector_case (matrix *mat)
     # this function "fixes" the column vector case by
     # turning the input matrix in a 3-column matrix with
     # NAs at the sides
-
-    rlab = rnameget(mat)
-    clab = cnameget(mat)
+    strings rlab = rnameget(mat)
+    strings clab = cnameget(mat)
     strings newlabs = array(0)
     strings newlabs = nelem(clab) == 1 ? defarray(" ", clab[1], " ") : newlabs
 
@@ -197,6 +203,26 @@ function void fix_column_vector_case (matrix *mat)
     if nelem(rlab)
         rnameset(mat, rlab)
     endif
+end function
+*/
+
+function matrix fix_column_vector_case (const matrix mat)
+    # this function "fixes" the column vector case by
+    # turning the input matrix in a 3-column matrix with
+    # NAs at the sides
+    strings rlab = rnameget(mat)
+    strings clab = cnameget(mat)
+    strings newlabs = array(0)
+    strings newlabs = nelem(clab) == 1 ? defarray(" ", clab[1], " ") : newlabs
+
+    matrix newmat = NA ~ mat ~ NA
+    cnameset(newmat, newlabs)
+
+    if nelem(rlab)
+        rnameset(newmat, rlab)
+    endif
+
+    return newmat
 end function
 
 function scalar get_limit (const scalar val, const scalar fallback)
