@@ -6,6 +6,8 @@ session.inp
 *.dta
 *.png
 *.eps
+*.gfn
+*.zip
 
 # Add folder "jack"
 jack/
