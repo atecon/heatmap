@@ -318,7 +318,15 @@ function string write_gnuplot_heatmap (const bundle self)
             print_xtics_rotation(N)
         elif self.input_type != "matrix" # either series or list
             print_datetics(self.obsdate, self)
+            if $datatype == 2 # time-series
             print_ytics(self.varnames, nelem(self.varnames), self.ticfs)
+            elif $datatype == 3 # panel
+                catch markers --to-array=Markers
+                if !$error
+                    strings Markers = struniq(Markers)
+                    print_ytics(Markers, nelem(Markers), self.ticfs)
+                endif
+            endif
         endif
         # The original parameter "xtics" and "ytics" were never documented.
         # I actually think the original code did never work
