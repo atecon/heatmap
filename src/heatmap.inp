@@ -149,6 +149,8 @@ end function
 
 function scalar colchk (string coldest,
                         string hottest)
+    /* Check if the specified color names are valid. */
+
     scalar err = !is_hex(coldest)
 
     if err
