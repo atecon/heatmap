@@ -909,6 +909,16 @@ function void pm3d_plot (const numeric Input, bundle opts[null])
         errorif(TRUE, "pm3d_plot supports matrix or list-of-three-series inputs")
     endif
 
+    if self.input_type == "list"
+        strings self.varnames = varnames(Input)
+    elif self.input_type == "matrix"
+        strings self.varnames = cnameget(Input)
+        if nelem(self.varnames) == 0
+            self.varnames = defarray(argname(Input))
+        endif
+    else
+        strings self.varnames = defarray(argname(Input))
+    endif
     string self.name_mat = argname(Input)
     string self.actual_title = set_title(self)
     string self.plottype = "pm3d"
