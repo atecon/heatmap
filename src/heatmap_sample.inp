@@ -7,47 +7,62 @@ set seed 20111158
 ### random matrix
 n = 32
 A = conv2d(ones(6,6), mnormal(n, n))
-heatmap(A, _(dest="1_heatmap.png"))             # default heatmap plot
+
+heatmap(A)             # default heatmap plot
 # Use alias function for heatmap
-heatmap_plot(A, _(dest="1_heatmap_plot.png"))
+heatmap_plot(A)
 
 # Contour plot with custom options
 bundle opts = _(title="Matrix A with contour lines",
-                titlefs=18, quiet=1, clevels=4, dest="2_contour.png")
+                titlefs=18, quiet=1, clevels=4)
 contour_plot(A, opts)
+
 # Now as heatmap
-opts.dest="2_heatmap.png"
 opts.title="Matrix A with heatmap"
 heatmap_plot(A, opts)
 
+
 ### function plot
 bundle opts = _(title="binomial coefficients",
-                xlabel="n", ylabel="k", dest="bincoeff.png")
+                xlabel="n", ylabel="k")
 heatmap_func("bincoeff", 50, 10, 16, 1, 10, opts)
 
 # contour plot with a grid
 opts = opts + _(clevels=16, grid=1)
-opts.dest = "bincoeff_contour_with_grid.png"
 heatmap_func("bincoeff", 50, 10, 16, 1, 10, opts)
 
 
-# Work with time-series
+# Work with time-series - list of series must be passed (each plotted over time)
 open denmark.gdt --quiet
-## Single series case
-list X = LRM
-heatmap_plot(X, _(dest="heatmap_ts_single.png", title="Denmark unemployment rates",
-                    titlefs=12))
 ## list of series
 list L = diff(dataset)
-heatmap_plot(L, _(dest="heatmap_ts_list.png", title="Denmark unemployment rates",
+heatmap_plot(L, _(title="1st differences",
                   titlefs=12))
 
-
-# Work with panel data
+# Work with panel data - single series only can be passed
+# Values for each unit are plotted over time
 open grunfeld.gdt --quiet
 series y = ldiff(invest)
-heatmap_plot(y, _(dest="heatmap_panel.png"))
+heatmap_plot(y, _(title="1st differences",
+                  titlefs=12))
 ## Add markers for firms
 markers --from-series=firmname
-heatmap_plot(y, _(dest="heatmap_panel_w_markers.png"))
+heatmap_plot(y, _(title="1st differences",
+                  titlefs=12,
+                  ticfs=8))
 
+# pm3d plot
+open denmark.gdt --quiet
+## matrix use
+matrix M = mnormal(30,15)
+pm3d_plot(M)
+
+# rotate view
+bundle opts = _(with_contour=TRUE,
+                grid=TRUE,
+                view_x_axis=50, view_y_axis=35)
+pm3d_plot(M, opts)
+
+## list use
+list L = diff(LRM) IBO IDE
+pm3d_plot(L)
