@@ -373,11 +373,14 @@ function string write_gnuplot_contour (const bundle self)
         print_xrange(self.ncols_mat)
 
         if self.do_labels
-            print_xtics(column_names, self.ncols_mat, self.ticfs)
-            print_ytics(row_names, self.nrows_mat, self.ticfs)
-            print_xtics_rotation(N)
+            if nelem(self.column_names) == self.ncols_mat
+                print_xtics(self.column_names, self.ncols_mat, self.ticfs)
         endif
-        #print_custom_xtics_ytics
+            if nelem(self.row_names) == self.nrows_mat
+                print_ytics(self.row_names, self.nrows_mat, self.ticfs)
+                print_xtics_rotation(self.nrows_mat)
+            endif
+        endif
 
         print_axis_label("x", self.xlabel, self.labelfs)
         print_axis_label("y", self.ylabel, self.labelfs)
