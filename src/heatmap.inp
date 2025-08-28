@@ -515,15 +515,13 @@ function void print_plot_matrix_image (scalar printvals, scalar valfs)
     printf "\n"
 end function
 
-function void print_splot_matrix_pm3d_lines (const scalar grid_resolution,
-                                             const bool with_contour)
-    /* Print the gnuplot commands for a pm3d splot using a matrix input */
-     #printf "set pm3d at surface\n"  # TODO: not supported, yet
-     #printf "set hidden3d offset 1,1,1\n" # TODO: not supported, yet
+function void print_grid_resolution (const scalar grid_resolution)
+    /* Print the gnuplot command for setting the grid resolution */
 
     if ok(grid_resolution) && grid_resolution > 0
         printf "set dgrid3d %d,%d qnorm 2\n", grid_resolution, grid_resolution
     endif
+end function
 
     if with_contour
         printf "set hidden3d\n"
