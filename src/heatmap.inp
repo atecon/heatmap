@@ -523,6 +523,15 @@ function void print_grid_resolution (const scalar grid_resolution)
     endif
 end function
 
+function void print_add_grid_pm3d (void)
+    /* This function prints the gnuplot commands to add grid lines to the pm3d plot. */
+
+    printf "set pm3d at s hidden3d 100\n"
+    #printf "set palette defined ( 0 '#bd2c29', 2 '#ffd35a', 6 'white')\n"
+    printf "set style line 100 lc rgb '#000000' lt 1 lw 0.6\n"
+end function
+
+
     if with_contour
         printf "set hidden3d\n"
         printf "set contour base\n"
