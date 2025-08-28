@@ -915,7 +915,6 @@ function void pm3d_plot (const numeric Input, bundle opts[null])
     elif self.input_type == "list"
         errorif(nelem(Input) != 3,
                 "pm3d_plot requires a list of three series when input is a list")
-
         # pack list-of-three-series into Nx3 matrix (each series yields a column)
         matrix mat = {Input}
         is_grid = FALSE
