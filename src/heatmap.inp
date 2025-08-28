@@ -452,7 +452,7 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         print_title(self.actual_title, self.titlefs)
         printf "unset key\n"
 
-        # palette and tics
+        # palette and tics and labels
         print_palette(self)
         print_tics_nomirror(self.ticfs)
 
