@@ -863,6 +863,11 @@ function void heatmap_plot (const numeric Input, bundle opts[null])
     # Retrieve variable names
     if self.input_type == "list"
         strings self.varnames = varnames(Input)
+    elif self.input_type == "matrix"
+        strings self.varnames = cnameget(Input)
+        if nelem(self.varnames) == 0
+            self.varnames = defarray(argname(Input))
+        endif
     else
         strings self.varnames = defarray(argname(Input))
     endif
