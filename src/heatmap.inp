@@ -432,7 +432,20 @@ function void print_plot_matrix_image (scalar printvals, scalar valfs)
     printf "\n"
 end function
 
-function void print_data_block(const matrix mat)
+function void print_splot_matrix_pm3d_lines (void)
+    /* Print the gnuplot commands for a pm3d splot using a matrix input */
+    printf "set pm3d at surface\n"
+    printf "set hidden3d offset 1,1,1\n"
+    printf "splot $data matrix with pm3d\n"
+end function
+
+function void print_splot_block_pm3d (void)
+    /* Print the gnuplot command for a pm3d splot using x y z table input */
+    printf "set pm3d at surface\n"
+    printf "splot $data using 1:2:3 with pm3d\n"
+end function
+
+function void print_data_block (const matrix mat)
     # Print matrix data for gnuplot in the required format
 
     matrix m = mreverse(mat)
