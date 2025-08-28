@@ -402,6 +402,81 @@ function string write_gnuplot_contour (const bundle self)
 end function
 
 
+function void create_pm3d_plot (bundle self, const matrix mat, bool is_grid)
+    /* Prepare limits and invoke gnuplot for pm3d splot. */
+
+    scalar self.ncols_mat = cols(mat)
+    scalar self.nrows_mat = rows(mat)
+
+    if is_grid
+        self.min_limit = get_limit(self.limits[1], min(mat))
+        self.max_limit = get_limit(self.limits[2], max(mat))
+    else
+        # z values are in third column
+        self.min_limit = get_limit(self.limits[1], min(mat[,3]))
+        self.max_limit = get_limit(self.limits[2], max(mat[,3]))
+    endif
+
+    if self.native
+        self.zerowhite = FALSE
+    endif
+
+    string buffer_file = write_gnuplot_pm3d(self, mat, is_grid)
+    #string buffer = readfile(buffer_file)
+    #print buffer
+    #stop
+    string filename = self.dest
+    gnuplot --input="@buffer_file" --output="@filename"
+    print_creation_message(self)
+end function
+
+
+function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is_grid)
+    /* Write gnuplot script for a pm3d splot.
+       If is_grid is TRUE, mat is interpreted as a z-grid (matrix form).
+       Otherwise mat is treated as an Nx3 table of x y z rows. */
+
+    string buffer_file = ""
+    set force_decpoint on
+
+    outfile --tempfile=buffer_file
+        # terminal & title
+        print_enhanced(self.valfs)
+        print_title(self.actual_title, self.titlefs)
+        printf "unset key\n"
+
+        # palette and tics
+        print_palette(self)
+        print_tics_nomirror(self.ticfs)
+
+        # axes labels
+        print_xlabel(self.xlabel, self.labelfs)
+        print_ylabel(self.ylabel, self.labelfs)
+
+        print_autoscale_fix()
+        if self.grid
+            print_add_grid(FALSE)
+        endif
+
+        if is_grid
+            # use same matrix output as heatmap
+            print_data_grid_style(mat)
+            print_splot_matrix_pm3d_lines(self.grid_resolution, self.with_contour)
+        else
+            # x y z table
+            print_data_table_style(mat)
+            print_splot_block_pm3d(self.grid_resolution)
+        endif
+
+        printf "\n"
+    end outfile
+
+    set force_decpoint off
+
+    return buffer_file
+end function
+
+
 function void print_creation_message (const bundle self)
     /* Prints a message indicating the plot was created. */
     if !self.quiet
