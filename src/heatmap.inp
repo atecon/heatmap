@@ -411,13 +411,13 @@ function void print_creation_message (const bundle self)
 end function
 
 
-function void print_splot_matrix_lines(void)
+function void print_splot_matrix_lines (void)
     /* Print the gnuplot command for splotting the matrix with lines */
     printf "splot $data matrix with lines\n"
 end function
 
 
-function void print_plot_matrix_image(scalar printvals, scalar valfs)
+function void print_plot_matrix_image (scalar printvals, scalar valfs)
     /* Print the gnuplot command for plotting the matrix as an image */
 
     printf "plot $data matrix with image"
@@ -446,7 +446,7 @@ end function
 
 
 
-function void print_contour_linetypes(scalar clevels)
+function void print_contour_linetypes (scalar clevels)
     # Print gnuplot linetype settings for contour plot levels
 
     clevels = ceil(clevels)
