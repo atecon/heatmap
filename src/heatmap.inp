@@ -1,3 +1,7 @@
+include string_utils.gfn
+
+
+
 function strings stock_labels (const matrix X,
                                bool do_cols)
     /* Get stock labels for matrix dimensions */
@@ -241,7 +245,6 @@ function void create_heatmap_plot (bundle self)
     /* Main function for creating a heatmap plot */
 
     if self.ncols_mat == 1
-        # fix_column_vector_case(&self.mat)  # TODO: still necessary?
         matrix self.mat = fix_column_vector_case(self.mat)
         scalar self.ncols_mat = cols(self.mat)
     endif
@@ -812,7 +815,7 @@ function void heatmap_plot (const numeric Input, bundle opts[null])
 
         # If data_type is time-series (data_type=2): Accept series and list
         if data_type == 2
-            # single time series or list accepted
+            errorif(nelem(Input) <= 1, "List must contain at least two time series")
             mat = {Input}
         else
             # If data_type is of type panel (data_type=3): Accept series only
