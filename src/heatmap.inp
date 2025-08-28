@@ -65,7 +65,7 @@ function bundle default_opts (void)
     ret.input_type = "matrix"
 
     # colours
-    ret.native = 0
+    ret.native = FALSE
     ret.limits = {NA,NA}
     ret.coldest = "#bd2c29"  # "blue"
     ret.hottest = "#ffd35a"  # "red"
