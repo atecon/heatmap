@@ -346,8 +346,6 @@ end function
 function void create_contour_plot (bundle self)
     /* Main function for creating a contour plot */
 
-    scalar self.ncols_mat = cols(self.mat)
-    scalar self.nrows_mat = rows(self.mat)
     string dest = self.dest
 
     string buffer = write_gnuplot_contour(self)
@@ -375,7 +373,7 @@ function string write_gnuplot_contour (const bundle self)
         if self.do_labels
             if nelem(self.column_names) == self.ncols_mat
                 print_xtics(self.column_names, self.ncols_mat, self.ticfs)
-        endif
+            endif
             if nelem(self.row_names) == self.nrows_mat
                 print_ytics(self.row_names, self.nrows_mat, self.ticfs)
                 print_xtics_rotation(self.nrows_mat)
@@ -422,10 +420,6 @@ function void create_pm3d_plot (bundle self, const matrix mat, bool is_grid)
         string self.xlabel = self.varnames[1]
         string self.ylabel = self.varnames[2]
         string self.zlabel = self.varnames[3]
-    else
-        string self.xlabel = "x"
-        string self.ylabel = "y"
-        string self.zlabel = "z"
     endif
 
     string buffer_file = write_gnuplot_pm3d(self, mat, is_grid)
@@ -455,16 +449,9 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         # palette and tics and labels
         print_palette(self)
         print_tics_nomirror(self.ticfs)
-
-        # axes labels
-        if self.do_labels
-            strings self.row_names = stock_labels(self.mat, FALSE)
-            strings self.column_names = stock_labels(self.mat, 1)
-        endif
         print_axis_label("x", self.xlabel, self.labelfs)
         print_axis_label("y", self.ylabel, self.labelfs)
         print_axis_label("z", self.zlabel, self.labelfs)
-
         print_autoscale_fix()
         if self.grid
             print_add_grid(FALSE)
@@ -1070,22 +1057,3 @@ function void print_datetics (const series obsdate,
         self.date_rotate, self.date_offset_x, self.date_offset_y, self.ticfs
 end function
 
-
-function string set_title (const bundle self)
-    /* Set the title for the heatmap */
-
-    string ret = ""
-    if strlen(self.title) > 0
-        ret = self.title
-    else
-        strings vnames = self.varnames
-        loop foreach i vnames
-            ret += sprintf("%s", vnames[i])
-            if i < nelem(vnames)
-                ret += ", "
-            endif
-        endloop
-    endif
-
-    return ret
-end function
