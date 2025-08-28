@@ -67,8 +67,8 @@ function bundle default_opts (void)
     # colours
     ret.native = 0
     ret.limits = {NA,NA}
-    ret.coldest = "blue"
-    ret.hottest = "red"
+    ret.coldest = "#bd2c29"  # "blue"
+    ret.hottest = "#ffd35a"  # "red"
     ret.zerowhite = FALSE
 
     # labels
