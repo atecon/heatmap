@@ -351,6 +351,7 @@ function void create_contour_plot (bundle self)
     string dest = self.dest
 
     string buffer = write_gnuplot_contour(self)
+
     gnuplot --input="@buffer" --output="@dest"
     print_creation_message(self)
 end function
@@ -456,17 +457,20 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         print_axis_label("z", self.zlabel, self.labelfs)
         print_autoscale_fix()
         if self.grid
-            print_add_grid(FALSE)
+            print_add_grid_pm3d()
         endif
+        print_view(self.view_x_axis, self.view_y_axis)
+        print_grid_resolution(self.grid_resolution)
+        print_border_pm3d()
 
         if is_grid
             # use same matrix output as heatmap
             print_data_grid_style(mat)
-            print_splot_matrix_pm3d_lines(self.grid_resolution, self.with_contour)
+            print_splot_matrix_pm3d_lines(self.with_contour)
         else
             # x y z table
             print_data_table_style(mat)
-            print_splot_block_pm3d(self.grid_resolution)
+            print_splot_block_pm3d()
         endif
 
         printf "\n"
