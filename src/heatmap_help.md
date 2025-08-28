@@ -142,7 +142,7 @@ As for the options bundle, the active keys are:
 
 ## strings and labels
 
-- `title`: string, the plot title
+- `title`: string, the plot title (default: none).
 - `do_labels`: boolean, decorate the plot with x and y labels (default:
   false). If set to 1, the plot will use the row and column labels of
   the matrix, if present.
