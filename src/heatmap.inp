@@ -344,6 +344,18 @@ function string write_gnuplot_heatmap (const bundle self)
 end function
 
 
+function void create_contour_plot (bundle self)
+    /* Main function for creating a contour plot */
+
+    scalar self.ncols_mat = cols(self.mat)
+    scalar self.nrows_mat = rows(self.mat)
+    string dest = self.dest
+
+    string buffer = write_gnuplot_contour(self)
+    gnuplot --input="@buffer" --output="@dest"
+    print_creation_message(self)
+end function
+
 function string write_gnuplot_contour (const bundle self)
     /* Function writing the actual gnuplot commands for contour plot */
 
