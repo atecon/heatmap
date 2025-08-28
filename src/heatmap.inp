@@ -96,7 +96,7 @@ function bundle default_opts (void)
 
     # for pm3d only
     scalar ret.grid_resolution = 25 # smoothness of grid surface
-    scalar ret.with_contour = TRUE # only for matrix input, yet
+    scalar ret.with_contour = TRUE  # only for matrix input, yet
 
     return ret
 end function
