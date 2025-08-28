@@ -11,6 +11,7 @@ Moreover, a **menu entry** can be added under the "View" menu, which offers a si
 ## heatmap(X, opts)
 
 Arguments:
+
 - X: matrix, required
 - opts: bundle, optional (see below)
 
@@ -21,6 +22,7 @@ below).
 ## heatmap_func(func, res, x0, x1, y0, y1, opts)
 
 Arguments:
+
 - func: string
 - res: scalar
 - x0, x1: two scalars
@@ -63,6 +65,7 @@ heatmap_func("myfunc", 40, -1, 1, -1, 1, opts)
 ## contour_plot(X, opts[null], clevels[::8])
 
 Arguments:
+
 - X: matrix, required
 - opts: bundle, optional
 - clevels: scalar, optional (default = 8)
@@ -72,6 +75,7 @@ A small convenience wrapper that forces creation of a contour plot by setting th
 ## heatmap_plot(Input, opts[null])
 
 Arguments:
+
 - Input: numeric, required - accepts a matrix, or a list of series (time-series)
 - opts: bundle, optional
 
@@ -80,11 +84,14 @@ A convenience wrapper for producing heatmaps from the common data shapes encount
 ## pm3d_plot(Input, opts[null])
 
 Arguments:
+
 - Input: numeric, required - accepts a matrix (grid form), a matrix with three columns (x y z rows), or a list of three series (each series becomes a column and the list is transposed into Nx3 rows).
 - opts: bundle, optional
 
 Creates a 3-dimensional surface visualization by driving gnuplot's pm3d mode together with the splot command. Behaviour depends on the form of the input:
+
 - Matrix form (cols != 3): the matrix is interpreted as a z-grid (rows/columns form a regular lattice). The plot uses the matrix data format understood by gnuplot.
+
 - Table form (matrix with 3 columns or list of three series): the input is interpreted as an (x, y, z) table. If desired, the implementation may apply gnuplot's dgrid3d to interpolate scattered points onto a regular grid before plotting.
 
 **Note:** This functionality is currently not accessible via the GUI menu.
@@ -179,6 +186,7 @@ Conversely, the `clevels` setting is mandatory, for obvious reasons; the `grid` 
 
 
 # CHANGELOG
+
 * 1.9 -> 2.0: add support for creating 3D-plot via `pm3d_plot()` function; add new wrapper functions `contour_plot()` and `heatmap_plot()`; new dependency on `string_utils.gfn` (using `struniq()`); Raise minimum Gretl version to 2023a.
 * 1.8 -> 1.9: introduce adjustable font sizes (see the "correlations" example for a demonstration).
 * 1.7 -> 1.8: extend the "grid" switch to heatmaps. Also, amend the "correlations" example to show the new feature.
