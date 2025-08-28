@@ -1067,7 +1067,7 @@ function void print_datetics (const series obsdate,
 
     endloop
     printf ") out rotate by %g offset %g,%g font ',%g'\n",
-        self.date_rotate, self.date_offset_x, self.date_offset_y, self.labelfs
+        self.date_rotate, self.date_offset_x, self.date_offset_y, self.ticfs
 end function
 
 
