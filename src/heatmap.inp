@@ -301,9 +301,14 @@ function string write_gnuplot_heatmap (const bundle self)
         #endif
 
         if self.do_labels && self.input_type == "matrix"
-            print_xtics(column_names, self.ncols_mat, self.ticfs)
-            print_ytics(row_names, self.nrows_mat, self.ticfs)
-            print_xtics_rotation(N)
+            if nelem(self.column_names) == self.ncols_mat
+                print_xtics(self.column_names, self.ncols_mat, self.ticfs)
+            endif
+            if nelem(self.row_names) == self.nrows_mat
+                print_ytics(self.row_names, self.nrows_mat, self.ticfs)
+                print_xtics_rotation(self.nrows_mat)
+            endif
+
         elif self.input_type != "matrix" # either series or list
             print_datetics(self.obsdate, self)
             if $datatype == 2 # time-series
@@ -322,6 +327,7 @@ function string write_gnuplot_heatmap (const bundle self)
 
         print_axis_label("x", self.xlabel, self.labelfs)
         print_axis_label("y", self.ylabel, self.labelfs)
+
         print_autoscale_fix()
         if self.grid
             print_add_grid(FALSE)
