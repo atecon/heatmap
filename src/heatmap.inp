@@ -448,6 +448,8 @@ end function
 function void print_data_block (const matrix mat)
     # Print matrix data for gnuplot in the required format
 
+    # Reverse by rows (cross-sectional units) because gnuplot draws the initial rows
+    # of "m" at the bottom of the plot
     matrix m = mreverse(mat)
     cnameset(m, "")
     rnameset(m, "")
