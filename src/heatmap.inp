@@ -706,6 +706,8 @@ function void heatmap_plot (const numeric Input, bundle opts[null])
     /* Create a standard heatmap: accept matrix, series (time/panel) or a list of time-series;
        force clevels=0 and call heatmap(). */
 
+    set skip_missing off
+
     bundle self = exists(opts) ? opts + default_opts() : default_opts()
     scalar self.clevels = 0
     string self.input_type = typename(Input)
@@ -735,7 +737,7 @@ function void heatmap_plot (const numeric Input, bundle opts[null])
             mat = mshape({Input}, num_periods, n_units)
         endif
 
-        mat = transp(mat)
+        mat = transp(mat)  # rows: cross-sectional unit, cols: time period
         series self.obsdate = $obsdate
     endif
 
@@ -747,6 +749,9 @@ function void heatmap_plot (const numeric Input, bundle opts[null])
     endif
 
     heatmap(mat, self)
+    set skip_missing on
+end function
+
 end function
 
 
