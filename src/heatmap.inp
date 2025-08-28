@@ -662,8 +662,8 @@ function void print_xtics (strings column_names, scalar ncols_mat, const scalar 
 #'
 #' Prints the x-axis tic labels for a plot in gnuplot format.
 #'
-#' @param column_names        A string array containing the column names to be used as tic labels.
-#' @param ncols_mat A scalar indicating the number of columns (i.e., number of tics).
+#' @param column_names: A string array containing the column names to be used as tic labels.
+#' @param ncols_mat: A scalar indicating the number of columns (i.e., number of tics).
 #'
 #' The function generates and prints the gnuplot 'set xtics' command, formatting the tic labels
 #' according to the provided column names and their positions. If there is only one column,
