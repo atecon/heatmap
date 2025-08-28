@@ -317,8 +317,8 @@ function string write_gnuplot_heatmap (const bundle self)
         # I actually think the original code did never work
         #print_custom_xtics_ytics
 
-        print_xlabel(self.xlabel, self.labelfs)
-        print_ylabel(self.ylabel, self.labelfs)
+        print_axis_label("x", self.xlabel, self.labelfs)
+        print_axis_label("y", self.ylabel, self.labelfs)
         print_autoscale_fix()
         if self.grid
             print_add_grid(FALSE)
@@ -370,8 +370,8 @@ function string write_gnuplot_contour (const bundle self)
         endif
         #print_custom_xtics_ytics
 
-        print_xlabel(self.xlabel, self.labelfs)
-        print_ylabel(self.ylabel, self.labelfs)
+        print_axis_label("x", self.xlabel, self.labelfs)
+        print_axis_label("y", self.ylabel, self.labelfs)
         print_autoscale_fix()
         if self.grid
             print_add_grid(TRUE)
@@ -403,8 +403,14 @@ function void create_pm3d_plot (bundle self, const matrix mat, bool is_grid)
         self.max_limit = get_limit(self.limits[2], max(mat[,3]))
     endif
 
-    if self.native
-        self.zerowhite = FALSE
+    if nelem(self.varnames) == 3
+        string self.xlabel = self.varnames[1]
+        string self.ylabel = self.varnames[2]
+        string self.zlabel = self.varnames[3]
+    else
+        string self.xlabel = "x"
+        string self.ylabel = "y"
+        string self.zlabel = "z"
     endif
 
     string buffer_file = write_gnuplot_pm3d(self, mat, is_grid)
@@ -436,8 +442,13 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         print_tics_nomirror(self.ticfs)
 
         # axes labels
-        print_xlabel(self.xlabel, self.labelfs)
-        print_ylabel(self.ylabel, self.labelfs)
+        if self.do_labels
+            strings self.row_names = stock_labels(self.mat, FALSE)
+            strings self.column_names = stock_labels(self.mat, 1)
+        endif
+        print_axis_label("x", self.xlabel, self.labelfs)
+        print_axis_label("y", self.ylabel, self.labelfs)
+        print_axis_label("z", self.zlabel, self.labelfs)
 
         print_autoscale_fix()
         if self.grid
@@ -689,27 +700,14 @@ function void print_tics_nomirror (const scalar ticfs)
     endif
 end function
 
-function void print_ylabel (const string ylabel, const scalar labelfs)
-    /* Print the gnuplot set ylabel command with optional font size */
+function void print_axis_label (const string axis, const string label, const scalar labelfs)
+    /* Print the gnuplot set xlabel/ylabel/zlabel command with optional font size.
+       axis: "x", "y", or "z"
+    */
 
-    if strlen(ylabel) > 0
-        string axislab = strsub(ylabel, "\"", "'")
-        printf "set ylabel \"%s\" ", axislab
-        if ok(labelfs)
-            printf "font \",%d\"\n", labelfs
-        else
-            printf "\n"
-        endif
-    endif
-end function
-
-
-function void print_xlabel (const string xlabel, const scalar labelfs)
-    /* Print the gnuplot set xlabel command with optional font size */
-
-    if strlen(xlabel) > 0
-        string axislab = strsub(xlabel, "\"", "'")
-        printf "set xlabel \"%s\" ", axislab
+    if strlen(label) > 0
+        string axislab = strsub(label, "\"", "'")
+        printf "set %slabel \"%s\" ", axis, axislab
         if ok(labelfs)
             printf "font \",%d\"\n", labelfs
         else
