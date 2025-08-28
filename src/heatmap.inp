@@ -252,9 +252,12 @@ function void create_heatmap_plot (bundle self)
     endif
 
     if self.do_labels
-        strings self.row_names = stock_labels(self.mat, FALSE)
-        strings self.column_names = stock_labels(self.mat, 1)
+        #strings self.row_names = stock_labels(self.mat, FALSE)
+        #strings self.column_names = stock_labels(self.mat, 1)
+        string self.xlabel = "x"
+        string self.ylabel = "y"
     endif
+
     string dest = self.dest
 
     scalar self.min_limit = get_limit(self.limits[1], min(self.mat))
