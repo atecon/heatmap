@@ -93,16 +93,21 @@ Creates a 3-dimensional surface visualization by driving gnuplot's pm3d mode tog
 - Matrix form (cols != 3): the matrix is interpreted as a z-grid (rows/columns form a regular lattice). The plot uses the matrix data format understood by gnuplot.
 - Table form (matrix with 3 columns or list of three series): the input is interpreted as an (x, y, z) table. If desired, the implementation may apply gnuplot's dgrid3d to interpolate scattered points onto a regular grid before plotting.
 
-Several options from the standard options bundle affect the pm3d plot (palette, limits, title, labels). In addition, two pm3d-specific options are available:
+Several options from the standard options bundle affect the pm3d plot (palette, limits, title, labels). In addition, pm3d-specific options are available:
 
 ### pm3d-specific options
 
 - `grid_resolution`: scalar, controls the resolution used by gnuplot's dgrid3d interpolation when applied to table-style (x y z) inputs or when smoothing the surface. The default value is 25. Setting this to 0 disables dgrid3d interpolation.
 
-- `with_contour`: boolean, when TRUE (default) and the input is a matrix, the pm3d plot may be augmented with contour-plot so that contour lines on the base or are combined with the pm3d surface.
+- `view_x_axis`: scalar, controls the rotation of the plot around the x-axis. The default value is 60.
 
-These two keys are present in the default options bundle and are only used by pm3d_plot().
+- `view_y_axis`: scalar, controls the rotation of the plot around the y-axis. The default value is 15.
 
+- `with_contour`: boolean, when TRUE and the input is a matrix, the pm3d plot may be augmented with contour-plot so that contour lines on the base or are combined with the pm3d surface. The default value is FALSE.
+
+These keys are present in the default options bundle and are only used by pm3d_plot().
+
+The `grid` option from the standard bundle draws a grid on the surface of the plot when `TRUE`, which can help to visualize the data more clearly.
 
 
 # OPTIONS
@@ -116,8 +121,7 @@ As for the options bundle, the active keys are:
 - `quiet`: boolean, don't print a completion message (default = FALSE)
 - `fparam`: matrix, used in conjunction with the heatmap_func (see above)
 - `clevels`: scalar, max number of levels for contour plots (see below)
-- `grid`: boolean, plot a grid (white for heatmaps, see below for
-  contour plots)
+- `grid`: boolean, plot a grid (white for heatmaps, see below for contour plots)
 
 ## colours
 
@@ -173,13 +177,9 @@ When passing a time series or a list of time series to the `heatmap_plot()` func
 
 Starting from version 1.7, a contour plot can be produced instead of a heatmap. This happens if the `clevels` scalar in the option bundle is set to a value between 1 and 32. The number itself refers to the number of points on the z-axis that gnuplot will use for plotting the contour lines. Note that there is no predictable relationship between the `clevels` setting and the number of contour lines you're going to get, but in most cases, with higher numbers you should see more lines. With gretl 2023c or later, contour lines will be coloured  from blue (lower z) to red (higher).
 
-Some options have no effects with contour plots, namely: "do_labels",
-"printvals", "native", "limits", "coldest", "hottest" and
-"zerowhite".
+Some options have no effects with contour plots, namely: "do_labels", "printvals", "native", "limits", "coldest", "hottest" and "zerowhite".
 
-Conversely, the `clevels` setting is mandatory, for obvious reasons;
-the `grid` boolean key may be used for plotting a 2-dimensional dotted
-grid.
+Conversely, the `clevels` setting is mandatory, for obvious reasons; the `grid` boolean key may be used for plotting a  -dimensional dotted grid.
 
 
 # CHANGELOG
