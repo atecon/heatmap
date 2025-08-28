@@ -130,11 +130,11 @@ As for the options bundle, the active keys are:
 - `coldest`: string, colour for the minimum of the plotted values. This
   setting is active if the 'native' option is 0. It has to be in a
   format recognised by gnuplot, eg "black" or "#0000cc" (default =
-  "blue")
+  kind of reddish)
 - `hottest`: string, colour for the maximum of the plotted values. This
   setting is active if the 'native' option is 0. It has to be in a
   format recognised by gnuplot, eg "white" or "#aa88ed" (default =
-  "red")
+  kind of yellowish)
 - `zerowhite`: boolean, useful for the cases when it is important to
   separate positive and negative values: if enabled, will colour 0
   entries as white (default = 0). This setting is active only if the
