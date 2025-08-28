@@ -637,7 +637,7 @@ function void print_autoscale_fix (void)
     printf "set autoscale fix\n"
 end function
 
-function void print_xtics_rotation (scalar N)
+function void print_xtics_rotation (const scalar N)
     # Prints the gnuplot command to rotate x-axis tics based on N
     scalar angle = N > 9 ? (N > 20 ? 90 : 45) : 0
     printf "set xtics rotate by %d right\n", angle
