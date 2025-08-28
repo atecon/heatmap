@@ -78,10 +78,31 @@ A small convenience wrapper that forces creation of a contour plot by setting th
 ## heatmap_plot(Input, opts[null])
 
 Arguments:
-- Input: numeric, required - accepts a matrix, a single series, or a list of series (time-series)
+- Input: numeric, required - accepts a matrix, or a list of series (time-series)
 - opts: bundle, optional
 
-A convenience wrapper for producing heatmaps from the common data shapes encountered in Gretl workflows. If a **matrix** is provided it is used as-is. For **time-series datasets** a single series or a list of series is accepted and converted internally to a matrix (columns are series, rows are observations). For **panel datasets** a panel series is accepted and the wrapper will reshape it so that each unit becomes a column and time runs along rows. **Cross-sectional** series are not supported by this wrapper. After conversion the call is forwarded to heatmap().
+A convenience wrapper for producing heatmaps from the common data shapes encountered in Gretl workflows. If a **matrix** is provided it is used as-is. For **time-series datasets** a list of series (at least two) is accepted and converted internally to a matrix (columns are series, rows are observations). For **panel datasets** a single panel series is accepted and the wrapper will reshape it so that each unit becomes a column and time runs along rows. **Cross-sectional** series are not supported by this wrapper. After conversion the call is forwarded to heatmap().
+
+## pm3d_plot(Input, opts[null])
+
+Arguments:
+- Input: numeric, required - accepts a matrix (grid form), a matrix with three columns (x y z rows), or a list of three series (each series becomes a column and the list is transposed into Nx3 rows).
+- opts: bundle, optional
+
+Creates a 3-dimensional surface visualization by driving gnuplot's pm3d mode together with the splot command. Behaviour depends on the form of the input:
+- Matrix form (cols != 3): the matrix is interpreted as a z-grid (rows/columns form a regular lattice). The plot uses the matrix data format understood by gnuplot.
+- Table form (matrix with 3 columns or list of three series): the input is interpreted as an (x, y, z) table. If desired, the implementation may apply gnuplot's dgrid3d to interpolate scattered points onto a regular grid before plotting.
+
+Several options from the standard options bundle affect the pm3d plot (palette, limits, title, labels). In addition, two pm3d-specific options are available:
+
+### pm3d-specific options
+
+- `grid_resolution`: scalar, controls the resolution used by gnuplot's dgrid3d interpolation when applied to table-style (x y z) inputs or when smoothing the surface. The default value is 25. Setting this to 0 disables dgrid3d interpolation.
+
+- `with_contour`: boolean, when TRUE (default) and the input is a matrix, the pm3d plot may be augmented with contour-plot so that contour lines on the base or are combined with the pm3d surface.
+
+These two keys are present in the default options bundle and are only used by pm3d_plot().
+
 
 
 # OPTIONS
@@ -147,6 +168,7 @@ When passing a time series or a list of time series to the `heatmap_plot()` func
 - `date_offset_x`: scalar, the x-axis offset for the date labels (default -3.5)
 - `date_offset_y`: scalar, the y-axis offset for the date labels (default -1.4)
 
+
 # CONTOUR PLOTS
 
 Starting from version 1.7, a contour plot can be produced instead of a heatmap. This happens if the `clevels` scalar in the option bundle is set to a value between 1 and 32. The number itself refers to the number of points on the z-axis that gnuplot will use for plotting the contour lines. Note that there is no predictable relationship between the `clevels` setting and the number of contour lines you're going to get, but in most cases, with higher numbers you should see more lines. With gretl 2023c or later, contour lines will be coloured  from blue (lower z) to red (higher).
@@ -161,7 +183,7 @@ grid.
 
 
 # CHANGELOG
-* 1.9 -> 2.0: add support for creating 3D-plot; add new wrapper functions `contour_plot()` and `heatmap_plot()`; new dependency on `string_utils.gfn` (using `struniq()`).
+* 1.9 -> 2.0: add support for creating 3D-plot via `pm3d_plot()` function; add new wrapper functions `contour_plot()` and `heatmap_plot()`; new dependency on `string_utils.gfn` (using `struniq()`).
 * 1.8 -> 1.9: introduce adjustable font sizes (see the "correlations" example for a demonstration).
 * 1.7 -> 1.8: extend the "grid" switch to heatmaps. Also, amend the "correlations" example to show the new feature.
 * 1.6 -> 1.7: contour plots; "xlabel" and "ylabel" options.
