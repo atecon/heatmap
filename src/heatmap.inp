@@ -95,8 +95,10 @@ function bundle default_opts (void)
     ret.valfs = NA  # font size for matrix values
 
     # for pm3d only
-    scalar ret.grid_resolution = 25 # smoothness of grid surface
-    scalar ret.with_contour = TRUE  # only for matrix input, yet
+    scalar ret.grid_resolution = 25  # smoothness of grid surface
+    scalar ret.with_contour = FALSE  # only for matrix input, yet
+    scalar ret.view_x_axis = 60
+    scalar ret.view_y_axis = 15
 
     return ret
 end function
