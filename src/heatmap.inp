@@ -531,11 +531,21 @@ function void print_add_grid_pm3d (void)
     printf "set style line 100 lc rgb '#000000' lt 1 lw 0.6\n"
 end function
 
+function void print_splot_matrix_pm3d_lines (const bool with_contour)
+    /* Print the gnuplot commands for a pm3d splot using a matrix input */
 
     if with_contour
         printf "set hidden3d\n"
         printf "set contour base\n"
     endif
+
+    # The "at s" part specifies where the color surface (the pm3d plot) is drawn
+    # relative to the 3D surface mesh.
+    #at s stands for "at surface". This means the color shading (pm3d) is drawn
+    ## directly on the surface defined by your data points.
+    #Other options include:
+    #- at b (at base): draws the color map at the base (z=0 or the minimum z).
+    #- at t (at top): draws the color map at the top (maximum z).
     printf "splot $data matrix with pm3d \n"
 end function
 
