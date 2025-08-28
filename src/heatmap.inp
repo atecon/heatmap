@@ -286,6 +286,7 @@ function void create_heatmap_plot (bundle self)
     print_creation_message(self)
 end function
 
+
 function string write_gnuplot_heatmap (const bundle self)
     /* Function writing the actual gnuplot commands for heatmap */
 
@@ -653,6 +654,9 @@ function void heatmap (const matrix mat,
         create_heatmap_plot(self)
     endif
 end function
+
+
+
 
 
 function void contour_plot (const matrix mat, bundle opts[null], scalar clevels[::8])
