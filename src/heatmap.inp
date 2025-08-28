@@ -107,7 +107,7 @@ function void print_palette (const bundle self)
     /* Function to print the color palette settings. */
 
     printf "set cbrange [%g:%g]\n", self.min_limit, self.max_limit
-    if !self.native
+    if self.native == FALSE
         printf "%s\n", makepalette(self.min_limit, self.max_limit, self.zerowhite,
                                    self.coldest, self.hottest)
     endif
