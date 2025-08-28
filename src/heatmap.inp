@@ -332,7 +332,7 @@ function string write_gnuplot_heatmap (const bundle self)
         if self.grid
             print_add_grid(FALSE)
         endif
-        print_matrix_data(self.mat)
+        print_data_block(self.mat)
         print_plot_matrix_image(self.printvals, self.valfs)
         printf "\n"
     end outfile
@@ -374,7 +374,7 @@ function string write_gnuplot_contour (const bundle self)
             print_add_grid(TRUE)
         endif
         print_contour_linetypes(self.clevels)
-        print_matrix_data(self.mat)
+        print_data_block(self.mat)
         print_splot_matrix_lines()
 
         printf "\n"
@@ -419,7 +419,7 @@ function void print_plot_matrix_image(scalar printvals, scalar valfs)
     printf "\n"
 end function
 
-function void print_matrix_data(const matrix mat)
+function void print_data_block(const matrix mat)
     # Print matrix data for gnuplot in the required format
 
     matrix m = mreverse(mat)
