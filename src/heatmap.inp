@@ -510,21 +510,41 @@ function void print_plot_matrix_image (scalar printvals, scalar valfs)
     printf "\n"
 end function
 
-function void print_splot_matrix_pm3d_lines (void)
+function void print_splot_matrix_pm3d_lines (const scalar grid_resolution,
+                                             const bool with_contour)
     /* Print the gnuplot commands for a pm3d splot using a matrix input */
-    printf "set pm3d at surface\n"
-    printf "set hidden3d offset 1,1,1\n"
-    printf "splot $data matrix with pm3d\n"
+     #printf "set pm3d at surface\n"  # TODO: not supported, yet
+     #printf "set hidden3d offset 1,1,1\n" # TODO: not supported, yet
+
+    if ok(grid_resolution) && grid_resolution > 0
+        printf "set dgrid3d %d,%d qnorm 2\n", grid_resolution, grid_resolution
+    endif
+
+    if with_contour
+        printf "set hidden3d\n"
+        printf "set contour base\n"
+    endif
+    printf "splot $data matrix with pm3d \n"
 end function
 
-function void print_splot_block_pm3d (void)
-    /* Print the gnuplot command for a pm3d splot using x y z table input */
-    printf "set pm3d at surface\n"
-    printf "splot $data using 1:2:3 with pm3d\n"
+
+function void print_splot_block_pm3d (const scalar grid_resolution)
+    /* Print the gnuplot command for a pm3d splot using x y z table input.
+       If grid_resolution > 0, use dgrid3d interpolation with grid_resolution x grid_resolution resolution.
+       If grid_resolution == 0 (default), do not interpolate. */
+
+    if ok(grid_resolution) && grid_resolution > 0
+        printf "set dgrid3d %d,%d qnorm 2\n", grid_resolution, grid_resolution
+    endif
+
+    # printf "set hidden3d\n"
+    # printf "set contour base\n"
+    printf "splot $data using 1:2:3 with pm3d palette\n"
 end function
 
-function void print_data_block (const matrix mat)
-    # Print matrix data for gnuplot in the required format
+function void print_data_grid_style (const matrix mat)
+    /* Print matrix data for gnuplot using what's called the "grid" style.
+       URL: https://psy.swansea.ac.uk/staff/Carter/gnuplot/gnuplot_3d.htm */
 
     # Reverse by rows (cross-sectional units) because gnuplot draws the initial rows
     # of "m" at the bottom of the plot
@@ -534,6 +554,17 @@ function void print_data_block (const matrix mat)
 
     printf "$data << EOD\n"
     printf "%12.5g", m
+    printf "EOD\n\n"
+end function
+
+function void print_data_table_style (const matrix mat)
+    /* Print matrix as a simple table (called )"table" style). */
+
+    cnameset(mat, "")
+    rnameset(mat, "")
+
+    printf "$data << EOD\n"
+    printf "%12.5g", mat
     printf "EOD\n\n"
 end function
 
