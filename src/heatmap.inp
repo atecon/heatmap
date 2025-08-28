@@ -405,6 +405,9 @@ function void create_pm3d_plot (bundle self, const matrix mat, bool is_grid)
 
     scalar self.ncols_mat = cols(mat)
     scalar self.nrows_mat = rows(mat)
+    string self.xlabel = "x"
+    string self.ylabel = "y"
+    string self.zlabel = "z"
 
     if is_grid
         self.min_limit = get_limit(self.limits[1], min(mat))
