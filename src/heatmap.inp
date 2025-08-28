@@ -731,11 +731,25 @@ function void print_axis_label (const string axis, const string label, const sca
     endif
 end function
 
+function string set_title (const bundle self)
+    /* Set the title for the heatmap */
+
+    string ret = ""
+    if strlen(self.title) > 0
+        ret = self.title
+    endif
+
+    return ret
+end function
 
 function void print_title (const string title,
                            const scalar fontsize)
     /* code description
     return: type, description */
+
+    if strlen(title) == 0
+        return
+    endif
 
     printf "set title '%s' ", title
     if ok(fontsize)
