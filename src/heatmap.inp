@@ -550,14 +550,11 @@ function void print_splot_matrix_pm3d_lines (const bool with_contour)
 end function
 
 
-function void print_splot_block_pm3d (const scalar grid_resolution)
+function void print_splot_block_pm3d (void)
     /* Print the gnuplot command for a pm3d splot using x y z table input.
        If grid_resolution > 0, use dgrid3d interpolation with grid_resolution x grid_resolution resolution.
        If grid_resolution == 0 (default), do not interpolate. */
 
-    if ok(grid_resolution) && grid_resolution > 0
-        printf "set dgrid3d %d,%d qnorm 2\n", grid_resolution, grid_resolution
-    endif
 
     # printf "set hidden3d\n"
     # printf "set contour base\n"
