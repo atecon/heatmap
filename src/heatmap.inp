@@ -401,11 +401,10 @@ end function
 function void print_creation_message (const bundle self)
     /* Prints a message indicating the plot was created. */
     if !self.quiet
-        string ptype = self.do_contour ? "contour plot" : "heatmap"
         if strlen(self.name_mat) == 0
-            printf "%s created\n", ptype
+            printf "%s created plot\n", self.plottype
         else
-            printf "%s for %s created\n", ptype, self.name_mat
+            printf "%s for %s created plot\n", self.plottype, self.name_mat
         endif
     endif
 end function
@@ -676,14 +675,13 @@ function void heatmap (const matrix mat,
     string self.actual_title = set_title(self)
 
     if self.do_contour == TRUE
+        self.plottype = "contour"
         create_contour_plot(self)
     else
+        self.plottype = "heatmap"
         create_heatmap_plot(self)
     endif
 end function
-
-
-
 
 
 function void contour_plot (const matrix mat, bundle opts[null], scalar clevels[::8])
