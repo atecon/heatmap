@@ -237,24 +237,11 @@ function scalar get_limit (const scalar val, const scalar fallback)
 end function
 
 
-function void create_contour_plot (bundle self)
-    /* Main function for creating a contour plot */
-
-    scalar self.ncols_mat = cols(self.mat)
-    scalar self.nrows_mat = rows(self.mat)
-    string dest = self.dest
-
-    string buffer = write_gnuplot_contour(self)
-    gnuplot --input="@buffer" --output="@dest"
-    print_creation_message(self)
-end function
-
-
 function void create_heatmap_plot (bundle self)
     /* Main function for creating a heatmap plot */
 
     if self.ncols_mat == 1
-        #fix_column_vector_case(&self.mat)
+        # fix_column_vector_case(&self.mat)  # TODO: still necessary?
         matrix self.mat = fix_column_vector_case(self.mat)
         scalar self.ncols_mat = cols(self.mat)
     endif
@@ -284,7 +271,6 @@ function void create_heatmap_plot (bundle self)
     endif
 
     string buffer_file = write_gnuplot_heatmap(self)
-    #print readfile("@buffer_file") # for debugging only
 
     gnuplot --input="@buffer_file" --output="@dest"
     print_creation_message(self)
@@ -337,7 +323,7 @@ function string write_gnuplot_heatmap (const bundle self)
         if self.grid
             print_add_grid(FALSE)
         endif
-        print_data_block(self.mat)
+        print_data_grid_style(self.mat)
         print_plot_matrix_image(self.printvals, self.valfs)
         printf "\n"
     end outfile
@@ -391,7 +377,7 @@ function string write_gnuplot_contour (const bundle self)
             print_add_grid(TRUE)
         endif
         print_contour_linetypes(self.clevels)
-        print_data_block(self.mat)
+        print_data_grid_style(self.mat)
         print_splot_matrix_lines()
 
         printf "\n"
@@ -590,8 +576,6 @@ function void print_contour_linetypes (scalar clevels)
     printf "set cntrparam bspline levels %d firstlinetype 101\n", clevels
 end function
 
-
-
 function void print_add_grid (bool do_contour)
     /* This function prints the gnuplot commands to add grid lines to the plot. */
 
@@ -720,7 +704,6 @@ function void print_ylabel (const string ylabel, const scalar labelfs)
 end function
 
 
-
 function void print_xlabel (const string xlabel, const scalar labelfs)
     /* Print the gnuplot set xlabel command with optional font size */
 
@@ -756,7 +739,6 @@ function void print_enhanced (const scalar valfs)
         printf "set termoption enhanced\n"
     endif
 end function
-
 
 
 function void heatmap (const matrix mat,
