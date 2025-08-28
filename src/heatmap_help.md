@@ -1,16 +1,10 @@
 # DESCRIPTION
 
-This package is intended for producing heatmap or contour plots:
-Heatmaps are 2-dimensional plots where you have a rectangular array of
-"tiles" whose colours carry the relevant information; contour plots
-draw lines where the information is displayed by joining points with
-the same value.
+This package is intended for producing heatmap or contour plots: Heatmaps are 2-dimensional plots where you have a rectangular array of "tiles" whose colours carry the relevant information; contour plots draw lines where the information is displayed by joining points with the same value.
 
-The package offers 2 public functions; both feature a limited degree
-of customisability via an "options" bundle (discussed later).
+The package offers 2 public functions; both feature a limited degree of customisability via an "options" bundle (discussed later).
 
-Moreover, a menu entry can be added under the "View" menu, which
-offers a simplified interface to the "heatmap" function.
+Moreover, a **menu entry** can be added under the "View" menu, which offers a simplified interface to the "heatmap" function.
 
 # AVAILABLE FUNCTIONS
 
@@ -92,6 +86,8 @@ Arguments:
 Creates a 3-dimensional surface visualization by driving gnuplot's pm3d mode together with the splot command. Behaviour depends on the form of the input:
 - Matrix form (cols != 3): the matrix is interpreted as a z-grid (rows/columns form a regular lattice). The plot uses the matrix data format understood by gnuplot.
 - Table form (matrix with 3 columns or list of three series): the input is interpreted as an (x, y, z) table. If desired, the implementation may apply gnuplot's dgrid3d to interpolate scattered points onto a regular grid before plotting.
+
+**Note:** This functionality is currently not accessible via the GUI menu.
 
 Several options from the standard options bundle affect the pm3d plot (palette, limits, title, labels). In addition, pm3d-specific options are available:
 
