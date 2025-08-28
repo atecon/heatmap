@@ -587,7 +587,15 @@ function void print_data_table_style (const matrix mat)
     printf "EOD\n\n"
 end function
 
+function void print_border_pm3d (void)
+    /* Print gnuplot command to set border for pm3d plots */
+    print "set border 4095 front linetype -1 linewidth 0.5 linecolor rgb 'black'"
+end function
 
+function void print_view (const scalar x_axis, const scalar y_axis)
+    # Print gnuplot view command for 3D plots
+    printf "set view %d, %d\n", x_axis, y_axis
+end function
 
 function void print_contour_linetypes (scalar clevels)
     # Print gnuplot linetype settings for contour plot levels
