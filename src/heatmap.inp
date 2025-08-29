@@ -82,6 +82,7 @@ function bundle default_opts (void)
     ret.ytics = ""
     ret.printvals = -1
     ret.tics_out = FALSE
+    string ret.obsaxis = ""
 
     # Date tics
     string ret.date_format = "%Y-%m"
@@ -330,7 +331,7 @@ function string write_gnuplot_heatmap (const bundle self)
             endif
 
         elif self.input_type != "matrix" # either series or list
-            print_datetics(self.obsdate, self)
+            print_datetics(self.obsdate, "x", self)
             if $datatype == 2 # time-series
                 print_ytics(self.varnames, nelem(self.varnames), self.ticfs)
             elif $datatype == 3 # panel
@@ -486,6 +487,10 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         print_grid_resolution(self.grid_resolution)
         print_border_pm3d()
 
+        if exists(self.obsdate) && strlen(self.obsaxis) > 0
+            print_datetics(self.obsdate, self.obsaxis, self)
+        endif
+
         if is_grid
             # use same matrix output as heatmap
             print_data_grid_style(mat)
@@ -577,7 +582,6 @@ function void print_splot_block_pm3d (void)
     /* Print the gnuplot command for a pm3d splot using x y z table input.
        If grid_resolution > 0, use dgrid3d interpolation with grid_resolution x grid_resolution resolution.
        If grid_resolution == 0 (default), do not interpolate. */
-
 
     # printf "set hidden3d\n"
     # printf "set contour base\n"
