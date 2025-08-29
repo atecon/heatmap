@@ -147,15 +147,12 @@ As for the options bundle, the active keys are:
   entries as white (default = 0). This setting is active only if the
   'native' option is 0.
 
-## strings and labels
+## strings, labels and tics
 
 - `title`: string, the plot title (default: none).
-- `do_labels`: boolean, decorate the plot with x and y labels (default:
-  false). If set to 1, the plot will use the row and column labels of
-  the matrix, if present.
-- `printvals`: an integer, controlling whether to print the matrix
-  values in the plot. If negative, nothing is printed. If positive, it
-  controls the number of decimals. (default = -1)
+- `do_labels`: boolean, decorate the plot with x and y labels (default: FALSE). If set to 1, the plot will use the row and column labels of the matrix, if present.
+- `printvals`: an integer, controlling whether to print the matrix values in the plot. If negative, nothing is printed. If positive, it controls the number of decimals. (default = -1)
+- `tics_out`: boolean, if true, tics are drawn outside the plot (default = FALSE)
 - `xlabel`: string, optional x-axis title
 - `ylabel`: string, optional y-axis title
 
