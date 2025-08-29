@@ -165,12 +165,14 @@ As for the options bundle, the active keys are:
 
 ## date options
 
-When passing a time series or a list of time series to the `heatmap_plot()` function, you can specify the date format and rotation for the x-axis labels using the `date_format` and `date_rotate` options in the options bundle.
+When passing a time series or a list of time series to the `heatmap_plot()` or `pm3d_plot()` function, you can specify the date format and rotation for the x-axis labels using the `date_format` and `date_rotate` options in the options bundle.
 
 - `date_format`: string, the format for the x-axis date labels (default "%Y-%m")
 - `date_rotate`: scalar, the rotation angle for the x-axis date labels (default 45)
 - `date_offset_x`: scalar, the x-axis offset for the date labels (default -3.5)
 - `date_offset_y`: scalar, the y-axis offset for the date labels (default -1.4)
+- `obsaxis`: string, the observation axis (default: "")
+- `obsdate`: matrix, column vector of observation dates in ISO8601 format (default: NA)
 
 
 # CONTOUR PLOTS
