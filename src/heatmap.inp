@@ -422,9 +422,19 @@ function void create_pm3d_plot (bundle self, const matrix mat, bool is_grid)
 
     scalar self.ncols_mat = cols(mat)
     scalar self.nrows_mat = rows(mat)
-    string self.xlabel = "x"
-    string self.ylabel = "y"
-    string self.zlabel = "z"
+
+    # set defaults if not specified by user
+    if self.input_type == "matrix"
+        string self.xlabel = strlen(self.xlabel) == 0 ? "x" : self.xlabel
+        string self.ylabel = strlen(self.ylabel) == 0 ? "y" : self.ylabel
+        string self.zlabel = strlen(self.zlabel) == 0 ? "z" : self.zlabel
+    endif
+    #  For series and lists
+    if nelem(self.varnames) == 3 && self.input_type != "matrix"
+        string self.xlabel = self.varnames[1]
+        string self.ylabel = self.varnames[2]
+        string self.zlabel = self.varnames[3]
+    endif
 
     if is_grid
         self.min_limit = get_limit(self.limits[1], min(mat))
