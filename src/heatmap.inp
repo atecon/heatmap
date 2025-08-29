@@ -114,6 +114,22 @@ function void print_palette (const bundle self)
 end function
 
 
+function void print_palette_jet (void)
+    /* Print the MATLAB 'jet' color palette for gnuplot pm3d plots.
+       Borrowed from: https://gist.github.com/bagrow/805122 */
+
+    printf "set palette defined (0 0.0 0.0 0.5, \\\n"
+    printf "                     1 0.0 0.0 1.0, \\\n"
+    printf "                     2 0.0 0.5 1.0, \\\n"
+    printf "                     3 0.0 1.0 1.0, \\\n"
+    printf "                     4 0.5 1.0 0.5, \\\n"
+    printf "                     5 1.0 1.0 0.0, \\\n"
+    printf "                     6 1.0 0.5 0.0, \\\n"
+    printf "                     7 1.0 0.0 0.0, \\\n"
+    printf "                     8 0.5 0.0 0.0 )\n"
+end function
+
+
 function string makepalette (scalar m,
                              scalar M,
                              bool zw,
