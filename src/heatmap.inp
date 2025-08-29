@@ -99,6 +99,7 @@ function bundle default_opts (void)
     scalar ret.with_contour = FALSE  # only for matrix input, yet
     scalar ret.view_x_axis = 60
     scalar ret.view_y_axis = 15
+    scalar ret.surface_grid = TRUE
 
     return ret
 end function
@@ -477,7 +478,7 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         print_axis_label("y", self.ylabel, self.labelfs)
         print_axis_label("z", self.zlabel, self.labelfs)
         print_autoscale_fix()
-        if self.grid
+        if self.surface_grid
             print_add_grid_pm3d()
         endif
         print_view(self.view_x_axis, self.view_y_axis)
