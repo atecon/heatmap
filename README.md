@@ -88,7 +88,7 @@ Arguments:
 - Input: numeric, required - accepts a matrix (grid form), a matrix with three columns (x y z rows), or a list of three series (each series becomes a column and the list is transposed into Nx3 rows).
 - opts: bundle, optional
 
-Creates a 3-dimensional surface visualization by driving gnuplot's pm3d mode together with the splot command. Behaviour depends on the form of the input:
+Creates a 3-dimensional surface visualization by driving gnuplot's pm3d mode together with the splot command. The native color scheme is the MATLAB 'jet' colormap. Behaviour depends on the form of the input:
 
 - Matrix form (cols != 3): the matrix is interpreted as a z-grid (rows/columns form a regular lattice). The plot uses the matrix data format understood by gnuplot.
 
@@ -107,10 +107,10 @@ Several options from the standard options bundle affect the pm3d plot (palette, 
 - `view_y_axis`: scalar, controls the rotation of the plot around the y-axis. The default value is 15.
 
 - `with_contour`: boolean, when TRUE and the input is a matrix, the pm3d plot may be augmented with contour-plot so that contour lines on the base or are combined with the pm3d surface. The default value is FALSE.
+- `surface_grid`: boolean, when TRUE and the input is a matrix, a grid is drawn on the surface of the pm3d plot. The default value is TRUE.
 
 These keys are present in the default options bundle and are only used by pm3d_plot().
 
-The `grid` option from the standard bundle draws a grid on the surface of the plot when `TRUE`, which can help to visualize the data more clearly.
 
 
 # OPTIONS
