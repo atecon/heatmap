@@ -932,6 +932,8 @@ function void pm3d_plot (const numeric Input, bundle opts[null])
     string self.input_type = typename(Input)
     matrix mat = {}
     scalar is_grid = FALSE
+    string self.plottype = "pm3d"
+    scalar self.native = TRUE  # default palette (jet)
 
     if self.input_type == "matrix"
         mat = Input
