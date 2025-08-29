@@ -147,6 +147,14 @@ As for the options bundle, the active keys are:
   entries as white (default = 0). This setting is active only if the
   'native' option is 0.
 
+## colorbox
+
+- `colorbox`: boolean, if TRUE, a colorbox is drawn next to the plot (default = TRUE).
+- `colorbox_width`: scalar, the width of the colorbox; sensible value is e.g. 0.02 (default = NA).
+- `colorbox_height`: scalar, the height of the colorbox; sensible value is e.g. 0.5 (default = NA).
+- `colorbox_x_pos`: scalar, the x position of the colorbox; sensible value is e.g. 0.1 (default = NA).
+- `colorbox_y_pos`: scalar, the y position of the colorbox; sensible value is e.g. 0.1 (default = NA).
+
 ## strings, labels and tics
 
 - `title`: string, the plot title (default: none).
