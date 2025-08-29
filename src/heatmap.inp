@@ -71,7 +71,7 @@ function bundle default_opts (void)
     ret.hottest = "#ffd35a"  # "red"
     ret.zerowhite = FALSE
 
-    # labels
+    # labels and tics
     ret.title = ""
     strings ret.varnames = array(0)
     ret.do_labels = FALSE
@@ -81,6 +81,7 @@ function bundle default_opts (void)
     ret.xtics = ""
     ret.ytics = ""
     ret.printvals = -1
+    ret.tics_out = FALSE
 
     # Date tics
     string ret.date_format = "%Y-%m"
@@ -311,7 +312,7 @@ function string write_gnuplot_heatmap (const bundle self)
         print_title(self.actual_title, self.titlefs)
         printf "unset key\n"
         print_palette(self)
-        print_tics_nomirror(self.ticfs)
+        print_tics_nomirror(self.ticfs, self.tics_out)
         print_xrange(self.ncols_mat)
 
         # Currently not needed
@@ -387,7 +388,7 @@ function string write_gnuplot_contour (const bundle self)
         printf "set contour base\n"
         printf "unset surface\n"
         printf "set view map\n"
-        print_tics_nomirror(self.ticfs)
+        print_tics_nomirror(self.ticfs, self.tics_out)
         print_xrange(self.ncols_mat)
 
         if self.do_labels
@@ -473,7 +474,7 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         # palette and tics and labels
         print_palette_jet()
         print_palette(self)  # only relevant if self.native==FALSE
-        print_tics_nomirror(self.ticfs)
+        print_tics_nomirror(self.ticfs, self.tics_out)
         print_axis_label("x", self.xlabel, self.labelfs)
         print_axis_label("y", self.ylabel, self.labelfs)
         print_axis_label("z", self.zlabel, self.labelfs)
@@ -741,10 +742,15 @@ function void print_yrange (scalar nrows_mat)
 end function
 
 
-function void print_tics_nomirror (const scalar ticfs)
-    /* Print 'set tics nomirror' with optional font size */
+function void print_tics_nomirror (const scalar ticfs, const bool tics_out)
+    /* Print 'set tics nomirror' with optional font size and tics direction */
 
     printf "set tics nomirror "
+    if tics_out == TRUE
+        printf "out "
+    else
+        printf "in "
+    endif
     if ok(ticfs)
         printf "font \",%d\"\n", ticfs
     else
