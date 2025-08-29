@@ -759,16 +759,19 @@ end function
 function void print_axis_label (const string axis, const string label, const scalar labelfs)
     /* Print the gnuplot set xlabel/ylabel/zlabel command with optional font size.
        axis: "x", "y", or "z"
+       If axis is "z", rotate label by 90 degrees.
     */
 
     if strlen(label) > 0
         string axislab = strsub(label, "\"", "'")
         printf "set %slabel \"%s\" ", axis, axislab
         if ok(labelfs)
-            printf "font \",%d\"\n", labelfs
-        else
-            printf "\n"
+            printf "font \",%d\" ", labelfs
         endif
+        if axis == "z"
+            printf "rotate by 90 "
+        endif
+        printf "\n"
     endif
 end function
 
