@@ -71,6 +71,13 @@ function bundle default_opts (void)
     ret.hottest = "#ffd35a"  # "red"
     ret.zerowhite = FALSE
 
+    # colourbox
+    ret.colorbox = TRUE
+    ret.colorbox_width = NA
+    ret.colorbox_height = NA
+    ret.colorbox_x_pos = NA
+    ret.colorbox_y_pos = NA
+
     # labels and tics
     ret.title = ""
     strings ret.varnames = array(0)
@@ -104,6 +111,23 @@ function bundle default_opts (void)
     scalar ret.surface_grid = TRUE
 
     return ret
+end function
+
+function void print_colorbox (const bundle self)
+    /* Print gnuplot command to set colorbox with optional parameters from self.
+       Only set width, height, x_pos, y_pos if they are not NA. */
+
+    # "set colorbox vertical user origin .02, .1 size .01,.6\n".
+
+    string cmd = sprintf("set colorbox vertical user font ',%d'", self.ticfs)
+    if ok(self.colorbox_x_pos) && ok(self.colorbox_y_pos)
+        cmd ~= sprintf(" origin %g, %g", self.colorbox_x_pos, self.colorbox_y_pos)
+    endif
+    if ok(self.colorbox_width) && ok(self.colorbox_height)
+        cmd ~= sprintf(" size %g, %g", self.colorbox_width, self.colorbox_height)
+    endif
+
+    printf "%s\n", cmd
 end function
 
 function void print_palette (const bundle self)
@@ -315,6 +339,9 @@ function string write_gnuplot_heatmap (const bundle self)
         print_palette(self)
         print_tics_nomirror(self.ticfs, self.tics_out)
         print_xrange(self.ncols_mat)
+        if self.colorbox
+            print_colorbox(self)
+        endif
 
         # Currently not needed
         #if self.nrows_mat == 1 && self.input_type != "matrix"
@@ -391,6 +418,9 @@ function string write_gnuplot_contour (const bundle self)
         printf "set view map\n"
         print_tics_nomirror(self.ticfs, self.tics_out)
         print_xrange(self.ncols_mat)
+        if self.colorbox
+            print_colorbox(self)
+        endif
 
         if self.do_labels
             if nelem(self.column_names) == self.ncols_mat
@@ -475,6 +505,9 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         # palette and tics and labels
         print_palette_jet()
         print_palette(self)  # only relevant if self.native==FALSE
+        if self.colorbox
+            print_colorbox(self)
+        endif
         print_tics_nomirror(self.ticfs, self.tics_out)
         print_axis_label("x", self.xlabel, self.labelfs)
         print_axis_label("y", self.ylabel, self.labelfs)
