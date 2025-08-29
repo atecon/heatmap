@@ -445,12 +445,6 @@ function void create_pm3d_plot (bundle self, const matrix mat, bool is_grid)
         self.max_limit = get_limit(self.limits[2], max(mat[,3]))
     endif
 
-    if nelem(self.varnames) == 3
-        string self.xlabel = self.varnames[1]
-        string self.ylabel = self.varnames[2]
-        string self.zlabel = self.varnames[3]
-    endif
-
     string buffer_file = write_gnuplot_pm3d(self, mat, is_grid)
     #string buffer = readfile(buffer_file)
     #print buffer
@@ -476,7 +470,8 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         printf "unset key\n"
 
         # palette and tics and labels
-        print_palette(self)
+        print_palette_jet()
+        print_palette(self)  # only relevant if self.native==FALSE
         print_tics_nomirror(self.ticfs)
         print_axis_label("x", self.xlabel, self.labelfs)
         print_axis_label("y", self.ylabel, self.labelfs)
@@ -966,7 +961,6 @@ function void pm3d_plot (const numeric Input, bundle opts[null])
     endif
     string self.name_mat = argname(Input)
     string self.actual_title = set_title(self)
-    string self.plottype = "pm3d"
 
     create_pm3d_plot(self, mat, is_grid)
 end function
