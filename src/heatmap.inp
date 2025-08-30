@@ -621,13 +621,13 @@ function void print_splot_block_pm3d (void)
     printf "splot $data using 1:2:3 with pm3d palette\n"
 end function
 
-function void print_data_grid_style (const matrix mat)
+function void print_data_grid_style (const matrix mat, const bool reverse_columns[TRUE])
     /* Print matrix data for gnuplot using what's called the "grid" style.
        URL: https://psy.swansea.ac.uk/staff/Carter/gnuplot/gnuplot_3d.htm */
 
     # Reverse by rows (cross-sectional units) because gnuplot draws the initial rows
     # of "m" at the bottom of the plot
-    matrix m = mreverse(mat)
+    matrix m = reverse_columns==TRUE ? mreverse(mat) : mat
     cnameset(m, "")
     rnameset(m, "")
 
