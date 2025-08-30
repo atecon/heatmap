@@ -526,7 +526,10 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
 
         if is_grid
             # use same matrix output as heatmap
-            print_data_grid_style(mat)
+            # Do not reverse matrix, otherwise initial y-axis values are drawn at the
+            # end of the axis but not beginning which is also inconsistent with eventual
+            # ytics labels
+            print_data_grid_style(mat, FALSE)
             print_splot_matrix_pm3d_lines(self.with_contour)
         else
             # x y z table
