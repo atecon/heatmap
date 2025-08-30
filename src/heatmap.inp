@@ -109,6 +109,12 @@ function bundle default_opts (void)
     scalar ret.view_x_axis = 60
     scalar ret.view_y_axis = 15
     scalar ret.surface_grid = TRUE
+    scalar ret.xrange_min = NA
+    scalar ret.xrange_max = NA
+    scalar ret.yrange_min = NA
+    scalar ret.yrange_max = NA
+    scalar ret.zrange_min = NA
+    scalar ret.zrange_max = NA
 
     return ret
 end function
@@ -512,7 +518,13 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         print_axis_label("x", self.xlabel, self.labelfs)
         print_axis_label("y", self.ylabel, self.labelfs)
         print_axis_label("z", self.zlabel, self.labelfs)
+
+        # Set ranges
         print_autoscale_fix()
+        print_xyzrange("x", self.xrange_min, self.xrange_max)
+        print_xyzrange("y", self.yrange_min, self.yrange_max)
+        print_xyzrange("z", self.zrange_min, self.zrange_max)
+
         if self.surface_grid
             print_add_grid_pm3d()
         endif
@@ -768,18 +780,34 @@ function void print_xtics (strings column_names, scalar ncols_mat, const scalar 
     printf ") out font \",%g\"\n", fontsize
 end function
 
-
-function void print_xrange (scalar ncols_mat)
+function void print_xrange (scalar n)
     /* Print gnuplot set xrange command for columns */
     scalar subtract = 0.5
-    printf "set xrange [-0.5:%4.1f]\n", ncols_mat-subtract
+    printf "set xrange [-0.5:%4.1f]\n", n-subtract
 end function
 
-function void print_yrange (scalar nrows_mat)
+function void print_yrange (scalar n)
     /* Print gnuplot set yrange command for rows */
     scalar subtract = 0.5
-    printf "set yrange [%4.1f:%4.1f]\n", -subtract, nrows_mat-subtract
+    printf "set yrange [%4.1f:%4.1f]\n", -subtract, n-subtract
 end function
+
+function void print_xyzrange (const string axis, const scalar min, const scalar max)
+    /* Print gnuplot set *range command for columns */
+
+    string ret = sprintf("set %srange [", axis)
+    if ok(min)
+        ret += sprintf("%.5f", min)
+    endif
+    ret += ":"
+    if ok(max)
+        ret += sprintf("%.5f", max)
+    endif
+    ret += sprintf("]\n")
+
+    print ret
+end function
+
 
 
 function void print_tics_nomirror (const scalar ticfs, const bool tics_out)
