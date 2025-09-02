@@ -410,7 +410,6 @@ function void create_contour_plot (bundle self)
     /* Main function for creating a contour plot */
 
     string dest = self.dest
-
     string buffer = write_gnuplot_contour(self)
 
     gnuplot --input="@buffer" --output="@dest"
@@ -430,11 +429,11 @@ function string write_gnuplot_contour (const bundle self)
         printf "unset key\n"
         printf "set contour base\n"
         printf "unset surface\n"
-        printf "set view map\n"
+        printf "set view map\n"  # ensure 2D perspective
         print_tics_nomirror(self.ticfs, self.tics_out)
         print_xrange(self.ncols_mat)
         if self.colorbox
-            print_colorbox(self)
+            #print_colorbox(self)
         else
             printf "unset colorbox\n"
         endif
@@ -461,7 +460,6 @@ function string write_gnuplot_contour (const bundle self)
         print_user_contour_level(self.contour_levels)
         print_isosamples(self.isosamples)
         print_splot_matrix_lines()
-
         printf "\n"
     end outfile
     set force_decpoint off
@@ -967,15 +965,15 @@ function void contour_plot (const matrix mat, bundle opts[null], scalar clevels[
     /* Create a contour plot: ensure clevels is set (default 8) and call heatmap().
        Convenience public wrapper for heatmap(). */
 
-    bundle myopts = exists(opts) ? opts + default_opts() : default_opts()
+    bundle self = exists(opts) ? opts + default_opts() : default_opts()
 
     if ok(clevels)
-        myopts.clevels = clevels
-    elif !inbundle(myopts, "clevels") || myopts.clevels == 0
-        myopts.clevels = 8
+        self.clevels = clevels
+    elif !inbundle(self, "clevels") || self.clevels == 0
+        self.clevels = 8
     endif
 
-    heatmap(mat, myopts)
+    heatmap(mat, self)
 end function
 
 
