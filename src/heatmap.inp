@@ -434,7 +434,7 @@ function string write_gnuplot_contour (const bundle self)
         print_tics_nomirror(self.ticfs, self.tics_out)
         print_xrange(self.ncols_mat)
         if self.colorbox
-            #print_colorbox(self)
+            print_colorbox(self)
         else
             printf "unset colorbox\n"
         endif
@@ -456,12 +456,11 @@ function string write_gnuplot_contour (const bundle self)
             print_add_grid(TRUE)
         endif
         print_contour_linetypes(self.clevels)
-        ##printf "set cntrlabel start 1 interval -1 font ',7'\n"
         print_data_grid_style(self.mat)
         print_user_contour_level(self.contour_levels)
         print_isosamples(self.isosamples)
         print_splot_matrix_lines()
-        #print_splot_matrix_labels() # Does not work, yet
+        # print_splot_matrix_labels() # Does not work, yet
 
         printf "\n"
     end outfile
