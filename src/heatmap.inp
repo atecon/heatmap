@@ -727,7 +727,7 @@ end function
 
 function void print_view (const scalar x_axis, const scalar y_axis)
     # Print gnuplot view command for 3D plots
-    printf "set view %d, %d\n", x_axis, y_axis
+    printf "set view %d, %d\n", y_axis, x_axis
 end function
 
 function void print_contour_linetypes (scalar clevels)
