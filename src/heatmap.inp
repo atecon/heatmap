@@ -115,8 +115,13 @@ function bundle default_opts (void)
     scalar ret.zrange_min = NA
     scalar ret.zrange_max = NA
 
+    # for contour plots
+    matrix ret.contour_levels = {}
+    matrix ret.isosamples = {}
+
     return ret
 end function
+
 
 function void print_colorbox (const bundle self)
     /* Print gnuplot command to set colorbox with optional parameters from self.
@@ -451,7 +456,10 @@ function string write_gnuplot_contour (const bundle self)
             print_add_grid(TRUE)
         endif
         print_contour_linetypes(self.clevels)
+        ##printf "set cntrlabel start 1 interval -1 font ',7'\n"
         print_data_grid_style(self.mat)
+        print_user_contour_level(self.contour_levels)
+        print_isosamples(self.isosamples)
         print_splot_matrix_lines()
 
         printf "\n"
@@ -578,9 +586,39 @@ function void print_creation_message (const bundle self)
 end function
 
 
+function void print_user_contour_level (const matrix levels)
+    /* Print gnuplot command to set user-specified discrete contour levels.
+       Example: set cntrparam levels discrete 0.1, 1.0, 10.0, 100.0 */
+
+    if nelem(levels) && sum(ok(levels)) > 0
+        matrix mat = vec(levels)
+        printf "set cntrparam levels discrete "
+        loop i = 1..nelem(mat)
+            if !ok(mat[i])
+                continue
+            endif
+            printf "%g", mat[i]
+            if i < nelem(mat)
+                printf ", "
+            endif
+        endloop
+        printf "\n"
+    endif
+end function
+
+function void print_isosamples (const matrix isosamples)
+        /* Print gnuplot set isosamples command using a 2-element matrix.
+           Only print if both values are not NA. This sets the grid resolution for
+           contour plots. */
+
+    if nelem(isosamples) == 2 && ok(isosamples[1]) && ok(isosamples[2])
+        printf "set isosamples %g,%g\n", isosamples[1], isosamples[2]
+    endif
+end function
+
 function void print_splot_matrix_lines (void)
-    /* Print the gnuplot command for splotting the matrix with lines */
-    printf "splot $data matrix with lines\n"
+    /* Print the gnuplot command for splotting the matrix with lines for contour plot only. */
+    printf "splot $data matrix with lines"
 end function
 
 
