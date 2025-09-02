@@ -550,7 +550,6 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         print_contour_settings(self.with_contour)
         if exists(self.obsdate) && strlen(self.obsaxis) > 0
             print_datetics(self.obsdate, self.obsaxis, self)
-            # print_gnuplot_time_axis(self)
         endif
 
         if is_grid
@@ -1242,6 +1241,8 @@ function void print_datetics (const numeric obsdate,
     printf ") out rotate by %g offset %g,%g font ',%g'\n",
         self.date_rotate, self.date_offset_x, self.date_offset_y, self.ticfs
 end function
+
+
 
 
 function void print_gnuplot_time_axis (const bundle self)
