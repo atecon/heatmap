@@ -128,12 +128,8 @@ As for the options bundle, the active keys are:
 
 ## colours
 
-- `native`: boolean, use the native gnuplot palette for contour and heatmaps and the MATLAB jet color scheme for pm3d plots; the default is
-  FALSE for heatmap() and TRUE for heatmap_func() and pm3d_plot().
-- `limits`: matrix. A 2-element vector for controlling the minimum and
-  maximum values for the colour palette. If either is set to NA (the default), the
-  min and max (respectively) of the input matrix will be used. This
-  can be useful, for example, when plotting correlation matrices.
+- `native`: boolean, use the native gnuplot palette for contour and heatmaps, and the MATLAB jet color scheme for pm3d plots; the default is FALSE for heatmap() and TRUE for heatmap_func() and pm3d_plot().
+- `limits`: matrix. A 2-element vector for controlling the minimum and maximum values for the colour palette. The user can set either the first value (minimum) or the second (maximum) and leave the other as NA; NA means that gnuplot will select an automatic value. This can be useful, for example, when plotting correlation matrices.
 - `coldest`: string, colour for the minimum of the plotted values. This
   setting is active if the 'native' option is 0. It has to be in a
   format recognised by gnuplot, eg "black" or "#0000cc" (default =
