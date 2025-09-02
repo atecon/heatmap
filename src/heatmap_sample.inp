@@ -68,6 +68,14 @@ bundle opts = _(with_contour=TRUE,
                 view_x_axis=50, view_y_axis=35)
 pm3d_plot(M, opts)
 
+# 2D-matrix and vector of observation dates on y-axis
+matrix X = {IBO, IDE}
+bundle opts = _(obsdate={$obsdate}, obsaxis="y",
+                date_format="%Y-%m",
+                date_offset_y=0.1,
+                date_offset_x=1.8)
+pm3d_plot(X, opts)
+
 ## list use
 list L = diff(LRM) IBO IDE
 pm3d_plot(L)
