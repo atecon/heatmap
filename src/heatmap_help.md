@@ -168,6 +168,7 @@ When passing a time series or a list of time series to the `heatmap_plot()` or `
 - `date_rotate`: scalar, the rotation angle for the x-axis date labels (default 45)
 - `date_offset_x`: scalar, the x-axis offset for the date labels (default -3.5)
 - `date_offset_y`: scalar, the y-axis offset for the date labels (default -1.4)
+- `max_date_tics`: scalar, the maximum number of date tics to display to avoid clutter (default: 6)
 - `obsaxis`: string, the observation axis (default: "")
 - `obsdate`: matrix, column vector of observation dates in ISO8601 format (default: NA)
 

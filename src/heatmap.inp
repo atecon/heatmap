@@ -95,6 +95,7 @@ function bundle default_opts (void)
     scalar ret.date_rotate = 45
     scalar ret.date_offset_x = -3.5
     scalar ret.date_offset_y = -1.4
+    scalar ret.max_date_tics = 6
 
     # font size values
     ret.titlefs = 14
@@ -549,6 +550,7 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         print_contour_settings(self.with_contour)
         if exists(self.obsdate) && strlen(self.obsaxis) > 0
             print_datetics(self.obsdate, self.obsaxis, self)
+            # print_gnuplot_time_axis(self)
         endif
 
         if is_grid
@@ -1210,24 +1212,23 @@ function void print_datetics (const numeric obsdate,
 
     matrix dates = values(obsdate)  # values() needed for panel data
     scalar n = nobs(dates)
-    # choose at most ~10 labels to avoid clutter
-    scalar maxlabels = 10
+    # choose at most ~max_date_tics labels to avoid clutter
+    scalar maxlabels = self.max_date_tics
     scalar step = n > maxlabels ? ceil(n / maxlabels) : 1
+
+    # assume ISO date as integer YYYYMMDD (or YYYYMM)
+    matrix year = floor(dates/10000)
+    matrix month = floor((dates - year*10000) / 100)
+    matrix day = dates - year*10000 - month*100
 
     printf "set %stics (", axis
     scalar first = 1
     loop i = 1..n
-        if i == 1 || i == n || ((i-1) % step == 0)
-            scalar val = dates[i]
-            # assume ISO date as integer YYYYMMDD (or YYYYMM)
-            scalar year = floor(val/10000)
-            scalar month = floor((val - year*10000) / 100)
-            scalar day = val - year*10000 - month*100
-
+        if i == 1 || ((i-1) % step == 0)
             string lab = self.date_format
-            lab = strsub(lab, "%Y", sprintf("%04d", year))
-            lab = strsub(lab, "%m", sprintf("%02d", month))
-            lab = strsub(lab, "%d", sprintf("%02d", day))
+            lab = strsub(lab, "%Y", sprintf("%04d", year[i]))
+            lab = strsub(lab, "%m", sprintf("%02d", month[i]))
+            lab = strsub(lab, "%d", sprintf("%02d", day[i]))
 
             if first
                 printf("'%s' %d", lab, i-1)
@@ -1242,3 +1243,36 @@ function void print_datetics (const numeric obsdate,
         self.date_rotate, self.date_offset_x, self.date_offset_y, self.ticfs
 end function
 
+
+function void print_gnuplot_time_axis (const bundle self)
+    /* NOT IN USE
+        Print gnuplot commands for date axis using timefmt and displayfmt.
+       obsaxis: "x", "y", or "z"
+       timefmt: format of the input data (e.g., "%Y%m%d")
+       date_format: format for axis labels (e.g., "%Y-%m")
+       rotate: optional, angle for label rotation
+       date_offset_x, date_offset_y: optional, label offset
+       ticfs: optional, font size for tics
+    */
+
+    printf "set %sdata time\n", self.obsaxis
+    printf "set timefmt \"%s\"\n", "%Y%m%d"  # natively ISO8601
+    printf "set format %s \"%s\"\n", self.obsaxis, self.date_format
+
+    string xtics_cmd = sprintf("set %stics nomirror", self.obsaxis)
+    if self.tics_out
+        xtics_cmd ~= " out nomirror"
+    endif
+    if ok(self.date_rotate)
+        xtics_cmd ~= sprintf(" rotate by %g", self.date_rotate)
+    endif
+    if ok(self.date_offset_x) || ok(self.date_offset_y)
+        xtics_cmd ~= sprintf(" offset %g,%g",
+            ok(self.date_offset_x) ? self.date_offset_x : 0,
+            ok(self.date_offset_y) ? self.date_offset_y : 0)
+    endif
+    if ok(self.ticfs)
+        xtics_cmd ~= sprintf(" font ',%g'", self.ticfs)
+    endif
+    print xtics_cmd
+end function
