@@ -122,7 +122,7 @@ As for the options bundle, the active keys are:
 - `quiet`: boolean, don't print a completion message (default = FALSE)
 - `fparam`: matrix, used in conjunction with the heatmap_func (see above)
 - `clevels`: scalar, max number of levels for contour plots (see below)
-- `grid`: boolean, plot a grid (white for heatmaps, see below for contour plots)  (default = FALSE)
+- `grid`: boolean, plot a grid (white for heatmaps, see below for contour plots; surface grid for pm3d plots)  (default = FALSE)
 
 ## colours
 
@@ -151,7 +151,7 @@ As for the options bundle, the active keys are:
 
 - `title`: string, the plot title (default: none).
 - `do_labels`: boolean, decorate the plot with x and y labels (default: FALSE). If set to 1, the plot will use the row and column labels of the matrix, if present.
-- `printvals`: an integer, controlling whether to print the matrix values in the plot. If negative, nothing is printed. If positive, it controls the number of decimals. (default = -1)
+- `printvals`: an integer, controlling whether to print the matrix values in the heatmap plot. If negative, nothing is printed. If positive, it controls the number of decimals. (default = -1)
 - `tics_out`: boolean, if true, tics are drawn outside the plot (default = FALSE)
 - `xlabel`: string, optional x-axis title
 - `ylabel`: string, optional y-axis title
@@ -203,6 +203,3 @@ Additional parameters are:
 * 1.0 -> 1.1: introduce 'builtin' and 'quiet' options, produce a completion message and provide a GUI interface
 
 
-# TODO:
-- rename or add alias for `limits` e.g. `cbar_limits`
-- Check options for all 3 plot types
