@@ -96,10 +96,10 @@ function bundle default_opts (void)
     scalar ret.date_offset_y = -1.4
 
     # font size values
-    ret.titlefs = NA
-    ret.ticfs = NA
-    ret.labelfs = NA
-    ret.valfs = NA  # font size for matrix values
+    ret.titlefs = 14
+    ret.ticfs = 12
+    ret.labelfs = 12
+    ret.valfs = 12  # font size for matrix values
 
     # for pm3d only
     scalar ret.grid_resolution = 25  # smoothness of grid surface
