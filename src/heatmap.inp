@@ -521,7 +521,9 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
 
         # palette and tics and labels
         print_palette_jet()
-        print_palette(self)  # only relevant if self.native==FALSE
+        if self.native==FALSE
+            print_palette(self)
+        endif
         if self.colorbox
             print_colorbox(self)
         else
