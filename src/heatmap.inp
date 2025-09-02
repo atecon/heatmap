@@ -460,6 +460,8 @@ function string write_gnuplot_contour (const bundle self)
         print_user_contour_level(self.contour_levels)
         print_isosamples(self.isosamples)
         print_splot_matrix_lines()
+        #print_splot_matrix_labels() # Does not work, yet
+
         printf "\n"
     end outfile
     set force_decpoint off
@@ -616,7 +618,15 @@ end function
 
 function void print_splot_matrix_lines (void)
     /* Print the gnuplot command for splotting the matrix with lines for contour plot only. */
-    printf "splot $data matrix with lines"
+    printf "splot $data matrix with lines\n"
+end function
+
+function void print_splot_matrix_labels (void)
+    /* Print the gnuplot command for splotting the matrix with labels for contour plot only. */
+
+    printf "set isosamples 50,50\n"
+    printf "set cntrlabel start 2 interval -1 font \",12\"\n"
+    printf "splot $data matrix with labels boxed\n"
 end function
 
 
