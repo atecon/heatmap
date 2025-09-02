@@ -105,8 +105,8 @@ function bundle default_opts (void)
     # for pm3d only
     scalar ret.grid_resolution = 25  # smoothness of grid surface
     scalar ret.with_contour = FALSE  # only for matrix input, yet
-    scalar ret.view_x_axis = 60
-    scalar ret.view_y_axis = 15
+    scalar ret.view_x_axis = 50
+    scalar ret.view_y_axis = 35
     scalar ret.surface_grid = TRUE
     scalar ret.xrange_min = NA
     scalar ret.xrange_max = NA
