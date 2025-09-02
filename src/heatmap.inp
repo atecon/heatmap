@@ -669,13 +669,8 @@ function void print_add_grid_pm3d (void)
     printf "set style line 100 lc rgb '#000000' lt 1 lw 0.6\n"
 end function
 
-function void print_splot_matrix_pm3d_lines (const bool with_contour)
+function void print_splot_matrix_pm3d_lines (void)
     /* Print the gnuplot commands for a pm3d splot using a matrix input */
-
-    if with_contour
-        printf "set hidden3d\n"
-        printf "set contour base\n"
-    endif
 
     # The "at s" part specifies where the color surface (the pm3d plot) is drawn
     # relative to the 3D surface mesh.
