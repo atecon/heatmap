@@ -815,7 +815,6 @@ function void print_xyzrange (const string axis, const scalar min, const scalar 
 end function
 
 
-
 function void print_tics_nomirror (const scalar ticfs, const bool tics_out)
     /* Print 'set tics nomirror' with optional font size and tics direction */
 
@@ -835,8 +834,7 @@ end function
 function void print_axis_label (const string axis, const string label, const scalar labelfs)
     /* Print the gnuplot set xlabel/ylabel/zlabel command with optional font size.
        axis: "x", "y", or "z"
-       If axis is "z", rotate label by 90 degrees.
-    */
+       If axis is "z", rotate label by 90 degrees. */
 
     if strlen(label) > 0
         string axislab = strsub(label, "\"", "'")
