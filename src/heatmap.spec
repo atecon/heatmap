@@ -1,7 +1,7 @@
 author = Riccardo "Jack" Lucchetti and Artur Tarassow
 email = r.lucchetti@univpm.it
 version = 2.0
-date = 2025-08-29
+date = 2025-09-03
 description = Heatmap and contour plots
 tags = C10
 min-version = 2023a
