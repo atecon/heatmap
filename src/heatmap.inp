@@ -483,9 +483,9 @@ function void create_pm3d_plot (bundle self, const matrix mat, bool is_grid)
     endif
     #  For series and lists
     if nelem(self.varnames) == 3 && self.input_type != "matrix"
-        string self.xlabel = self.varnames[1]
-        string self.ylabel = self.varnames[2]
-        string self.zlabel = self.varnames[3]
+        string self.xlabel = strlen(self.xlabel) > 0 ? self.xlabel : self.varnames[1]
+        string self.ylabel = strlen(self.ylabel) > 0 ? self.ylabel : self.varnames[2]
+        string self.zlabel = strlen(self.zlabel) > 0 ? self.zlabel : self.varnames[3]
     endif
 
     if is_grid
