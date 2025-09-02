@@ -143,13 +143,11 @@ As for the options bundle, the active keys are:
   entries as white (default = 0). This setting is active only if the
   'native' option is 0 (=FALSE), otherwise it is ignored.
 
-## colorbox
+## colorbox (aka colour palette)
 
 - `colorbox`: boolean, if TRUE, a colorbox is drawn next to the plot (default = TRUE).
-- `colorbox_width`: scalar, the width of the colorbox; sensible value is e.g. 0.02 (default = NA).
-- `colorbox_height`: scalar, the height of the colorbox; sensible value is e.g. 0.5 (default = NA).
-- `colorbox_x_pos`: scalar, the x position of the colorbox; sensible value is e.g. 0.1 (default = NA).
-- `colorbox_y_pos`: scalar, the y position of the colorbox; sensible value is e.g. 0.1 (default = NA).
+- `colorbox_size`: matrix, the size of the colorbox in x- and y-dimensions; sensible value is e.g. {0.02, 0.5} (default = {NA, NA}).
+- `colorbox_position`: matrix, the position of the colorbox in x- and y-dimensions; sensible value is e.g. {0.1, 0.1} (default = {NA, NA}).
 
 ## strings, labels and tics
 
@@ -163,7 +161,7 @@ As for the options bundle, the active keys are:
 ## font sizes
 
 - `labelfs`: font size for the x- and y-titles (default = 14)
-- `ticfs`: font size for the tic marks (default = 14)
+- `ticfs`: font size for the tic marks (also for the colorbox) (default = 14)
 - `titlefs`: font size for the plot title (default = 14)
 - `valfs`: font size for the matrix values (default = 14)
 
@@ -202,3 +200,7 @@ Conversely, the `clevels` setting is mandatory, for obvious reasons; the `grid` 
 * 1.1 -> 1.2: bugfix: enforce decimal point when writing to gnuplot, so we don't have an error when running localised versions of gretl.
 * 1.0 -> 1.1: introduce 'builtin' and 'quiet' options, produce a completion message and provide a GUI interface
 
+
+# TODO:
+- rename or add alias for `limits` e.g. `cbar_limits`
+- Check options for all 3 plot types
