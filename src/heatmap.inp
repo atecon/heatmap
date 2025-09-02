@@ -547,7 +547,6 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         print_grid_resolution(self.grid_resolution)
         print_border_pm3d()
         print_contour_settings(self.with_contour)
-
         if exists(self.obsdate) && strlen(self.obsaxis) > 0
             print_datetics(self.obsdate, self.obsaxis, self)
         endif
@@ -1062,6 +1061,8 @@ function void pm3d_plot (const numeric Input, bundle opts[null])
     # default palette (jet) for pm3d
     scalar self.native = !inbundle(opts, "native") ? TRUE : opts.native
     scalar self.grid = !inbundle(opts, "grid") ? TRUE : opts.grid
+
+    # the contour option requires grid
     self.grid = self.with_contour == TRUE ? TRUE : self.grid
 
     if self.input_type == "matrix"
