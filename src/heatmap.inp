@@ -72,7 +72,8 @@ function bundle default_opts (void)
     ret.zerowhite = FALSE
 
     # colourbox
-    ret.colorbox = TRUE
+    scalar ret.colorbox = TRUE
+    scalar ret.colorbox_horizontal = FALSE
     matrix ret.colorbox_size = {NA, NA}  # must be matrix with 2 elements
     matrix ret.colorbox_position = {NA, NA}  # must be matrix with 2 elements
 
@@ -123,7 +124,8 @@ function void print_colorbox (const bundle self)
 
     # "set colorbox vertical user origin .02, .1 size .01,.6\n".
 
-    string cmd = sprintf("set colorbox vertical")
+    string cmd = sprintf("set colorbox")
+    cmd ~= self.colorbox_horizontal ? " horizontal" : " vertical"
     cmd ~= sprintf(" font ',%d'", self.ticfs)
 
     if sum(ok(self.colorbox_position)) == 2 # both 2 values are valid (not NA)
