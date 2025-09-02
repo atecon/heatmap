@@ -890,7 +890,7 @@ function void print_axis_label (const string axis, const string label, const sca
 
     if strlen(label) > 0
         string axislab = strsub(label, "\"", "'")
-        printf "set %slabel \"%s\" ", axis, axislab
+        printf "set %slabel \"%s\" ", axis, strsub(axislab, "_", "")
         if ok(labelfs)
             printf "font \",%d\" ", labelfs
         endif
