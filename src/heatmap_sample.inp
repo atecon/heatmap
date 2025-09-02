@@ -8,9 +8,14 @@ set seed 20111158
 n = 32
 A = conv2d(ones(6,6), mnormal(n, n))
 
-heatmap(A)             # default heatmap plot
+# default heatmap plot
+heatmap(A)
 # Use alias function for heatmap
 heatmap_plot(A)
+bundle opts = _(title="Matrix A with contour lines",
+                titlefs=18, quiet=1)
+heatmap_plot(A, opts)
+
 
 # Contour plot with custom options
 bundle opts = _(title="Matrix A with contour lines",
