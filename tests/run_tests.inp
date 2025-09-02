@@ -4,11 +4,442 @@ set assert stop
 
 # Load libraries
 include assertion.gfn
-include "./src/heatmap.inp"
+include ./src/heatmap.inp
+set seed 20111158
+
+# TODO. test: obsaxis, obsdata options
+
+### Random matrix
+n = 32
+A = conv2d(ones(6,6), mnormal(n, n))
 
 
+####################################
+# Using heatmap_plot()
+####################################
+
+# Use alias function for heatmap
+bundle opts = _(dest="heatmap_plot()_default.png")
+heatmap_plot(A, opts)
+
+# test "quiet" option
+bundle opts = _(dest="heatmap_plot()_quiet=TRUE.png",
+                quiet=TRUE)
+heatmap_plot(A, opts)
+
+# test "grid" option
+bundle opts = _(dest="heatmap_plot()_grid=TRUE.png",
+                grid=TRUE)
+heatmap_plot(A, opts)
+
+# test "native" option
+bundle opts = _(dest="heatmap_plot()_native=TRUE.png",
+                native=TRUE)
+heatmap_plot(A, opts)
+
+# test "limits" option
+bundle opts = _(dest="heatmap_plot()_limits.png",
+                limits={-1,1})
+heatmap_plot(A, opts)
+
+# test "limits" option: only upper
+bundle opts = _(dest="heatmap_plot()_limit_upper.png",
+                limits={NA,9})
+heatmap_plot(A, opts)
+
+# test "coldest" option
+bundle opts = _(dest="heatmap_plot()_coldest.png",
+                coldest="blue")
+heatmap_plot(A, opts)
+
+# test "coldest" and "hottest" option
+bundle opts = _(dest="heatmap_plot()_coldest_hottest.png",
+                coldest="blue",
+                hottest="green")
+heatmap_plot(A, opts)
+
+# test "zerowhite" option
+bundle opts = _(dest="heatmap_plot()_zerowhite.png",
+                zerowhite=TRUE)
+heatmap_plot(A, opts)
+
+# test "zerowhite" with "coldest" and "hottest" option
+bundle opts = _(dest="heatmap_plot()_zerowhite_coldest_hottest.png",
+                coldest="blue",
+                hottest="green",
+                zerowhite=TRUE)
+heatmap_plot(A, opts)
+
+# When native=TRUE, "zerowhite" will be ignored
+bundle opts = _(dest="heatmap_plot()_zerowhite_w_native=TRUE.png",
+                zerowhite=TRUE,
+                native=TRUE)
+heatmap_plot(A, opts)
 
 
+# test colorbox=TRUE option
+bundle opts = _(dest="heatmap_plot()_colorbox=TRUE.png",
+                colorbox=TRUE)
+heatmap_plot(A, opts)
+
+# test colorbox=FALSE option
+bundle opts = _(dest="heatmap_plot()_colorbox=FALSE.png",
+                colorbox=FALSE)
+heatmap_plot(A, opts)
+
+# test colorbox_size and colorbox_height options
+# --> not supposed to work with heatmap and contour plots
+bundle opts = _(dest="heatmap_plot()_colorbox_size.png",
+                colorbox_size={0.2, 0.2})
+heatmap_plot(A, opts)
+
+# test colorbox_position
+bundle opts = _(dest="heatmap_plot()_colorbox_position.png",
+                colorbox_position={0.2, 0.2})
+heatmap_plot(A, opts)
+
+# test "title" option and label and tics fonts
+bundle opts = _(dest="heatmap_plot()_title_label_and_fonts.png",
+                title="My Heatmap",
+                ylabel="Row Index",
+                xlabel="Column Index",
+                titlefs=20,
+                labelfs=15,
+                ticfs=10)
+heatmap_plot(A, opts)
+
+# test "printvals" option
+bundle opts = _(dest="heatmap_plot()_printvals.png",
+                printvals=2,
+                valfs=5)
+heatmap_plot(A, opts)
+
+# test "ticsout" option
+bundle opts = _(dest="heatmap_plot()_ticsout.png",
+                tics_out=TRUE)
+heatmap_plot(A, opts)
+
+
+####################################
+# Using heatmap()
+####################################
+
+# default heatmap plot
+bundle opts = _(dest="heatmap()_default.png")
+heatmap(A, opts)
+
+# test "quiet" option
+bundle opts = _(dest="heatmap()_quiet=TRUE.png",
+                quiet=TRUE)
+heatmap(A, opts)
+
+# test "grid" option
+bundle opts = _(dest="heatmap()_grid=TRUE.png",
+                grid=TRUE)
+heatmap_plot(A, opts)
+
+# test "native" option
+bundle opts = _(dest="heatmap()_native=TRUE.png",
+                native=TRUE)
+heatmap(A, opts)
+# test "limits" option
+bundle opts = _(dest="heatmap()_limits.png",
+                limits={-1,1})
+heatmap(A, opts)
+
+# test "limits" option: only upper
+bundle opts = _(dest="heatmap()_limit_upper.png",
+                limits={NA,9})
+heatmap(A, opts)
+
+# test "coldest" option
+bundle opts = _(dest="heatmap()_coldest.png",
+                coldest="blue")
+heatmap(A, opts)
+
+# test "coldest" and "hottest" option
+bundle opts = _(dest="heatmap()_coldest_hottest.png",
+                coldest="blue",
+                hottest="green")
+heatmap(A, opts)
+
+# test "zerowhite" option
+bundle opts = _(dest="heatmap()_zerowhite.png",
+                zerowhite=TRUE)
+heatmap(A, opts)
+
+# test "zerowhite" with "coldest" and "hottest" option
+bundle opts = _(dest="heatmap()_zerowhite_coldest_hottest.png",
+                coldest="blue",
+                hottest="green",
+                zerowhite=TRUE)
+heatmap(A, opts)
+
+# When native=TRUE, "zerowhite" will be ignored
+bundle opts = _(dest="heatmap()_zerowhite_w_native=TRUE.png",
+                zerowhite=TRUE,
+                native=TRUE)
+heatmap(A, opts)
+
+# test colorbox=TRUE option
+bundle opts = _(dest="heatmap()_colorbox=TRUE.png",
+                colorbox=TRUE)
+heatmap(A, opts)
+
+
+# test colorbox=FALSE option
+bundle opts = _(dest="heatmap()_colorbox=FALSE.png",
+                colorbox=FALSE)
+heatmap(A, opts)
+
+# test colorbox_size and colorbox_height options
+# --> not supposed to work with heatmap and contour plots
+bundle opts = _(dest="heatmap()_colorbox_size.png",
+                colorbox_size={0.2, 0.2})
+heatmap(A, opts)
+
+# test colorbox_position
+bundle opts = _(dest="heatmap()_colorbox_position.png",
+                colorbox_position={0.2, 0.2})
+heatmap(A, opts)
+
+# test "title" option and label and tics fonts
+bundle opts = _(dest="heatmap()_title_label_and_fonts.png",
+                title="My Heatmap",
+                ylabel="Row Index",
+                xlabel="Column Index",
+                titlefs=20,
+                labelfs=15,
+                ticfs=10)
+heatmap(A, opts)
+
+# test "printvals" option
+bundle opts = _(dest="heatmap()_printvals.png",
+                printvals=2,
+                valfs=5)
+heatmap(A, opts)
+
+# test "ticsout" option
+bundle opts = _(dest="heatmap()_ticsout.png",
+                tics_out=TRUE)
+heatmap(A, opts)
+
+
+####################################
+# Using contour_plot()
+####################################
+
+
+# Use alias function for heatmap
+bundle opts = _(dest="contour_plot()_default.png")
+contour_plot(A, opts)
+
+# test "contour_levels" option
+bundle opts = _(dest="contour_plot()_contour_levels.png",
+                contour_levels={-1,4,11})
+contour_plot(A, opts)
+
+# test "printvals" option -> no effect expected
+bundle opts = _(dest="contour_plot()_printvals.png",
+                printvals=TRUE,
+                valfs=5)
+contour_plot(A, opts)
+
+# test "quiet" option
+bundle opts = _(dest="contour_plot()_quiet=TRUE.png",
+                quiet=TRUE)
+contour_plot(A, opts)
+
+# test "grid" option
+bundle opts = _(dest="contour_plot()_grid=TRUE.png",
+                grid=TRUE)
+contour_plot(A, opts)
+
+# test "native" option --> not supported
+bundle opts = _(dest="contour_plot()_native=TRUE.png",
+                native=TRUE)
+contour_plot(A, opts)
+
+# test "limits" option
+bundle opts = _(dest="contour_plot()_limits.png",
+                limits={-1,1})
+contour_plot(A, opts)
+
+# test "limits" option: only upper
+bundle opts = _(dest="contour_plot()_limit_upper.png",
+                limits={NA,9})
+contour_plot(A, opts)
+
+# test "coldest" option -> not for contour plot
+bundle opts = _(dest="contour_plot()_coldest.png",
+                coldest="blue")
+contour_plot(A, opts)
+
+# test "coldest" and "hottest" option -> not for contour plot
+bundle opts = _(dest="contour_plot()_coldest_hottest.png",
+                coldest="blue",
+                hottest="green")
+contour_plot(A, opts)
+
+# test "zerowhite" option -> not for contour plot
+bundle opts = _(dest="contour_plot()_zerowhite.png",
+                zerowhite=TRUE)
+contour_plot(A, opts)
+
+# test "zerowhite" with "coldest" and "hottest" option -> not for contour plot
+bundle opts = _(dest="contour_plot()_zerowhite_coldest_hottest.png",
+                coldest="blue",
+                hottest="green",
+                zerowhite=TRUE)
+contour_plot(A, opts)
+
+# When native=TRUE, "zerowhite" will be ignored -> not for contour plot
+bundle opts = _(dest="contour_plot()_zerowhite_w_native=TRUE.png",
+                zerowhite=TRUE,
+                native=TRUE)
+contour_plot(A, opts)
+
+# test colorbox=TRUE option
+bundle opts = _(dest="contour_plot()_colorbox=TRUE.png",
+                colorbox=TRUE)
+contour_plot(A, opts)
+
+# test colorbox=FALSE option
+bundle opts = _(dest="contour_plot()_colorbox=FALSE.png",
+                colorbox=FALSE)
+contour_plot(A, opts)
+
+# test colorbox_size and colorbox_height options
+# --> not supposed to work with heatmap and contour plots
+bundle opts = _(dest="contour_plot()_colorbox_size.png",
+                colorbox_size={0.2, 0.2})
+contour_plot(A, opts)
+
+# test colorbox_position
+bundle opts = _(dest="contour_plot()_colorbox_position.png",
+                colorbox_position={0.2, 0.2})
+contour_plot(A, opts)
+
+# test "title" option and label and tics fonts
+bundle opts = _(dest="contour_plot()_title_label_and_fonts.png",
+                title="My Heatmap",
+                ylabel="Row Index",
+                xlabel="Column Index",
+                titlefs=20,
+                labelfs=15,
+                ticfs=10)
+contour_plot(A, opts)
+
+# test "ticsout" option
+bundle opts = _(dest="contour_plot()_ticsout.png",
+                tics_out=TRUE)
+contour_plot(A, opts)
+
+
+##################
+### Function plot
+##################
+bundle opts = _(title="binomial coefficients", xlabel="n", ylabel="k",
+                dest="heatmap_func_bincoeff_default.png")
+heatmap_func("bincoeff", 50, 10, 16, 1, 10, opts)
+
+# contour plot with a grid
+opts = opts + _(clevels=16, grid=1)
+opts.dest = "heatmap_func_bincoeff_clevels16_grid1.png"
+heatmap_func("bincoeff", 50, 10, 16, 1, 10, opts)
+
+
+######################
+# Work with time-series - list of series must be passed (each plotted over time)
+######################
+open denmark.gdt --quiet
+## list of series
+list L = diff(dataset)
+heatmap_plot(L, _(title="1st differences",
+                  titlefs=12,
+                  dest="heatmap_plot_timeseries.png"))
+
+#######################
+# Work with panel data - single series only can be passed
+# Values for each unit are plotted over time
+#######################
+open grunfeld.gdt --quiet
+series y = ldiff(invest)
+heatmap_plot(y, _(title="1st differences",
+                  titlefs=12,
+                  printvals=1,
+                  valfs=6,
+                  dest="heatmap_plot_panel.png"))
+## Add markers for firms
+markers --from-series=firmname
+heatmap_plot(y, _(title="1st differences",
+                  titlefs=12,
+                  ticfs=8,
+                  dest="heatmap_plot_panel_markers.png"))
+
+
+###############
+# pm3d plot
+###############
+open denmark.gdt --quiet
+
+## matrix use
+matrix M = mnormal(30,15)
+pm3d_plot(M, _(dest="pm3d_plot_default.png"))
+
+# rotate view
+bundle opts = _(with_contour=TRUE,
+                grid=TRUE,
+                view_x_axis=20, view_y_axis=15,
+                dest="pm3d_plot_rotated.png")
+pm3d_plot(M, opts)
+
+# full blown
+bundle opts = _(with_contour=TRUE,
+                grid=TRUE,
+                grid_resolution=20,
+                view_x_axis=60,
+                view_y_axis=50,
+                ticfs=9,
+                labelfs=9,
+                tics_out=TRUE,
+                xlabel="Horizon",
+                ylabel="Window #",
+                zlabel="Response",
+                colorbox=TRUE,
+                colorbox_size={0.02, 0.5},
+                colorbox_position={0.88, 0.1},
+                native=FALSE,
+                coldest="grey",
+                dest="pm3d_plot_fullblown_matrix.png")
+pm3d_plot(M, opts)
+
+## list use
+list L = diff(LRM) IBO IDE
+pm3d_plot(L, _(dest="pm3d_plot_default_list.png"))
+
+
+# Full-blown example
+# native, colorbox_*, grid, obsaxis, *label, coldest, hottest
+bundle opts = _(with_contour=FALSE,
+                grid=TRUE,
+                view_x_axis=20,
+                view_y_axis=35,
+                ticfs=9,
+                labelfs=9,
+                titlefs=8,
+                tics_out=TRUE,
+                obsaxis="y",
+                date_offset_x=-0.5,
+                date_offset_y=0.2,
+                xlabel="My Own label",
+                title="Some title",
+                colorbox=TRUE,
+                colorbox_size={0.02, 0.3},
+                colorbox_position={0.1, 0.6},
+                dest="pm3d_plot_fullblown_list.png")
+
+pm3d_plot(L, opts)
 
 print "Finished all tests successfully."
 quit
