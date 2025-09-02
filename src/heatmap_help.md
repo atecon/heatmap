@@ -108,6 +108,7 @@ Several options from the standard options bundle affect the pm3d plot (palette, 
 
 - `with_contour`: boolean, when TRUE and the input is a matrix, the pm3d plot may be augmented with contour-plot so that contour lines on the base or are combined with the pm3d surface. The default value is FALSE.
 - `surface_grid`: boolean, when TRUE and the input is a matrix, a grid is drawn on the surface of the pm3d plot. The default value is TRUE.
+- `colorbox_size`: matrix, the size of the colorbox in x- and y-dimensions; sensible value is e.g. {0.02, 0.5} (default = {NA, NA}).
 
 These keys are present in the default options bundle and are only used by pm3d_plot().
 
@@ -128,7 +129,7 @@ As for the options bundle, the active keys are:
 
 ## colours
 
-- `native`: boolean, use the native gnuplot palette for contour and heatmaps, and the MATLAB jet color scheme for pm3d plots; the default is FALSE for heatmap() and TRUE for heatmap_func() and pm3d_plot().
+- `native`: boolean, use the native gnuplot palette for and heatmaps, and the MATLAB jet color scheme for pm3d plots; the default is FALSE for heatmap() and TRUE for heatmap_func() and pm3d_plot().
 - `limits`: matrix. A 2-element vector for controlling the minimum and maximum values for the colour palette. The user can set either the first value (minimum) or the second (maximum) and leave the other as NA; NA means that gnuplot will select an automatic value. This can be useful, for example, when plotting correlation matrices.
 - `coldest`: string, colour for the minimum of the plotted values. This
   setting is active if the 'native' option is 0. It has to be in a
