@@ -1166,7 +1166,7 @@ function void heatmap_GUI (matrix mat "Matrix to plot",
                            int decimal_places[0:6:0] "Decimals")
     /* GUI function */
 
-    bundle opts = defbundle("do_labels", do_labels)
+    bundle self = defbundle("do_labels", do_labels)
     if contour
         scalar self.clevels = 8
     endif
@@ -1197,15 +1197,16 @@ function void heatmap_GUI (matrix mat "Matrix to plot",
             err = colchk(coldest, hottest)
             errorif(err == 1, "Color " ~ coldest ~ " is invalid")
             errorif(err == 2, "Color " ~ hottest ~ " is invalid")
-            opts = defbundle("coldest", coldest, "hottest", hottest) + opts
+            self = defbundle("coldest", coldest, "hottest", hottest) + self
         endif
     endif
 
     if pv
         self.printvals = decimal_places
+        self.ticfs = 7
     endif
 
-    heatmap(mat, opts)
+    heatmap(mat, self)
 end function
 
 function void print_datetics (const numeric obsdate,
