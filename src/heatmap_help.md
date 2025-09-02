@@ -109,8 +109,9 @@ Several options from the standard options bundle affect the pm3d plot (palette, 
 - `grid_resolution`: scalar, controls the resolution used by gnuplot's dgrid3d interpolation when applied to table-style (x y z) inputs or when smoothing the surface. The default value is 25. Setting this to 0 disables dgrid3d interpolation. Requires that `grid=TRUE`.
 - `view_x_axis`: scalar, controls the rotation of the plot around the x-axis. The default value is 50.
 - `view_y_axis`: scalar, controls the rotation of the plot around the y-axis. The default value is 35.
-- `with_contour`: boolean, when TRUE and the input is a matrix, the pm3d plot may be augmented with contour-plot so that contour lines on the base or are combined with the pm3d surface. The default value is FALSE.
+- `colorbox`: boolean, if TRUE, a colorbox is drawn next to the plot (default = TRUE).
 - `colorbox_size`: matrix, the size of the colorbox in x- and y-dimensions; sensible value is e.g. {0.02, 0.5} (default = {NA, NA}).
+- `colorbox_position`: matrix, the position of the colorbox in x- and y-dimensions; sensible value is e.g. {0.1, 0.1} (default = {NA, NA}).
 
 These keys are present in the default options bundle and are only used by pm3d_plot().
 
