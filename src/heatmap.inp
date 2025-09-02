@@ -129,7 +129,7 @@ function void print_colorbox (const bundle self)
     if ok(self.colorbox_x_pos) && ok(self.colorbox_y_pos)
         cmd ~= sprintf(" user origin %g, %g", self.colorbox_x_pos, self.colorbox_y_pos)
     else
-        cmd ~= " default"
+        cmd ~= " default" # position it to the right of the plot
     endif
     if ok(self.colorbox_width) && ok(self.colorbox_height)
         cmd ~= sprintf(" size %g, %g", self.colorbox_width, self.colorbox_height)
