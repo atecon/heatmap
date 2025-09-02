@@ -1059,9 +1059,15 @@ function void pm3d_plot (const numeric Input, bundle opts[null])
     matrix mat = {}
     scalar data_is_grid = FALSE
     string self.plottype = "pm3d"
-    # default palette (jet) for pm3d
-    scalar self.native = !inbundle(opts, "native") ? TRUE : opts.native
-    scalar self.grid = !inbundle(opts, "grid") ? TRUE : opts.grid
+
+    if exists(opts)
+        # default palette (jet) for pm3d
+        scalar self.native = !inbundle(opts, "native") ? TRUE : opts.native
+        scalar self.grid = !inbundle(opts, "grid") ? TRUE : opts.grid
+    else
+        scalar self.native = TRUE
+        scalar self.grid = TRUE
+    endif
 
     # the contour option requires grid
     self.grid = self.with_contour == TRUE ? TRUE : self.grid
