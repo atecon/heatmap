@@ -124,7 +124,7 @@ As for the options bundle, the active keys are:
 - `quiet`: boolean, don't print a completion message (default = FALSE)
 - `fparam`: matrix, used in conjunction with the heatmap_func (see above)
 - `clevels`: scalar, max number of levels for contour plots (see below)
-- `grid`: boolean, plot a grid (white for heatmaps, see below for contour plots)
+- `grid`: boolean, plot a grid (white for heatmaps, see below for contour plots)  (default = FALSE)
 
 ## colours
 
