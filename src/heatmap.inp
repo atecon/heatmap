@@ -1048,7 +1048,7 @@ end function
 function void pm3d_plot (const numeric Input, bundle opts[null])
     /* Public wrapper for pm3d plotting.
        Accepts:
-         - a matrix representing a z-grid (cols != 3) => is_grid = TRUE
+         - a matrix representing a z-grid (cols != 3) => data_is_grid = TRUE
          - a matrix with 3 columns => interpreted as x y z rows
          - a list of three series => combined into Nx3 rows (x,y,z)
     */
@@ -1056,16 +1056,14 @@ function void pm3d_plot (const numeric Input, bundle opts[null])
     bundle self = exists(opts) ? opts + default_opts() : default_opts()
     string self.input_type = typename(Input)
     matrix mat = {}
-    scalar is_grid = FALSE
+    scalar data_is_grid = FALSE
     string self.plottype = "pm3d"
     scalar self.native = TRUE  # default palette (jet)
 
     if self.input_type == "matrix"
         mat = Input
-        if cols(mat) == 3
-            is_grid = FALSE
-        else
-            is_grid = TRUE
+        if cols(mat) != 3
+            data_is_grid = TRUE
         endif
 
     elif self.input_type == "list"
@@ -1073,14 +1071,12 @@ function void pm3d_plot (const numeric Input, bundle opts[null])
                 "pm3d_plot requires a list of three series when input is a list")
         # pack list-of-three-series into Nx3 matrix (each series yields a column)
         matrix mat = {Input}
-        is_grid = FALSE
-
     else
         errorif(TRUE, "pm3d_plot supports matrix or list-of-three-series inputs")
     endif
 
     if self.input_type == "list"
-        strings self.varnames = varnames(Input)
+        strings self.varnames = varnames(Input) # TODO: retrieve graph-names if specified
     elif self.input_type == "matrix"
         strings self.varnames = cnameget(Input)
         if nelem(self.varnames) == 0
@@ -1092,7 +1088,7 @@ function void pm3d_plot (const numeric Input, bundle opts[null])
     string self.name_mat = argname(Input)
     string self.actual_title = set_title(self)
 
-    create_pm3d_plot(self, mat, is_grid)
+    create_pm3d_plot(self, mat, data_is_grid)
 end function
 
 
