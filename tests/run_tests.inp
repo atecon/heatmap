@@ -7,7 +7,6 @@ include assertion.gfn
 include ./src/heatmap.inp
 set seed 20111158
 
-# TODO. test: obsaxis, obsdata options
 
 ### Random matrix
 n = 32
@@ -383,16 +382,27 @@ heatmap_plot(y, _(title="1st differences",
 ###############
 open denmark.gdt --quiet
 
+
 ## matrix use
 matrix M = mnormal(30,15)
-pm3d_plot(M, _(dest="pm3d_plot_default.png"))
+#pm3d_plot(M, _(dest="pm3d_plot_default.png"))
 
 # rotate view
 bundle opts = _(with_contour=TRUE,
                 grid=TRUE,
                 view_x_axis=20, view_y_axis=15,
                 dest="pm3d_plot_rotated.png")
-pm3d_plot(M, opts)
+#pm3d_plot(M, opts)
+
+# 2D matrix and vector of observation dates on y-axis
+matrix X = {IBO, IDE}
+bundle opts = _(obsdate={$obsdate}, obsaxis="y",
+                date_format="%Y-%m",
+                dest="pm3d_plot_matrix_w_date.png",
+                date_offset_y=0.1,
+                date_offset_x=2.5)
+pm3d_plot(X, opts)
+
 
 # full blown
 bundle opts = _(with_contour=TRUE,
@@ -418,9 +428,7 @@ pm3d_plot(M, opts)
 list L = diff(LRM) IBO IDE
 pm3d_plot(L, _(dest="pm3d_plot_default_list.png"))
 
-
 # Full-blown example
-# native, colorbox_*, grid, obsaxis, *label, coldest, hottest
 bundle opts = _(with_contour=FALSE,
                 grid=TRUE,
                 view_x_axis=20,
@@ -437,6 +445,9 @@ bundle opts = _(with_contour=FALSE,
                 colorbox=TRUE,
                 colorbox_size={0.02, 0.3},
                 colorbox_position={0.1, 0.6},
+                native=FALSE,
+                coldest="grey",
+                hottest="green",
                 dest="pm3d_plot_fullblown_list.png")
 
 pm3d_plot(L, opts)
