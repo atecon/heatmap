@@ -123,7 +123,9 @@ function void print_colorbox (const bundle self)
 
     # "set colorbox vertical user origin .02, .1 size .01,.6\n".
 
-    string cmd = sprintf("set colorbox vertical font ',%d'", self.ticfs)
+    string cmd = sprintf("set colorbox vertical")
+    cmd ~= sprintf(" font ',%d'", self.ticfs)
+
     if sum(ok(self.colorbox_position)) == 2 # both 2 values are valid (not NA)
         cmd ~= sprintf(" user origin %g, %g", self.colorbox_position[1], self.colorbox_position[2])
     else
