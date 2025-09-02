@@ -161,9 +161,9 @@ As for the options bundle, the active keys are:
 ## font sizes
 
 - `labelfs`: font size for the x- and y-titles (default = 14)
-- `ticfs`: font size for the tic marks (also for the colorbox) (default = 14)
-- `titlefs`: font size for the plot title (default = 14)
-- `valfs`: font size for the matrix values (default = 14)
+- `ticfs`: font size for the tic marks (also for the colorbox) (default = 12)
+- `titlefs`: font size for the plot title (default = 12)
+- `valfs`: font size for the matrix values (default = 12)
 
 ## date options
 
