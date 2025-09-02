@@ -349,6 +349,8 @@ function string write_gnuplot_heatmap (const bundle self)
         print_xrange(self.ncols_mat)
         if self.colorbox
             print_colorbox(self)
+        else
+            printf "unset colorbox\n"
         endif
 
         # Currently not needed
@@ -428,6 +430,8 @@ function string write_gnuplot_contour (const bundle self)
         print_xrange(self.ncols_mat)
         if self.colorbox
             print_colorbox(self)
+        else
+            printf "unset colorbox\n"
         endif
 
         if self.do_labels
@@ -515,6 +519,8 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         print_palette(self)  # only relevant if self.native==FALSE
         if self.colorbox
             print_colorbox(self)
+        else
+            printf "unset colorbox\n"
         endif
         print_tics_nomirror(self.ticfs, self.tics_out)
         print_axis_label("x", self.xlabel, self.labelfs)
