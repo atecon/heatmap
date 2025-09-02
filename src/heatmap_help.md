@@ -1,3 +1,9 @@
+# TODO:
+- currently no colorbox for contour plot, even though `colorbox=TRUE` is set
+- rename or add alias for `limits` e.g. `cbar_limits`
+- Check options for all 3 plot types
+
+
 # DESCRIPTION
 
 This package is intended for producing heatmap or contour plots: Heatmaps are 2-dimensional plots where you have a rectangular array of "tiles" whose colours carry the relevant information; contour plots draw lines where the information is displayed by joining points with the same value.
@@ -110,7 +116,6 @@ Several options from the standard options bundle affect the pm3d plot (palette, 
 These keys are present in the default options bundle and are only used by pm3d_plot().
 
 
-
 # OPTIONS
 
 As for the options bundle, the active keys are:
@@ -144,7 +149,6 @@ As for the options bundle, the active keys are:
 ## colorbox (aka colour palette)
 
 - `colorbox`: boolean, if TRUE, a colorbox is drawn next to the plot (default = TRUE).
-- `colorbox_size`: matrix, the size of the colorbox in x- and y-dimensions; sensible value is e.g. {0.02, 0.5} (default = {NA, NA}).
 - `colorbox_position`: matrix, the position of the colorbox in x- and y-dimensions; sensible value is e.g. {0.1, 0.1} (default = {NA, NA}).
 
 ## strings, labels and tics
