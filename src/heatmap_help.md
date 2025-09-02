@@ -106,11 +106,10 @@ Several options from the standard options bundle affect the pm3d plot (palette, 
 
 ### pm3d-specific options
 
-- `grid_resolution`: scalar, controls the resolution used by gnuplot's dgrid3d interpolation when applied to table-style (x y z) inputs or when smoothing the surface. The default value is 25. Setting this to 0 disables dgrid3d interpolation.
+- `grid_resolution`: scalar, controls the resolution used by gnuplot's dgrid3d interpolation when applied to table-style (x y z) inputs or when smoothing the surface. The default value is 25. Setting this to 0 disables dgrid3d interpolation. Requires that `grid=TRUE`.
 - `view_x_axis`: scalar, controls the rotation of the plot around the x-axis. The default value is 50.
 - `view_y_axis`: scalar, controls the rotation of the plot around the y-axis. The default value is 35.
 - `with_contour`: boolean, when TRUE and the input is a matrix, the pm3d plot may be augmented with contour-plot so that contour lines on the base or are combined with the pm3d surface. The default value is FALSE.
-- `surface_grid`: boolean, when TRUE and the input is a matrix, a grid is drawn on the surface of the pm3d plot. The default value is TRUE.
 - `colorbox_size`: matrix, the size of the colorbox in x- and y-dimensions; sensible value is e.g. {0.02, 0.5} (default = {NA, NA}).
 
 These keys are present in the default options bundle and are only used by pm3d_plot().
@@ -127,7 +126,7 @@ As for the options bundle, the active keys are:
 - `quiet`: boolean, don't print a completion message (default = FALSE)
 - `fparam`: matrix, used in conjunction with the heatmap_func (see above)
 - `clevels`: scalar, max number of levels for contour plots (see below)
-- `grid`: boolean, plot a grid (white for heatmaps, see below for contour plots; surface grid for pm3d plots)  (default = FALSE)
+- `grid`: boolean, plot a grid (white for heatmaps, see below for contour plots; surface grid for pm3d plots)  (default = FALSE but TRUE for pm3d plot)
 
 ## colours
 
