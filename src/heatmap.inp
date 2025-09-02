@@ -107,7 +107,6 @@ function bundle default_opts (void)
     scalar ret.with_contour = FALSE  # only for matrix input, yet
     scalar ret.view_x_axis = 50
     scalar ret.view_y_axis = 35
-    scalar ret.surface_grid = TRUE
     scalar ret.xrange_min = NA
     scalar ret.xrange_max = NA
     scalar ret.yrange_min = NA
@@ -539,7 +538,7 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         print_xyzrange("y", self.yrange_min, self.yrange_max)
         print_xyzrange("z", self.zrange_min, self.zrange_max)
 
-        if self.surface_grid
+        if self.grid
             print_add_grid_pm3d()
         endif
         print_view(self.view_x_axis, self.view_y_axis)
