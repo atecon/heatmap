@@ -180,11 +180,15 @@ When passing a time series or a list of time series to the `heatmap_plot()` or `
 
 # CONTOUR PLOTS
 
-Starting from version 1.7, a contour plot can be produced instead of a heatmap. This happens if the `clevels` scalar in the option bundle is set to a value between 1 and 32. The number itself refers to the number of points on the z-axis that gnuplot will use for plotting the contour lines. Note that there is no predictable relationship between the `clevels` setting and the number of contour lines you're going to get, but in most cases, with higher numbers you should see more lines. With gretl 2023c or later, contour lines will be coloured  from blue (lower z) to red (higher).
+Starting from version 1.7, a contour plot can be produced instead of a heatmap. This happens if the `clevels` integer in the option bundle is set to a value between 1 and 32. The default value when using the wrapper function `contour_plot()` is 8. The number itself refers to the number of points on the z-axis that gnuplot will use for plotting the contour lines. Note that there is no predictable relationship between the `clevels` setting and the number of contour lines you're going to get, but in most cases, with higher numbers you should see more lines. With gretl 2023c or later, contour lines will be coloured  from blue (lower z) to red (higher).
 
-Some options have no effects with contour plots, namely: "do_labels", "printvals", "native", "limits", "coldest", "hottest" and "zerowhite".
+Some options have no effects with contour plots, namely: `do_labels`, `printvals`, `native`, `limits`, `coldest`, `hottest` and `zerowhite`.
 
-Conversely, the `clevels` setting is mandatory, for obvious reasons; the `grid` boolean key may be used for plotting a  -dimensional dotted grid.
+Conversely, the `clevels` setting is mandatory, for obvious reasons; the `grid` boolean key may be used for plotting a dotted grid in the background.
+
+Additional parameters are:
+- `contour_levels`: matrix, a vector of contour levels to be used instead of the automatic levels determined by gnuplot. The number of levels is determined by the length of the vector. This option overrides the `clevels` setting.
+- `isosamples`: matrix, a 2-element vector specifying the number of isosamples in the x and y directions. Both values must be positive integers (default: gnuplot's internal default).
 
 
 # CHANGELOG
