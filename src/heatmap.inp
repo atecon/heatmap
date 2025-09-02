@@ -499,9 +499,7 @@ function void create_pm3d_plot (bundle self, const matrix mat, bool is_grid)
     endif
 
     string buffer_file = write_gnuplot_pm3d(self, mat, is_grid)
-    #string buffer = readfile(buffer_file)
-    #print buffer
-    #stop
+    #string buffer = readfile(buffer_file) # for debugging
     string filename = self.dest
     gnuplot --input="@buffer_file" --output="@filename"
     print_creation_message(self)
