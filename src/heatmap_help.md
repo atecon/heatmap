@@ -141,7 +141,7 @@ As for the options bundle, the active keys are:
 - `zerowhite`: boolean, useful for the cases when it is important to
   separate positive and negative values: if enabled, will colour 0
   entries as white (default = 0). This setting is active only if the
-  'native' option is 0.
+  'native' option is 0 (=FALSE), otherwise it is ignored.
 
 ## colorbox
 
