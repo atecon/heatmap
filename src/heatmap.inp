@@ -545,6 +545,7 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
         print_view(self.view_x_axis, self.view_y_axis)
         print_grid_resolution(self.grid_resolution)
         print_border_pm3d()
+        print_contour_settings(self.with_contour)
 
         if exists(self.obsdate) && strlen(self.obsaxis) > 0
             print_datetics(self.obsdate, self.obsaxis, self)
@@ -556,7 +557,7 @@ function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is
             # end of the axis but not beginning which is also inconsistent with eventual
             # ytics labels
             print_data_grid_style(mat, FALSE)
-            print_splot_matrix_pm3d_lines(self.with_contour)
+            print_splot_matrix_pm3d_lines()
         else
             # x y z table
             print_data_table_style(mat)
@@ -580,6 +581,15 @@ function void print_creation_message (const bundle self)
         else
             printf "%s for %s created plot\n", self.plottype, self.name_mat
         endif
+    endif
+end function
+
+function void print_contour_settings (const bool with_contour)
+    /* Print gnuplot commands to set contour settings for pm3d plots. */
+
+    if with_contour
+        printf "set hidden3d\n"
+        printf "set contour base\n"
     endif
 end function
 
