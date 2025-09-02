@@ -130,17 +130,9 @@ As for the options bundle, the active keys are:
 - `native`: boolean, use the native gnuplot palette for and heatmaps, and the MATLAB jet color scheme for pm3d plots; the default is FALSE for heatmap() and TRUE for heatmap_func() and pm3d_plot().
 - `limits`: matrix. A 2-element vector for controlling the minimum and maximum values for the colour palette. The user can set either the first value (minimum) or the second (maximum) and leave the other as NA; NA means that gnuplot will select an automatic value. This can be useful, for example, when plotting correlation matrices.
 - `coldest`: string, colour for the minimum of the plotted values (not for contour plot!). This
-  setting is active if the 'native' option is 0. It has to be in a
-  format recognised by gnuplot, eg "black" or "#0000cc" (default =
-  kind of reddish)
-- `hottest`: string, colour for the maximum of the plotted values (not for contour plot!). This
-  setting is active if the 'native' option is 0. It has to be in a
-  format recognised by gnuplot, eg "white" or "#aa88ed" (default =
-  kind of yellowish)
-- `zerowhite`: boolean, useful for the cases when it is important to
-  separate positive and negative values: if enabled, will colour 0
-  entries as white (default = 0). This setting is active only if the
-  'native' option is 0 (=FALSE), otherwise it is ignored.
+  setting is active if the 'native' option is 0. It has to be in a format recognised by gnuplot, eg "black" or "#0000cc" (default =  kind of reddish)
+- `hottest`: string, colour for the maximum of the plotted values (not for contour plot!). This   setting is active if the 'native' option is 0. It has to be in a format recognised by gnuplot, eg "white" or "#aa88ed" (default = kind of yellowish)
+- `zerowhite`: boolean, useful for the cases when it is important to separate positive and negative values: if enabled, will colour 0   entries as white (default = 0). This setting is active only if the   'native' option is 0 (=FALSE), otherwise it is ignored.
 
 
 ## strings, labels and tics
