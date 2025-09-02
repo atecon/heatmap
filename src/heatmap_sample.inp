@@ -8,6 +8,9 @@ set seed 20111158
 n = 32
 A = conv2d(ones(6,6), mnormal(n, n))
 
+##########
+# Heatmap
+##########
 # default heatmap plot
 heatmap(A)
 # Use alias function for heatmap
@@ -17,17 +20,21 @@ bundle opts = _(title="Matrix A with contour lines",
 heatmap_plot(A, opts)
 
 
+#############
+# Contour plot
+#############
+# Default version
+contour_plot(A)
+
 # Contour plot with custom options
 bundle opts = _(title="Matrix A with contour lines",
                 titlefs=18, quiet=1, clevels=4)
 contour_plot(A, opts)
 
-# Now as heatmap
-opts.title="Matrix A with heatmap"
-heatmap_plot(A, opts)
 
-
-### function plot
+##################
+### Function plot
+##################
 bundle opts = _(title="binomial coefficients",
                 xlabel="n", ylabel="k")
 heatmap_func("bincoeff", 50, 10, 16, 1, 10, opts)
@@ -56,7 +63,10 @@ heatmap_plot(y, _(title="1st differences",
                   titlefs=12,
                   ticfs=8))
 
+
+###########
 # pm3d plot
+###########
 open denmark.gdt --quiet
 ## matrix use
 matrix M = mnormal(30,15)
@@ -80,8 +90,8 @@ pm3d_plot(X, opts)
 list L = diff(LRM) IBO IDE
 pm3d_plot(L)
 
-# TODO: add full-blown example
-/*
+
+# Full-blown example with detailed options
 bundle opts = _(with_contour=FALSE,
                 grid=TRUE,
                 view_x_axis=20,
@@ -102,4 +112,3 @@ bundle opts = _(with_contour=FALSE,
                 coldest="grey",
                 hottest="green")
 pm3d_plot(L, opts)
-*/
