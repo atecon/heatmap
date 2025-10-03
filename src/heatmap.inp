@@ -318,7 +318,6 @@ function void create_heatmap_plot (bundle self)
     #endif
 
     string dest = self.dest
-
     scalar self.min_limit = get_limit(self.limits[1], min(self.mat))
     scalar self.max_limit = get_limit(self.limits[2], max(self.mat))
 
@@ -1026,8 +1025,8 @@ function void heatmap_plot (const numeric Input, bundle opts[null])
             mat = mshape({Input}, num_periods, n_units)
         endif
 
+        matrix self.obsdate = $datatype == 2 ? {$obsdate} : values($obsdate)
         mat = transp(mat)  # rows: cross-sectional unit, cols: time period
-        series self.obsdate = $obsdate
     endif
 
     # Retrieve variable names
@@ -1209,38 +1208,31 @@ function void heatmap_GUI (matrix mat "Matrix to plot",
     heatmap(mat, self)
 end function
 
-function void print_datetics (const numeric obsdate,
+
+function void print_datetics (const matrix obsdate,
                               const string axis,
                               const bundle self)
     /* Print gnuplot commands to set axis tics from an ISO8601 integer series.
        axis: "x", "y", or "z"
        fmt: optional format string using %Y, %m, %d. */
 
-    matrix dates = values(obsdate)  # values() needed for panel data
-    scalar n = nobs(dates)
+    strings Dates = iso8601_to_period_labels(obsdate) # use calendar_utils pkg here
+    scalar ndates = nelem(Dates)
+
     # choose at most ~max_date_tics labels to avoid clutter
     scalar maxlabels = self.max_date_tics
-    scalar step = n > maxlabels ? ceil(n / maxlabels) : 1
-
-    # assume ISO date as integer YYYYMMDD (or YYYYMM)
-    matrix year = floor(dates/10000)
-    matrix month = floor((dates - year*10000) / 100)
-    matrix day = dates - year*10000 - month*100
+    scalar step = ndates > maxlabels ? ceil(ndates / maxlabels) : 1
 
     printf "set %stics (", axis
     scalar first = 1
-    loop i = 1..n
+    loop i = 1..ndates
         if i == 1 || ((i-1) % step == 0)
-            string lab = self.date_format
-            lab = strsub(lab, "%Y", sprintf("%04d", year[i]))
-            lab = strsub(lab, "%m", sprintf("%02d", month[i]))
-            lab = strsub(lab, "%d", sprintf("%02d", day[i]))
-
+            string date = Dates[i]
             if first
-                printf("'%s' %d", lab, i-1)
+                printf("'%s' %d", date, i-1)
                 first = 0
             else
-                printf(", '%s' %d", lab, i-1)
+                printf(", '%s' %d", date, i-1)
             endif
         endif
 
