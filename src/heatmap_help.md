@@ -54,11 +54,11 @@ heatmap_func("myfunc", 40, -1, 1, -1, 1, opts)
 ```
 
 
-## heatmap_plot(Input, opts)
+## heatmap_plot(Input, opts[null])
 
 Arguments:
 
-- Input: numeric, required — accepts a matrix, a list of time-series, or a panel series
+- Input: numeric, required - accepts a matrix, a list of time-series, or a panel series
 - opts: bundle, optional
 
 Convenience wrapper that converts common Gretl data shapes to a matrix and calls `heatmap()`.
@@ -83,9 +83,9 @@ Arguments:
   - a list of three series: combined into an Nx3 (x,y,z) table
 - opts: bundle, optional
 
-Creates a 3D surface using gnuplot's pm3d and splot. Table-style inputs (x y z) may be interpolated with `dgrid3d` controlled by `grid_resolution`.
+Creates a 3D surface using gnuplot's pm3d and splot. Table-style inputs (x y z) may be interpolated with gnuplot's `dgrid3d` controlled by `grid_resolution`.
 
-_NOTE:_ pm3d plotting is not currently exposed via the GUI menu in this version.
+*NOTE*: pm3d plotting is not currently exposed via the GUI menu in this version.
 
 # OPTIONS
 
@@ -145,17 +145,10 @@ Set `clevels` in the options bundle to produce contour plots from matrices. Typi
 
 Some keys have no effect with contour plots: `do_labels`, `printvals`, `native`, `limits`, `coldest`, `hottest`, `zerowhite`.
 
-# NOTES & EXAMPLES (brief)
-
-- Heatmap from matrix: heatmap(A)
-- Contour from matrix: contour_plot(A, _(clevels=12))
-- pm3d from grid matrix: pm3d_plot(M)
-- pm3d from (x,y,z) table: pm3d_plot(tbl, _(grid_resolution=50))
-- pm3d from list of three series: pm3d_plot({s1,s2,s3})
 
 # CHANGELOG (highlights)
 
-* 1.9 -> 2.0: add pm3d_plot(), improved wrappers, pm3d options, many new options
+* 1.9 -> 2.0: add support for creating 3D-plot via `pm3d_plot()` function; add new wrapper functions `contour_plot()` and `heatmap_plot()`; new dependency on *string_utils* (using `struniq()`) and *calendar_utils* (using `(iso8601_to_period_labels)`) packages; Raise minimum Gretl version to 2023a.
 * 1.8 -> 1.9: adjustable font sizes, improved palettes
 * 1.7 -> 1.8: extend the "grid" switch to heatmaps. Also, amend the "correlations" example to show the new feature.
 * 1.6 -> 1.7: contour plots; "xlabel" and "ylabel" options.
