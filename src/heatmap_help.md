@@ -114,7 +114,7 @@ The functions accept a bundle of options. Common keys are listed here; only keys
 - `do_labels`: boolean — use matrix row/column names for axis tics
 - `printvals`: integer — print matrix values inside tiles (heatmap)
 - `tics_out`: boolean — draw tics outside the plot
-- `labelfs`, `ticfs`, `titlefs`, `valfs`: scalars — font sizes
+- `labelfs`, `ticfs`, `titlefs`, `valfs`: scalars — font sizes for labels, tics, title, printed values
 
 ## Date-related options
 
