@@ -131,7 +131,8 @@ function void print_colorbox (const bundle self)
 
     string cmd = sprintf("set colorbox")
 
-    cmd ~= sprintf(" font ',%d'", self.ticfs)
+    # Only supported since gnuplot 6.1
+    #cmd ~= sprintf(" font ',%d'", self.ticfs)
 
     if sum(ok(self.colorbox_position)) == 2 # both 2 values are valid (not NA)
         cmd ~= sprintf(" user origin %g, %g", self.colorbox_position[1], self.colorbox_position[2])
@@ -664,7 +665,8 @@ end function
 function void print_add_grid_pm3d (void)
     /* This function prints the gnuplot commands to add grid lines to the pm3d plot. */
 
-    printf "set pm3d at s hidden3d 100\n"
+    #printf "set pm3d at s hidden3d 100\n"  # works only with gnuplot >= 6.1
+    printf "set pm3d at s hidden3d\n"
     #printf "set palette defined ( 0 '#bd2c29', 2 '#ffd35a', 6 'white')\n"
     printf "set style line 100 lc rgb '#000000' lt 1 lw 0.6\n"
 end function
