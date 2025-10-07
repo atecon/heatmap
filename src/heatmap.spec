@@ -1,5 +1,5 @@
 author = Riccardo "Jack" Lucchetti and Artur Tarassow
-email = r.lucchetti@univpm.it
+email = atecon@posteo.de
 version = 2.0
 date = 2025-10-07
 description = Heatmap, contour and 3D plots
