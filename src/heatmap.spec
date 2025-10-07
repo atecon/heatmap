@@ -1,8 +1,8 @@
 author = Riccardo "Jack" Lucchetti and Artur Tarassow
 email = r.lucchetti@univpm.it
 version = 2.0
-date = 2025-10-03
-description = Heatmap and contour plots
+date = 2025-10-07
+description = Heatmap, contour and 3D plots
 tags = C10
 min-version = 2023a
 public = heatmap heatmap_func heatmap_GUI heatmap_plot contour_plot pm3d_plot
