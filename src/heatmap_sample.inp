@@ -3,112 +3,118 @@ clear
 include heatmap.gfn
 set seed 20111158
 
+# Choose example
+scalar EXAMPLE = 1  # 1: without dataset, 2: with dataset
 
-### random matrix
-n = 32
-A = conv2d(ones(6,6), mnormal(n, n))
+if EXAMPLE == 1
+    ### random matrix
+    n = 32
+    A = conv2d(ones(6,6), mnormal(n, n))
 
-##########
-# Heatmap
-##########
-# default heatmap plot
-heatmap(A)
-# Use alias function for heatmap
-heatmap_plot(A)
-bundle opts = _(title="Matrix A with contour lines",
-                titlefs=18, quiet=1)
-heatmap_plot(A, opts)
-
-
-#############
-# Contour plot
-#############
-# Default version
-contour_plot(A)
-
-# Contour plot with custom options
-bundle opts = _(title="Matrix A with contour lines",
-                titlefs=18, quiet=1, clevels=4)
-contour_plot(A, opts)
+    ##########
+    # Heatmap
+    ##########
+    # default heatmap plot
+    heatmap(A)
+    # Use alias function for heatmap
+    heatmap_plot(A)
+    bundle opts = _(title="Matrix A with contour lines",
+                    titlefs=18, quiet=1)
+    heatmap_plot(A, opts)
 
 
-##################
-### Function plot
-##################
-bundle opts = _(title="binomial coefficients",
-                xlabel="n", ylabel="k")
-heatmap_func("bincoeff", 50, 10, 16, 1, 10, opts)
+    #############
+    # Contour plot
+    #############
+    # Default version
+    contour_plot(A)
 
-# contour plot with a grid
-opts = opts + _(clevels=16, grid=1)
-heatmap_func("bincoeff", 50, 10, 16, 1, 10, opts)
-
-
-# Work with time-series - list of series must be passed (each plotted over time)
-open denmark.gdt --quiet
-## list of series
-list L = diff(dataset)
-heatmap_plot(L, _(title="1st differences",
-                  titlefs=12))
-
-# Work with panel data - single series only can be passed
-# Values for each unit are plotted over time
-open grunfeld.gdt --quiet
-series y = ldiff(invest)
-heatmap_plot(y, _(title="1st differences",
-                  titlefs=12))
-## Add markers for firms
-markers --from-series=firmname
-heatmap_plot(y, _(title="1st differences",
-                  titlefs=12,
-                  ticfs=8))
+    # Contour plot with custom options
+    bundle opts = _(title="Matrix A with contour lines",
+                    titlefs=18, quiet=1, clevels=4)
+    contour_plot(A, opts)
 
 
-###########
-# pm3d plot
-###########
-open denmark.gdt --quiet
-## matrix use
-matrix M = mnormal(30,15)
-pm3d_plot(M)
+    ##################
+    ### Function plot
+    ##################
+    bundle opts = _(title="binomial coefficients",
+                    xlabel="n", ylabel="k")
+    heatmap_func("bincoeff", 50, 10, 16, 1, 10, opts)
 
-# rotate view
-bundle opts = _(with_contour=TRUE,
-                grid=TRUE,
-                view_x_axis=50, view_y_axis=35)
-pm3d_plot(M, opts)
+    # contour plot with a grid
+    opts = opts + _(clevels=16, grid=1)
+    heatmap_func("bincoeff", 50, 10, 16, 1, 10, opts)
+endif
 
-# 2D-matrix and vector of observation dates on y-axis
-matrix X = {IBO, IDE}
-bundle opts = _(obsdate={$obsdate}, obsaxis="y",
-                date_format="%Y-%m",
-                date_offset_y=0.1,
-                date_offset_x=1.8)
-pm3d_plot(X, opts)
+if EXAMPLE == 2
 
-## list use
-list L = diff(LRM) IBO IDE
-pm3d_plot(L)
+    # Work with time-series - list of series must be passed (each plotted over time)
+    open denmark.gdt --quiet
+    ## list of series
+    list L = diff(dataset)
+    heatmap_plot(L, _(title="1st differences",
+                    titlefs=12))
+
+    # Work with panel data - single series only can be passed
+    # Values for each unit are plotted over time
+    open grunfeld.gdt --quiet
+    series y = ldiff(invest)
+    heatmap_plot(y, _(title="1st differences",
+                    titlefs=12))
+    ## Add markers for firms
+    markers --from-series=firmname
+    heatmap_plot(y, _(title="1st differences",
+                    titlefs=12,
+                    ticfs=8))
 
 
-# Full-blown example with detailed options
-bundle opts = _(with_contour=FALSE,
-                grid=TRUE,
-                view_x_axis=20,
-                view_y_axis=35,
-                ticfs=9,
-                labelfs=9,
-                titlefs=8,
-                tics_out=TRUE,
-                obsaxis="y",
-                date_offset_x=-0.5,
-                date_offset_y=0.2,
-                xlabel="My Own label",
-                title="Some title",
-                colorbox=TRUE,
-                colorbox_size={0.02, 0.3},
-                colorbox_position={0.1, 0.6},
-                native=FALSE,
-                coldest="grey",
-                hottest="green")
-pm3d_plot(L, opts)
+    ###########
+    # pm3d plot
+    ###########
+    open denmark.gdt --quiet
+    ## matrix use
+    matrix M = mnormal(30,15)
+    pm3d_plot(M)
+
+    # rotate view
+    bundle opts = _(with_contour=TRUE,
+                    grid=TRUE,
+                    view_x_axis=50, view_y_axis=35)
+    pm3d_plot(M, opts)
+
+    # 2D-matrix and vector of observation dates on y-axis
+    matrix X = {IBO, IDE}
+    bundle opts = _(obsdate={$obsdate}, obsaxis="y",
+                    date_format="%Y-%m",
+                    date_offset_y=0.1,
+                    date_offset_x=1.8)
+    pm3d_plot(X, opts)
+
+    ## list use
+    list L = diff(LRM) IBO IDE
+    pm3d_plot(L)
+
+
+    # Full-blown example with detailed options
+    bundle opts = _(with_contour=FALSE,
+                    grid=TRUE,
+                    view_x_axis=20,
+                    view_y_axis=35,
+                    ticfs=9,
+                    labelfs=9,
+                    titlefs=8,
+                    tics_out=TRUE,
+                    obsaxis="y",
+                    date_offset_x=-0.5,
+                    date_offset_y=0.2,
+                    xlabel="My Own label",
+                    title="Some title",
+                    colorbox=TRUE,
+                    colorbox_size={0.02, 0.3},
+                    colorbox_position={0.1, 0.6},
+                    native=FALSE,
+                    coldest="grey",
+                    hottest="green")
+    pm3d_plot(L, opts)
+endif
