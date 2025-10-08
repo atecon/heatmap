@@ -4,7 +4,7 @@ version = 2.0
 date = 2025-10-08
 description = Heatmap, contour and 3D plots
 tags = C10
-min-version = 2023a
+min-version = 2023b
 public = heatmap heatmap_func heatmap_GUI heatmap_plot contour_plot pm3d_plot
 
 data-requirement = no-data-ok
