@@ -11,7 +11,6 @@ data-requirement = no-data-ok
 gui-main = heatmap_GUI
 gui-help = gui_help.md
 data-files = examples
-depends = string_utils
 
 label = Heatmap
 menu-attachment = MAINWIN/View
