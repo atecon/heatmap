@@ -1,7 +1,7 @@
 author = Riccardo "Jack" Lucchetti and Artur Tarassow
 email = atecon@posteo.de
 version = 2.0
-date = 2025-10-07
+date = 2025-10-08
 description = Heatmap, contour and 3D plots
 tags = C10
 min-version = 2023a
@@ -11,7 +11,7 @@ data-requirement = no-data-ok
 gui-main = heatmap_GUI
 gui-help = gui_help.md
 data-files = examples
-depends = string_utils calendar_utils
+depends = string_utils
 
 label = Heatmap
 menu-attachment = MAINWIN/View
