@@ -131,8 +131,9 @@ function void print_colorbox (const bundle self)
 
     string cmd = sprintf("set colorbox")
 
-    # Only supported since gnuplot 6.1
-    #cmd ~= sprintf(" font ',%d'", self.ticfs)
+    if gnuplot_version() >= 610
+        cmd ~= sprintf(" font ',%d'", self.ticfs)
+    endif
 
     if sum(ok(self.colorbox_position)) == 2 # both 2 values are valid (not NA)
         cmd ~= sprintf(" user origin %g, %g", self.colorbox_position[1], self.colorbox_position[2])
@@ -665,8 +666,11 @@ end function
 function void print_add_grid_pm3d (void)
     /* This function prints the gnuplot commands to add grid lines to the pm3d plot. */
 
-    #printf "set pm3d at s hidden3d 100\n"  # works only with gnuplot >= 6.1
-    printf "set pm3d at s hidden3d\n"
+    if gnuplot_version() >= 610
+        printf "set pm3d at s hidden3d 100\n"  # works only with gnuplot >= 6.1
+    else
+        printf "set pm3d at s hidden3d\n"
+    endif
     #printf "set palette defined ( 0 '#bd2c29', 2 '#ffd35a', 6 'white')\n"
     printf "set style line 100 lc rgb '#000000' lt 1 lw 0.6\n"
 end function
@@ -1244,8 +1248,6 @@ function void print_datetics (const matrix obsdate,
 end function
 
 
-
-
 function void print_gnuplot_time_axis (const bundle self)
     /* NOT IN USE
         Print gnuplot commands for date axis using timefmt and displayfmt.
@@ -1277,4 +1279,46 @@ function void print_gnuplot_time_axis (const bundle self)
         xtics_cmd ~= sprintf(" font ',%g'", self.ticfs)
     endif
     print xtics_cmd
+end function
+
+
+function scalar gnuplot_version (void)
+    /* Retrieve installed gnuplot version as integer. */
+
+    # The gnuplot version is available in $sysinfo since gretl 2024a
+    scalar version = $version >= 20240 ? atof(strsub($sysinfo.gnuplot, ".", "")) : 500
+    return version
+end function
+
+
+function strings iso8601_to_period_labels (const matrix obsdates)
+    /* Convert a matrix of ISO8601 dates (YYYYMMDD) to period labels.
+       If all months are in {1,4,7,10}, use quarterly labels YYYYqN,
+       otherwise use monthly labels YYYYmN.
+       Return a string array of labels.
+
+       Written by Allin. */
+
+    scalar nobs = rows(obsdates)
+    strings S = array(nobs)
+    matrix y = floor(obsdates/10000)
+    matrix p = floor((obsdates - 10000*y)/100)
+    scalar frequency = 1
+    if !isconst(p)
+        frequency = sumc(contains(p, {1,4,7,10})) == nobs ? 4 : 12
+    endif
+
+    loop i=1..nobs
+        if frequency == 1
+            S[i] = sprintf("%d", y[i])
+        elif frequency == 4
+            S[i] = sprintf("%dq%d", y[i], 1 + floor(p[i]/3))
+        elif frequency == 12
+            S[i] = sprintf("%dm%d", y[i], p[i])
+        else
+            S[i] = sprintf("%d", y[i])  # fallback
+        endif
+    endloop
+
+   return S
 end function
