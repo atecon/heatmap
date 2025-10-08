@@ -738,7 +738,7 @@ function void print_contour_linetypes (scalar clevels)
     clevels = xmin(clevels, 64)
     lw = clevels > 12 ? 1 : 2
 
-    if $version < 20232
+    if $version < 20232  # 2023b
         strings lcols = strsplit(sprintf("%06d", zeros(clevels,1)))
     else
         strings lcols = rgbmix("red", "blue", seq(0,clevels-1)/(clevels-1))
