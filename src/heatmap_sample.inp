@@ -16,9 +16,11 @@ if EXAMPLE == 1
     ##########
     # default heatmap plot
     heatmap(A)
-    # Use alias function for heatmap
-    heatmap_plot(A)
-    bundle opts = _(title="Matrix A with contour lines",
+    # Use alternatively the alias function
+    #heatmap_plot(A)
+
+    # Tweak the plot with options
+    bundle opts = _(title="My heatmap title",
                     titlefs=18, quiet=1)
     heatmap_plot(A, opts)
 
