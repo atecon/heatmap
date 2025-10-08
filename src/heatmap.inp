@@ -347,6 +347,17 @@ function string write_gnuplot_heatmap (const bundle self)
     string buffer_file = ""
     set force_decpoint on
 
+    # This check must be placed here outside the outfile block
+    # Otherwise, the potential error message would be lost
+    if self.input_type != "matrix" && $datatype == 3
+        strings Markers
+        catch markers --to-array=Markers
+        if !$error
+            check_string_utils_version()
+            strings Markers = struniq(Markers)
+        endif
+    endif
+
     outfile --tempfile=buffer_file
         print_enhanced(self.valfs)
         print_title(self.actual_title, self.titlefs)
@@ -379,11 +390,7 @@ function string write_gnuplot_heatmap (const bundle self)
             if $datatype == 2 # time-series
                 print_ytics(self.varnames, nelem(self.varnames), self.ticfs)
             elif $datatype == 3 # panel
-                catch markers --to-array=Markers
-                if !$error
-                    strings Markers = struniq(Markers)
-                    print_ytics(Markers, nelem(Markers), self.ticfs)
-                endif
+                print_ytics(Markers, nelem(Markers), self.ticfs)
             endif
         endif
         # The original parameter "xtics" and "ytics" were never documented.
@@ -1290,6 +1297,26 @@ function scalar gnuplot_version (void)
     return version
 end function
 
+
+function void check_string_utils_version (void)
+    /* Check for required string_utils package version. */
+    pkg query string_utils --quiet
+    bundle result = $result
+
+    errorif(!nelem(result), sprintf("The 'string_utils' package is required but not installed.\nPlease install it using the command:\npkg install string_utils"))
+
+    scalar version = result.version
+    if version < 0.7
+        string msg = sprintf("At least version 0.7 of the string_utils package is required.\n")
+        msg += sprintf("You have version %.1f installed.\n", version)
+        msg += sprintf("Please update the package using the command:\n")
+        msg += sprintf("pkg install string_utils\n")
+
+        errorif(version < 0.7, msg)
+    else
+        include string_utils.gfn
+    endif
+end function
 
 function strings iso8601_to_period_labels (const matrix obsdates)
     /* Convert a matrix of ISO8601 dates (YYYYMMDD) to period labels.
