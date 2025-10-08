@@ -63,6 +63,9 @@ Arguments:
 
 Convenience wrapper that converts common Gretl data shapes to a matrix and calls `heatmap()`.
 
+**Note**: When working with a panel and markers are present, the string_utils package is required (at least version 0.7). Otherwise, an error will be raised.
+
+
 ## contour_plot(X, opts[null])
 
 Arguments:
@@ -148,7 +151,7 @@ Some keys have no effect with contour plots: `do_labels`, `printvals`, `native`,
 
 # CHANGELOG (highlights)
 
-* 1.9 -> 2.0: add support for creating 3D-plot via `pm3d_plot()` function; add new wrapper functions `contour_plot()` and `heatmap_plot()`; new dependency on *string_utils* (using `struniq()`) and *calendar_utils* (using `(iso8601_to_period_labels)`) packages; Raise minimum Gretl version to 2023a.
+* 1.9 -> 2.0: add support for creating 3D-plot via `pm3d_plot()` function; add new wrapper functions `contour_plot()` and `heatmap_plot()`; Raise minimum Gretl version to 2023a.
 * 1.8 -> 1.9: adjustable font sizes, improved palettes
 * 1.7 -> 1.8: extend the "grid" switch to heatmaps. Also, amend the "correlations" example to show the new feature.
 * 1.6 -> 1.7: contour plots; "xlabel" and "ylabel" options.
