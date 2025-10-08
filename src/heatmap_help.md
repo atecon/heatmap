@@ -151,7 +151,7 @@ Some keys have no effect with contour plots: `do_labels`, `printvals`, `native`,
 
 # CHANGELOG (highlights)
 
-* 1.9 -> 2.0: add support for creating 3D-plot via `pm3d_plot()` function; add new wrapper functions `contour_plot()` and `heatmap_plot()`; Raise minimum Gretl version to 2023a.
+* 1.9 -> 2.0: add support for creating 3D-plot via `pm3d_plot()` function; add new wrapper functions `contour_plot()` and `heatmap_plot()`; Raise minimum Gretl version to 2023b.
 * 1.8 -> 1.9: adjustable font sizes, improved palettes
 * 1.7 -> 1.8: extend the "grid" switch to heatmaps. Also, amend the "correlations" example to show the new feature.
 * 1.6 -> 1.7: contour plots; "xlabel" and "ylabel" options.
