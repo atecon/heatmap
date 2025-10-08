@@ -64,11 +64,14 @@ if EXAMPLE == 2
     series y = ldiff(invest)
     heatmap_plot(y, _(title="1st differences",
                     titlefs=12))
+
     ## Add markers for firms
-    markers --from-series=firmname
-    heatmap_plot(y, _(title="1st differences",
-                    titlefs=12,
-                    ticfs=8))
+    ## NOTE: Running this example will fail if the package "string_utils"
+    ## (>=0.7) isn't installed
+    # markers --from-series=firmname
+    # heatmap_plot(y, _(title="1st differences",
+    #                 titlefs=12,
+    #                 ticfs=8))
 
 
     ###########
