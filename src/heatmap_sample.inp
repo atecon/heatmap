@@ -95,31 +95,4 @@ if EXAMPLE == 2
                     date_offset_y=0.1,
                     date_offset_x=1.8)
     pm3d_plot(X, opts)
-
-    ## list use
-    list L = diff(LRM) IBO IDE
-    pm3d_plot(L)
-
-
-    # Full-blown example with detailed options
-    bundle opts = _(with_contour=FALSE,
-                    grid=TRUE,
-                    view_x_axis=20,
-                    view_y_axis=35,
-                    ticfs=9,
-                    labelfs=9,
-                    titlefs=8,
-                    tics_out=TRUE,
-                    obsaxis="y",
-                    date_offset_x=-0.5,
-                    date_offset_y=0.2,
-                    xlabel="My Own label",
-                    title="Some title",
-                    colorbox=TRUE,
-                    colorbox_size={0.02, 0.3},
-                    colorbox_position={0.1, 0.6},
-                    native=FALSE,
-                    coldest="grey",
-                    hottest="green")
-    pm3d_plot(L, opts)
 endif
