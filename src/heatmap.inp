@@ -67,8 +67,10 @@ function bundle default_opts (void)
     # colours
     ret.native = FALSE
     ret.limits = {NA,NA}
-    ret.coldest = "#bd2c29"  # "blue"
-    ret.hottest = "#ffd35a"  # "red"
+    # colour scheme "spectral"
+    # https://github.com/Gnuplotting/gnuplot-palettes/blob/master/spectral.pal
+    ret.coldest = "blue"   #"#3288BD" # "#bd2c29"  #
+    ret.hottest = "red"   #"#D53E4F" # "#ffd35a"
     ret.zerowhite = FALSE
 
     # colourbox
@@ -200,17 +202,22 @@ function string makepalette (scalar m,
         endif
     else
         # simple
-        range = (M - m)
-        # avoid division by zero when limits are equal
-        if range == 0
-            ret = sprintf("set palette defined (0 '%s', 1 '%s')", cold, hot)
+        if strlen(cold) == 0 && strlen(hot) == 0  # default
+            print_palette_jet()
         else
-            ret = sprintf("set palette defined (%g '%s', %g '%s')", m/range, cold, M/range, hot)
+            range = (M - m)
+            # avoid division by zero when limits are equal
+            if range == 0
+                ret = sprintf("set palette defined (0 '%s', 1 '%s')", cold, hot)
+            else
+                ret = sprintf("set palette defined (%g '%s', %g '%s')", m/range, cold, M/range, hot)
+            endif
         endif
     endif
 
     return ret
 end function
+
 
 function scalar is_hex (string c)
     /* Check if a string is a valid hex color code. */
