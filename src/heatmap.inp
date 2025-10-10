@@ -919,6 +919,7 @@ function string set_title (const bundle self)
     string ret = ""
     if strlen(self.title) > 0
         ret = self.title
+        ret = strsub(ret, "'", "")  # remove single quotes (apostrophes)
     endif
 
     return ret
