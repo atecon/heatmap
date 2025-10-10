@@ -1132,7 +1132,6 @@ function void heatmap_func (string func,
     scalar dy = (y1 - y0)/(res-1)
     bundle self = defbundle("do_labels", FALSE, "quiet", TRUE)
     scalar self.native = 1
-    scalar has_param = inbundle(self, "fparam")
     scalar x = x0
 
     if exists(xopts)
@@ -1142,6 +1141,8 @@ function void heatmap_func (string func,
             self.native = xopts.native
         endif
     endif
+
+   scalar has_param = inbundle(self, "fparam")
 
     loop j = 1..res
         scalar y = y1
