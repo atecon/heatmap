@@ -151,6 +151,7 @@ Some keys have no effect with contour plots: `do_labels`, `printvals`, `native`,
 
 # CHANGELOG (highlights)
 
+* 2.0 -> 2.1: Print row and column labels of a matrix for heatmap plot if do_labels=TRUE
 * 1.9 -> 2.0: add support for creating 3D-plot via `pm3d_plot()` function; add new wrapper functions `contour_plot()` and `heatmap_plot()`; Raise minimum Gretl version to 2023b.
 * 1.8 -> 1.9: adjustable font sizes, improved palettes
 * 1.7 -> 1.8: extend the "grid" switch to heatmaps. Also, amend the "correlations" example to show the new feature.
