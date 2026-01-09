@@ -1,5 +1,7 @@
 function strings stock_labels (const matrix X,
                                bool do_cols)
+    /* Get stock labels for matrix dimensions */
+
     strings ret = do_cols ? cnameget(X) : rnameget(X)
     if nelem(ret) == 0
         if do_cols
@@ -10,17 +12,24 @@ function strings stock_labels (const matrix X,
             string pref = "row"
         endif
         ret = array(dim)
-        loop i = 1 .. dim --quiet
+        loop i = 1..dim
             ret[i] = sprintf("%s %02d", pref, i)
         endloop
     endif
     return ret
 end function
 
-function string tics (scalar x0,
-                      scalar x1,
-                      scalar n)
+function string tics (const scalar x0,
+                      const scalar x1,
+                      const scalar n)
+    /* Generate tic marks for a given range and number of ticks. */
+
     ret = "( "
+    # Guard against degenerate interval
+    if x1 == x0
+        return ""
+    endif
+
     pwr = floor(log10((x1-x0)/2))
     scale = 10^pwr
     ini = ceil(x0/scale)
@@ -28,7 +37,8 @@ function string tics (scalar x0,
     t = seq(ini,fin) * scale
     k = nelem(t)
     dx = (x1 - x0) / (n - 1)
-    loop i = 1 .. k
+
+    loop i = 1..k
         pos = (t[i] - x0) / dx
         ret = ret ~ sprintf("\"%.4g\" %g ", t[i], pos)
         if i == k
@@ -37,10 +47,13 @@ function string tics (scalar x0,
             ret = ret ~ ", "
         endif
     endloop
+
     return ret
 end function
 
 function bundle default_opts (void)
+    /* Function to create a bundle of default options for heatmap plotting. */
+
     bundle ret
 
     # general
@@ -49,37 +62,128 @@ function bundle default_opts (void)
     ret.fparam = {}
     ret.clevels = 0
     ret.grid = 0
+    ret.input_type = "matrix"
 
     # colours
-    ret.native = 0
+    ret.native = FALSE
     ret.limits = {NA,NA}
-    ret.coldest = "blue"
-    ret.hottest = "red"
+    # colour scheme "spectral"
+    # https://github.com/Gnuplotting/gnuplot-palettes/blob/master/spectral.pal
+    ret.coldest = "blue"   #"#3288BD" # "#bd2c29"  #
+    ret.hottest = "red"   #"#D53E4F" # "#ffd35a"
     ret.zerowhite = FALSE
 
-    # labels
+    # colourbox
+    scalar ret.colorbox = TRUE
+    scalar ret.colorbox_horizontal = FALSE
+    matrix ret.colorbox_size = {NA, NA}  # must be matrix with 2 elements
+    matrix ret.colorbox_position = {NA, NA}  # must be matrix with 2 elements
+
+    # labels and tics
     ret.title = ""
+    strings ret.varnames = array(0)
     ret.do_labels = FALSE
-    ret.xlabel = ""
-    ret.ylabel = ""
+    string ret.xlabel = ""
+    string ret.ylabel = ""
+    string ret.zlabel = ""
     ret.xtics = ""
     ret.ytics = ""
     ret.printvals = -1
+    ret.tics_out = FALSE
+    string ret.obsaxis = ""
+
+    # Date tics
+    string ret.date_format = "%Y-%m"
+    scalar ret.date_rotate = 45
+    scalar ret.date_offset_x = -3.5
+    scalar ret.date_offset_y = -1.4
+    scalar ret.max_date_tics = 6
 
     # font size values
-    ret.titlefs = NA
-    ret.ticfs = NA
-    ret.labelfs = NA
-    ret.valfs = NA
+    ret.titlefs = 14
+    ret.ticfs = 12
+    ret.labelfs = 12
+    ret.valfs = 12  # font size for matrix values
+
+    # for pm3d only
+    scalar ret.grid_resolution = 25  # smoothness of grid surface
+    scalar ret.with_contour = FALSE  # only for matrix input, yet
+    scalar ret.view_x_axis = 50
+    scalar ret.view_y_axis = 35
+    scalar ret.xrange_min = NA
+    scalar ret.xrange_max = NA
+    scalar ret.yrange_min = NA
+    scalar ret.yrange_max = NA
+    scalar ret.zrange_min = NA
+    scalar ret.zrange_max = NA
+
+    # for contour plots
+    matrix ret.contour_levels = {}
+    matrix ret.isosamples = {}
 
     return ret
 end function
+
+
+function void print_colorbox (const bundle self)
+    /* Print gnuplot command to set colorbox with optional parameters from self.
+       Only set width, height, x_pos, y_pos if they are not NA. */
+
+    # "set colorbox vertical user origin .02, .1 size .01,.6\n".
+
+    string cmd = sprintf("set colorbox")
+
+    if gnuplot_version() >= 610
+        cmd ~= sprintf(" font ',%d'", self.ticfs)
+    endif
+
+    if sum(ok(self.colorbox_position)) == 2 # both 2 values are valid (not NA)
+        cmd ~= sprintf(" user origin %g, %g", self.colorbox_position[1], self.colorbox_position[2])
+    else
+        #cmd ~= " default" # position it to the right of the plot
+        cmd ~= self.colorbox_horizontal ? " horizontal" : " default"
+    endif
+    if sum(ok(self.colorbox_size)) == 2 # both 2 values are valid (not NA)
+        cmd ~= sprintf(" size %g, %g", self.colorbox_size[1], self.colorbox_size[2])
+    endif
+
+    printf "%s\n", cmd
+end function
+
+function void print_palette (const bundle self)
+    /* Function to print the color palette settings. */
+
+    printf "set cbrange [%g:%g]\n", self.min_limit, self.max_limit
+    if self.native == FALSE
+        printf "%s\n", makepalette(self.min_limit, self.max_limit, self.zerowhite,
+                                   self.coldest, self.hottest)
+    endif
+end function
+
+
+function void print_palette_jet (void)
+    /* Print the MATLAB 'jet' color palette for gnuplot pm3d plots.
+       Borrowed from: https://gist.github.com/bagrow/805122 */
+
+    printf "set palette defined (0 0.0 0.0 0.5, \\\n"
+    printf "                     1 0.0 0.0 1.0, \\\n"
+    printf "                     2 0.0 0.5 1.0, \\\n"
+    printf "                     3 0.0 1.0 1.0, \\\n"
+    printf "                     4 0.5 1.0 0.5, \\\n"
+    printf "                     5 1.0 1.0 0.0, \\\n"
+    printf "                     6 1.0 0.5 0.0, \\\n"
+    printf "                     7 1.0 0.0 0.0, \\\n"
+    printf "                     8 0.5 0.0 0.0 )\n"
+end function
+
 
 function string makepalette (scalar m,
                              scalar M,
                              bool zw,
                              string cold,
                              string hot)
+    /* Create a color palette definition for gnuplot. */
+
     if zw
         # special cases first
         if m >= 0
@@ -98,25 +202,40 @@ function string makepalette (scalar m,
         endif
     else
         # simple
-        range = (M - m)
-        ret = sprintf("set palette defined (%g '%s', %g '%s')", m/range, cold, M/range, hot)
+        if strlen(cold) == 0 && strlen(hot) == 0  # default
+            print_palette_jet()
+        else
+            range = (M - m)
+            # avoid division by zero when limits are equal
+            if range == 0
+                ret = sprintf("set palette defined (0 '%s', 1 '%s')", cold, hot)
+            else
+                ret = sprintf("set palette defined (%g '%s', %g '%s')", m/range, cold, M/range, hot)
+            endif
+        endif
     endif
 
     return ret
 end function
 
+
 function scalar is_hex (string c)
+    /* Check if a string is a valid hex color code. */
+
     scalar ret = (c[1] == "#") && (strlen(c) == 7)
     if ret
         scalar x = NA
         scalar n = sscanf(c[2:strlen(c)], "%x", x)
         ret = (n == 1)
     endif
+
     return ret
 end function
 
 function scalar colchk (string coldest,
                         string hottest)
+    /* Check if the specified color names are valid. */
+
     scalar err = !is_hex(coldest)
 
     if err
@@ -140,18 +259,20 @@ function scalar colchk (string coldest,
     return err
 end function
 
+/* CURRENTLY FAILS WITH:
+The symbol 'BMEMB' is not valid in this context
+Syntax error
+*** error in function create_heatmap_plot, line 4
+*/
+/*
 function void fix_column_vector_case (matrix *mat)
     # this function "fixes" the column vector case by
     # turning the input matrix in a 3-column matrix with
     # NAs at the sides
-
-    rlab = rnameget(mat)
-    clab = cnameget(mat)
-    if nelem(clab) == 1
-        strings newlabs = defarray(" ", clab[1], " ")
-    else
-        strings newlabs = array(0)
-    endif
+    strings rlab = rnameget(mat)
+    strings clab = cnameget(mat)
+    strings newlabs = array(0)
+    strings newlabs = nelem(clab) == 1 ? defarray(" ", clab[1], " ") : newlabs
 
     mat = NA ~ mat ~ NA
     cnameset(mat, newlabs)
@@ -160,238 +281,848 @@ function void fix_column_vector_case (matrix *mat)
         rnameset(mat, rlab)
     endif
 end function
+*/
 
-# public functions
+function matrix fix_column_vector_case (const matrix mat)
+    # this function "fixes" the column vector case by
+    # turning the input matrix in a 3-column matrix with
+    # NAs at the sides
+    strings rlab = rnameget(mat)
+    strings clab = cnameget(mat)
+    strings newlabs = array(0)
+    strings newlabs = nelem(clab) == 1 ? defarray(" ", clab[1], " ") : newlabs
 
-function void heatmap (matrix mat,
-                       bundle opts[null])
-    if exists(opts)
-        opts = opts + default_opts()
+    matrix newmat = NA ~ mat ~ NA
+    cnameset(newmat, newlabs)
+
+    if nelem(rlab)
+        rnameset(newmat, rlab)
+    endif
+
+    return newmat
+end function
+
+function scalar get_limit (const scalar val, const scalar fallback)
+    # Helper function to get min/max with fallback
+    return ok(val) ? val : fallback
+end function
+
+
+function void create_heatmap_plot (bundle self)
+    /* Main function for creating a heatmap plot */
+
+    if self.ncols_mat == 1
+        matrix self.mat = fix_column_vector_case(self.mat)
+        scalar self.ncols_mat = cols(self.mat)
+    endif
+    if self.nrows_mat == 1 && self.input_type != "matrix"
+        # add an NA row above and below so the image has visible height
+        matrix self.mat = NA ~ self.mat ~ NA
+        self.nrows_mat = rows(self.mat)
+    endif
+
+    #if self.do_labels
+    #    #strings self.row_names = stock_labels(self.mat, FALSE)
+    #    #strings self.column_names = stock_labels(self.mat, 1)
+    #endif
+
+    string dest = self.dest
+    scalar self.min_limit = get_limit(self.limits[1], min(self.mat))
+    scalar self.max_limit = get_limit(self.limits[2], max(self.mat))
+
+    if self.native
+        self.zerowhite = FALSE
+    endif
+
+    if self.printvals >= 0
+        scalar self.decimale_places = self.printvals
     else
-        opts = default_opts()
+        self.printvals = 0
     endif
 
-    ### Process options
+    string buffer_file = write_gnuplot_heatmap(self)
 
-    CONTOUR = opts.clevels > 0
+    gnuplot --input="@buffer_file" --output="@dest"
+    print_creation_message(self)
+end function
 
-    c = cols(mat)
 
-    if CONTOUR
-        r = rows(mat)
-        if xmin(r,c) == 1
-            funcerr "Cannot do a contour plot of a vector"
-        endif
-    else
+function string write_gnuplot_heatmap (const bundle self)
+    /* Function writing the actual gnuplot commands for heatmap */
 
-        if c == 1
-            fix_column_vector_case(&mat)
-            c = 3
-            col_fixed = 1
-        else
-            col_fixed = 0
-        endif
-    endif
-
-    do_labels = opts.do_labels && !CONTOUR
-    if do_labels
-        rn = stock_labels(mat, 0)
-        strings cn = stock_labels(mat, 1)
-        N = nelem(rn)
-    else
-        N = rows(mat)
-    endif
-
-    string actual_title = strlen(opts.title) > 0 ? opts.title : argname(mat)
-    string dest = opts.dest
-
-    if !CONTOUR
-        scalar m = opts.limits[1]
-        m = ok(m) ? m : min(mat)
-        scalar M = opts.limits[2]
-        M = ok(M) ? M : max(mat)
-
-        native = opts.native
-        zw = opts.zerowhite
-
-        if native
-            zw = FALSE
-        endif
-
-        if opts.printvals >= 0
-            pv = 1
-            dec = opts.printvals
-        else
-            pv = 0
-        endif
-    endif
-
-    ### Prepare the gnuplot script
-    string fn = ""
+    # Prepare the gnuplot script
+    string buffer_file = ""
     set force_decpoint on
-    outfile --tempfile=fn
 
-        if ok(opts.valfs)
-            printf "set termoption enhanced\n"
+    # This check must be placed here outside the outfile block
+    # Otherwise, the potential error message would be lost
+    if self.input_type != "matrix" && $datatype == 3
+        strings Markers
+        catch markers --to-array=Markers
+        if !$error
+            check_string_utils_version()
+            strings Markers = struniq(Markers)
         endif
+    endif
 
-        printf "set title '%s' ", actual_title
-        if ok(opts.titlefs)
-            printf "font \",%d\"\n", opts.titlefs
-        else
-            printf "\n"
-        endif
-
+    outfile --tempfile=buffer_file
+        print_enhanced(self.valfs)
+        print_title(self.actual_title, self.titlefs)
         printf "unset key\n"
-
-        if CONTOUR
-            printf "set contour base\n"
-            printf "unset surface\n"
-            printf "set view map\n"
+        print_palette(self)
+        print_tics_nomirror(self.ticfs, self.tics_out)
+        print_xrange(self.ncols_mat)
+        if self.colorbox
+            print_colorbox(self)
         else
-            printf "set cbrange [%g:%g]\n", m, M
-            if !native
-                printf "%s\n", makepalette(m, M, opts.zerowhite, opts.coldest, opts.hottest)
-            endif
+            printf "unset colorbox\n"
         endif
 
-        printf "set tics nomirror "
-        if ok(opts.ticfs)
-            printf "font \",%d\"\n", opts.ticfs
+        # Currently not needed
+        #if self.nrows_mat == 1 && self.input_type != "matrix"
+        #    #print_yrange(self.nrows_mat)
+        #endif
+
+        if self.do_labels && self.input_type == "matrix"
+            if nelem(self.column_names) == self.ncols_mat
+                print_xtics(self.column_names, self.ncols_mat, self.ticfs)
+            endif
+            if nelem(self.row_names) == self.nrows_mat
+                print_ytics(self.row_names, self.nrows_mat, self.ticfs)
+                print_xtics_rotation(self.nrows_mat)
+            endif
+
+        elif self.input_type != "matrix" # either series or list
+            print_datetics(self.obsdate, "x", self)
+            if $datatype == 2 # time-series
+                print_ytics(self.varnames, nelem(self.varnames), self.ticfs)
+            elif $datatype == 3 # panel
+                print_ytics(Markers, nelem(Markers), self.ticfs)
+            endif
+        endif
+        # The original parameter "xtics" and "ytics" were never documented.
+        # I actually think the original code did never work
+        #print_custom_xtics_ytics
+
+        print_axis_label("x", self.xlabel, self.labelfs)
+        print_axis_label("y", self.ylabel, self.labelfs)
+
+        print_autoscale_fix()
+        if self.grid
+            print_add_grid(FALSE)
+        endif
+        print_data_grid_style(self.mat)
+        print_plot_matrix_image(self.printvals, self.valfs)
+        printf "\n"
+    end outfile
+
+    set force_decpoint off
+
+    return buffer_file
+end function
+
+
+function void create_contour_plot (bundle self)
+    /* Main function for creating a contour plot */
+
+    string dest = self.dest
+    string buffer = write_gnuplot_contour(self)
+
+    gnuplot --input="@buffer" --output="@dest"
+    print_creation_message(self)
+end function
+
+function string write_gnuplot_contour (const bundle self)
+    /* Function writing the actual gnuplot commands for contour plot */
+
+    # Prepare the gnuplot script
+    string buffer_file = ""
+    set force_decpoint on
+
+    outfile --tempfile=buffer_file
+        print_enhanced(self.valfs)
+        print_title(self.actual_title, self.titlefs)
+        printf "unset key\n"
+        printf "set contour base\n"
+        printf "unset surface\n"
+        printf "set view map\n"  # ensure 2D perspective
+        print_tics_nomirror(self.ticfs, self.tics_out)
+        print_xrange(self.ncols_mat)
+        if self.colorbox
+            print_colorbox(self)
         else
-            printf "\n"
+            printf "unset colorbox\n"
         endif
 
-        printf "set xrange [-0.5:%4.1f]\n", c-0.5
-
-        if do_labels
-            printf "set xtics ("
-            if c == 1
-                printf("'%s' %d", cn[1], 1)
-            else
-                loop i = 1 .. c --quiet
-                    s = cn[i]
-                    printf("'%s' %d", s, i-1)
-                    if i < c
-                        printf ", "
-                    endif
-                endloop
+        if self.do_labels
+            if nelem(self.column_names) == self.ncols_mat
+                print_xtics(self.column_names, self.ncols_mat, self.ticfs)
             endif
-            printf ") out\n"
-
-            printf "set ytics ("
-            loop i = 1 .. N --quiet
-                s = rn[i]
-                printf("'%s' %d", s , N - i)
-                if i < N
-                    printf ", "
-                endif
-            endloop
-            printf ") out\n"
-
-            angle = N > 9 ? (N > 20 ? 90 : 45) : 0
-            printf "set xtics rotate by %d right\n", angle
-        endif
-
-        if strlen(opts.xtics) > 0
-            printf "set xtics %s\n", opts.xtics
-        endif
-
-        if strlen(opts.ytics) > 0
-            printf "set ytics %s\n", opts.ytics
-        endif
-
-        if strlen(opts.xlabel) > 0
-            axislab = strsub(opts.xlabel, "\"", "'")
-            printf "set xlabel \"%s\" ", axislab
-            if ok(opts.labelfs)
-                printf "font \",%d\"\n", opts.labelfs
-            else
-                printf "\n"
-            endif
-
-        endif
-
-        if strlen(opts.ylabel) > 0
-            axislab = strsub(opts.ylabel, "\"", "'")
-            printf "set ylabel \"%s\" ", axislab
-            if ok(opts.labelfs)
-                printf "font \",%d\"\n", opts.labelfs
-            else
-                printf "\n"
+            if nelem(self.row_names) == self.nrows_mat
+                print_ytics(self.row_names, self.nrows_mat, self.ticfs)
+                print_xtics_rotation(self.nrows_mat)
             endif
         endif
 
-        printf "set autoscale fix\n"
-
-        if opts.grid
-            if CONTOUR
-                printf "set grid lw 0.5 lt -1 lc \"#dddddd\"\n"
-            else
-                printf "set x2tics 1 format '' scale 0,0.001\n"
-                printf "set y2tics 1 format '' scale 0,0.001\n"
-                printf "set mx2tics 2\nset my2tics 2\n"
-                printf "set link x2\nset link y2\n"
-                printf "set grid front mx2tics my2tics lw 2 lt -1 lc rgb 'white'\n"
-            endif
+        print_axis_label("x", self.xlabel, self.labelfs)
+        print_axis_label("y", self.ylabel, self.labelfs)
+        print_autoscale_fix()
+        if self.grid
+            print_add_grid(TRUE)
         endif
+        print_contour_linetypes(self.clevels)
+        print_data_grid_style(self.mat)
+        print_user_contour_level(self.contour_levels)
+        print_isosamples(self.isosamples)
+        print_splot_matrix_lines()
+        # print_splot_matrix_labels() # Does not work, yet
 
-        if CONTOUR
-            # line colours
-            clevels = ceil(opts.clevels)
-            clevels = xmin(clevels, 64)
-            lw = clevels > 12 ? 1 : 2
-
-            if $version < 20232
-                strings lcols = strsplit(sprintf("%06d", zeros(clevels,1)))
-            else
-                strings lcols = rgbmix("red", "blue", seq(0,clevels-1)/(clevels-1))
-            endif
-
-            loop i = 1 .. clevels
-                printf "set linetype %d lc \"#%s\" dt solid lw %d\n", 100+i, lcols[i], lw
-            endloop
-
-            printf "set cntrparam bspline levels %d firstlinetype 101\n", clevels
-        endif
-
-        mat = mreverse(mat)
-        cnameset(mat, "")
-        rnameset(mat, "")
-
-        printf "$data << EOD\n"
-        printf "%12.5g", mat
-        printf "EOD\n\n"
-
-        if CONTOUR
-            printf "splot $data matrix with lines"
-        else
-            printf "plot $data matrix with image"
-            if pv
-                printf ", $data matrix using 1:2:"
-                if ok(opts.valfs)
-                    printf "(sprintf(\"{/=%d \%.%df}\",$3)) with labels\n", opts.valfs, dec
-                else
-                    printf "(sprintf(\"\%.%df\",$3)) with labels\n", dec
-                endif
-            endif
-        endif
         printf "\n"
     end outfile
     set force_decpoint off
 
-    gnuplot --input="@fn" --output="@dest"
+    return buffer_file
+end function
 
-    if !opts.quiet
-        mname = argname(mat)
-        ptype = CONTOUR ? "contour plot" : "heatmap"
-        if strlen(mname) == 0
-            printf "%s created\n", ptype
+
+function void create_pm3d_plot (bundle self, const matrix mat, bool is_grid)
+    /* Prepare limits and invoke gnuplot for pm3d splot. */
+
+    scalar self.ncols_mat = cols(mat)
+    scalar self.nrows_mat = rows(mat)
+
+    # set defaults if not specified by user
+    if self.input_type == "matrix"
+        string self.xlabel = strlen(self.xlabel) == 0 ? "x" : self.xlabel
+        string self.ylabel = strlen(self.ylabel) == 0 ? "y" : self.ylabel
+        string self.zlabel = strlen(self.zlabel) == 0 ? "z" : self.zlabel
+    endif
+    #  For series and lists
+    if nelem(self.varnames) == 3 && self.input_type != "matrix"
+        string self.xlabel = strlen(self.xlabel) > 0 ? self.xlabel : self.varnames[1]
+        string self.ylabel = strlen(self.ylabel) > 0 ? self.ylabel : self.varnames[2]
+        string self.zlabel = strlen(self.zlabel) > 0 ? self.zlabel : self.varnames[3]
+    endif
+
+    if is_grid
+        self.min_limit = get_limit(self.limits[1], min(mat))
+        self.max_limit = get_limit(self.limits[2], max(mat))
+    else
+        # z values are in third column
+        self.min_limit = get_limit(self.limits[1], min(mat[,3]))
+        self.max_limit = get_limit(self.limits[2], max(mat[,3]))
+    endif
+
+    string buffer_file = write_gnuplot_pm3d(self, mat, is_grid)
+    #string buffer = readfile(buffer_file) # for debugging
+    string filename = self.dest
+    gnuplot --input="@buffer_file" --output="@filename"
+    print_creation_message(self)
+end function
+
+
+function string write_gnuplot_pm3d (const bundle self, const matrix mat, bool is_grid)
+    /* Write gnuplot script for a pm3d splot.
+       If is_grid is TRUE, mat is interpreted as a z-grid (matrix form).
+       Otherwise mat is treated as an Nx3 table of x y z rows. */
+
+    string buffer_file = ""
+    set force_decpoint on
+
+    outfile --tempfile=buffer_file
+        # terminal & title
+        print_enhanced(self.valfs)
+        print_title(self.actual_title, self.titlefs)
+        printf "unset key\n"
+
+        # palette and tics and labels
+        print_palette_jet()
+        if self.native==FALSE
+            print_palette(self)
+        endif
+        if self.colorbox
+            print_colorbox(self)
         else
-            printf "%s for %s created\n", ptype, mname
+            printf "unset colorbox\n"
+        endif
+        print_tics_nomirror(self.ticfs, self.tics_out)
+        print_axis_label("x", self.xlabel, self.labelfs)
+        print_axis_label("y", self.ylabel, self.labelfs)
+        print_axis_label("z", self.zlabel, self.labelfs)
+
+        # Set ranges
+        print_autoscale_fix()
+        print_xyzrange("x", self.xrange_min, self.xrange_max)
+        print_xyzrange("y", self.yrange_min, self.yrange_max)
+        print_xyzrange("z", self.zrange_min, self.zrange_max)
+
+        if self.grid
+            print_add_grid_pm3d()
+        endif
+        print_view(self.view_x_axis, self.view_y_axis)
+        print_grid_resolution(self.grid_resolution)
+        print_border_pm3d()
+        print_contour_settings(self.with_contour)
+        if exists(self.obsdate) && strlen(self.obsaxis) > 0
+            print_datetics(self.obsdate, self.obsaxis, self)
+        endif
+
+        if is_grid
+            # use same matrix output as heatmap
+            # Do not reverse matrix, otherwise initial y-axis values are drawn at the
+            # end of the axis but not beginning which is also inconsistent with eventual
+            # ytics labels
+            print_data_grid_style(mat, FALSE)
+            print_splot_matrix_pm3d_lines()
+        else
+            # x y z table
+            print_data_table_style(mat)
+            print_splot_block_pm3d()
+        endif
+
+        printf "\n"
+    end outfile
+
+    set force_decpoint off
+
+    return buffer_file
+end function
+
+
+function void print_creation_message (const bundle self)
+    /* Prints a message indicating the plot was created. */
+    if !self.quiet
+        if strlen(self.name_mat) == 0
+            printf "%s created plot\n", self.plottype
+        else
+            printf "%s for %s created plot\n", self.plottype, self.name_mat
         endif
     endif
 end function
+
+function void print_contour_settings (const bool with_contour)
+    /* Print gnuplot commands to set contour settings for pm3d plots. */
+
+    if with_contour
+        printf "set hidden3d\n"
+        printf "set contour base\n"
+    endif
+end function
+
+
+function void print_user_contour_level (const matrix levels)
+    /* Print gnuplot command to set user-specified discrete contour levels.
+       Example: set cntrparam levels discrete 0.1, 1.0, 10.0, 100.0 */
+
+    if nelem(levels) && sum(ok(levels)) > 0
+        matrix mat = vec(levels)
+        printf "set cntrparam levels discrete "
+        loop i = 1..nelem(mat)
+            if !ok(mat[i])
+                continue
+            endif
+            printf "%g", mat[i]
+            if i < nelem(mat)
+                printf ", "
+            endif
+        endloop
+        printf "\n"
+    endif
+end function
+
+function void print_isosamples (const matrix isosamples)
+        /* Print gnuplot set isosamples command using a 2-element matrix.
+           Only print if both values are not NA. This sets the grid resolution for
+           contour plots. */
+
+    if nelem(isosamples) == 2 && ok(isosamples[1]) && ok(isosamples[2])
+        printf "set isosamples %g,%g\n", isosamples[1], isosamples[2]
+    endif
+end function
+
+function void print_splot_matrix_lines (void)
+    /* Print the gnuplot command for splotting the matrix with lines for contour plot only. */
+    printf "splot $data matrix with lines\n"
+end function
+
+function void print_splot_matrix_labels (void)
+    /* Print the gnuplot command for splotting the matrix with labels for contour plot only. */
+
+    printf "set isosamples 50,50\n"
+    printf "set cntrlabel start 2 interval -1 font \",12\"\n"
+    printf "splot $data matrix with labels boxed\n"
+end function
+
+
+function void print_plot_matrix_image (scalar printvals, scalar valfs)
+    /* Print the gnuplot command for plotting the matrix as an image */
+
+    printf "plot $data matrix with image"
+    if printvals
+        printf ", $data matrix using 1:2:"
+        if ok(valfs)
+            printf "(sprintf(\"{/=%d \%.%df}\",$3)) with labels\n", valfs, printvals
+        else
+            printf "(sprintf(\"\%.%df\",$3)) with labels\n", printvals
+        endif
+    endif
+    printf "\n"
+end function
+
+function void print_grid_resolution (const scalar grid_resolution)
+    /* Print the gnuplot command for setting the grid resolution */
+
+    if ok(grid_resolution) && grid_resolution > 0
+        printf "set dgrid3d %d,%d qnorm 2\n", grid_resolution, grid_resolution
+    endif
+end function
+
+function void print_add_grid_pm3d (void)
+    /* This function prints the gnuplot commands to add grid lines to the pm3d plot. */
+
+    if gnuplot_version() >= 610
+        printf "set pm3d at s hidden3d 100\n"  # works only with gnuplot >= 6.1
+    else
+        printf "set pm3d at s hidden3d\n"
+    endif
+    #printf "set palette defined ( 0 '#bd2c29', 2 '#ffd35a', 6 'white')\n"
+    printf "set style line 100 lc rgb '#000000' lt 1 lw 0.6\n"
+end function
+
+function void print_splot_matrix_pm3d_lines (void)
+    /* Print the gnuplot commands for a pm3d splot using a matrix input */
+
+    # The "at s" part specifies where the color surface (the pm3d plot) is drawn
+    # relative to the 3D surface mesh.
+    #at s stands for "at surface". This means the color shading (pm3d) is drawn
+    ## directly on the surface defined by your data points.
+    #Other options include:
+    #- at b (at base): draws the color map at the base (z=0 or the minimum z).
+    #- at t (at top): draws the color map at the top (maximum z).
+    printf "splot $data matrix with pm3d \n"
+end function
+
+
+function void print_splot_block_pm3d (void)
+    /* Print the gnuplot command for a pm3d splot using x y z table input.
+       If grid_resolution > 0, use dgrid3d interpolation with grid_resolution x grid_resolution resolution.
+       If grid_resolution == 0 (default), do not interpolate. */
+
+    # printf "set hidden3d\n"
+    # printf "set contour base\n"
+    printf "splot $data using 1:2:3 with pm3d palette\n"
+end function
+
+function void print_data_grid_style (const matrix mat, const bool reverse_columns[TRUE])
+    /* Print matrix data for gnuplot using what's called the "grid" style.
+       URL: https://psy.swansea.ac.uk/staff/Carter/gnuplot/gnuplot_3d.htm */
+
+    # Reverse by rows (cross-sectional units) because gnuplot draws the initial rows
+    # of "m" at the bottom of the plot
+    matrix m = reverse_columns==TRUE ? mreverse(mat) : mat
+    cnameset(m, "")
+    rnameset(m, "")
+
+    printf "$data << EOD\n"
+    printf "%12.5g", m
+    printf "EOD\n\n"
+end function
+
+function void print_data_table_style (const matrix mat)
+    /* Print matrix as a simple table (called )"table" style). */
+
+    cnameset(mat, "")
+    rnameset(mat, "")
+
+    printf "$data << EOD\n"
+    printf "%12.5g", mat
+    printf "EOD\n\n"
+end function
+
+function void print_border_pm3d (void)
+    /* Print gnuplot command to set border for pm3d plots */
+    print "set border 4095 front linetype -1 linewidth 0.5 linecolor rgb 'black'"
+end function
+
+function void print_view (const scalar x_axis, const scalar y_axis)
+    # Print gnuplot view command for 3D plots
+    printf "set view %d, %d\n", y_axis, x_axis
+end function
+
+function void print_contour_linetypes (scalar clevels)
+    # Print gnuplot linetype settings for contour plot levels
+
+    clevels = ceil(clevels)
+    clevels = xmin(clevels, 64)
+    lw = clevels > 12 ? 1 : 2
+
+    if $version < 20232  # 2023b
+        strings lcols = strsplit(sprintf("%06d", zeros(clevels,1)))
+    else
+        strings lcols = rgbmix("red", "blue", seq(0,clevels-1)/(clevels-1))
+    endif
+
+    loop i = 1..clevels
+        printf "set linetype %d lc \"#%s\" dt solid lw %d\n", 100+i, lcols[i], lw
+    endloop
+
+    printf "set cntrparam bspline levels %d firstlinetype 101\n", clevels
+end function
+
+function void print_add_grid (bool do_contour)
+    /* This function prints the gnuplot commands to add grid lines to the plot. */
+
+    if do_contour
+        printf "set grid lw 0.5 lt -1 lc \"#dddddd\"\n"
+    else
+        printf "set x2tics 1 format '' scale 0,0.001\n"
+        printf "set y2tics 1 format '' scale 0,0.001\n"
+        printf "set mx2tics 2\nset my2tics 2\n"
+        printf "set link x2\nset link y2\n"
+        printf "set grid front mx2tics my2tics lw 2 lt -1 lc rgb 'white'\n"
+    endif
+end function
+
+
+# Currently not needed
+/*
+function void print_custom_xtics_ytics (const string xtics, const string ytics)
+    # Print custom x and y tics for gnuplot
+
+    if strlen(xtics) > 0
+        printf "set xtics %s\n", xtics
+    endif
+
+    if strlen(ytics) > 0
+        printf "set ytics %s\n", ytics
+    endif
+end function
+*/
+
+function void print_autoscale_fix (void)
+    /* Print the gnuplot command to set autoscale fix */
+    printf "set autoscale fix\n"
+end function
+
+function void print_xtics_rotation (const scalar N)
+    # Prints the gnuplot command to rotate x-axis tics based on N
+    scalar angle = N > 9 ? (N > 20 ? 90 : 45) : 0
+    printf "set xtics rotate by %d right\n", angle
+end function
+
+function void print_ytics (strings row_names, scalar nrows_mat, const scalar fontsize)
+    # Prints the y-axis tic labels for a plot in gnuplot format.
+
+    printf "set ytics ("
+    loop i = 1..nrows_mat
+        s = row_names[i]
+        printf("'%s' %d", s, nrows_mat - i)
+        if i < nrows_mat
+            printf ", "
+        endif
+    endloop
+    printf ") out font \",%g\"\n", fontsize
+end function
+
+
+function void print_xtics (strings column_names, scalar ncols_mat, const scalar fontsize)
+#'
+#' Prints the x-axis tic labels for a plot in gnuplot format.
+#'
+#' @param column_names: A string array containing the column names to be used as tic labels.
+#' @param ncols_mat: A scalar indicating the number of columns (i.e., number of tics).
+#'
+#' The function generates and prints the gnuplot 'set xtics' command, formatting the tic labels
+#' according to the provided column names and their positions. If there is only one column,
+#' it prints a single tic; otherwise, it prints all tics separated by commas.
+
+    printf "set xtics ("
+    if ncols_mat == 1
+        # Gnuplot matrix columns are indexed from 0 to n-1, and the
+        # multi-column branch already uses i-1 for positions. The
+        # single-column case previously used position 1, which put the tic
+        # label one unit to the right (misaligned with the lone column and
+        # outside the plotted column center given by set xrange [-0.5:n-0.5]).
+        # Changing it to 0 aligns the label with the actual column position and keeps behavior consistent with the multi-column branch.
+        printf("'%s' %d", column_names[1], 0) # before: <", 1)">
+    else
+        loop i = 1..ncols_mat
+            s = column_names[i]
+            printf("'%s' %d", s, i-1)
+            if i < ncols_mat
+                printf ", "
+            endif
+        endloop
+    endif
+    printf ") out font \",%g\"\n", fontsize
+end function
+
+function void print_xrange (scalar n)
+    /* Print gnuplot set xrange command for columns */
+    scalar subtract = 0.5
+    printf "set xrange [-0.5:%4.1f]\n", n-subtract
+end function
+
+function void print_yrange (scalar n)
+    /* Print gnuplot set yrange command for rows */
+    scalar subtract = 0.5
+    printf "set yrange [%4.1f:%4.1f]\n", -subtract, n-subtract
+end function
+
+function void print_xyzrange (const string axis, const scalar min, const scalar max)
+    /* Print gnuplot set *range command for columns */
+
+    string ret = sprintf("set %srange [", axis)
+    if ok(min)
+        ret += sprintf("%.5f", min)
+    endif
+    ret += ":"
+    if ok(max)
+        ret += sprintf("%.5f", max)
+    endif
+    ret += sprintf("]\n")
+
+    print ret
+end function
+
+
+function void print_tics_nomirror (const scalar ticfs, const bool tics_out)
+    /* Print 'set tics nomirror' with optional font size and tics direction */
+
+    printf "set tics nomirror "
+    if tics_out == TRUE
+        printf "out "
+    else
+        printf "in "
+    endif
+    if ok(ticfs)
+        printf "font \",%d\"\n", ticfs
+    else
+        printf "\n"
+    endif
+end function
+
+function void print_axis_label (const string axis, const string label, const scalar labelfs)
+    /* Print the gnuplot set xlabel/ylabel/zlabel command with optional font size.
+       axis: "x", "y", or "z"
+       If axis is "z", rotate label by 90 degrees. */
+
+    if strlen(label) > 0
+        string axislab = strsub(label, "\"", "'")
+        printf "set %slabel \"%s\" ", axis, strsub(axislab, "_", "")
+        if ok(labelfs)
+            printf "font \",%d\" ", labelfs
+        endif
+        if axis == "z"
+            printf "rotate by 90 "
+        endif
+        printf "\n"
+    endif
+end function
+
+function string set_title (const bundle self)
+    /* Set the title for the heatmap */
+
+    string ret = ""
+    if strlen(self.title) > 0
+        ret = self.title
+        ret = strsub(ret, "'", "")  # remove single quotes (apostrophes)
+    endif
+
+    return ret
+end function
+
+function void print_title (const string title,
+                           const scalar fontsize)
+    /* code description
+    return: type, description */
+
+    if strlen(title) == 0
+        return
+    endif
+
+    printf "set title '%s' ", title
+    if ok(fontsize)
+        printf "font \",%d\"\n", fontsize
+    else
+        printf "\n"
+    endif
+end function
+
+
+function void print_enhanced (const scalar valfs)
+    /* Print enhanced terminal option if valfs (valfs) is set  */
+    if ok(valfs)
+        printf "set termoption enhanced\n"
+    endif
+end function
+
+
+function void heatmap (const matrix mat,
+                       bundle opts[null])
+    /* Main function */
+
+    bundle self = empty
+    if exists(opts)
+        bundle self = opts + default_opts()
+    else
+        bundle self = default_opts()
+    endif
+
+    ### Process options
+    string self.name_mat = argname(mat)
+    scalar self.do_contour = self.clevels > 0
+    ncols_mat = cols(mat)
+    nrows_mat = rows(mat)
+
+    errorif(self.do_contour == TRUE && xmin(nrows_mat, ncols_mat) == 1,
+            "Cannot do a contour plot of a vector")
+
+    matrix self.mat = mat
+    scalar self.ncols_mat = cols(self.mat)
+    scalar self.nrows_mat = rows(self.mat)
+    string self.actual_title = set_title(self)
+    strings self.column_names = array(0)  # not supported yet
+    strings self.row_names = array(0)     # not supported yet
+
+    if self.do_contour == TRUE
+        self.plottype = "contour"
+        create_contour_plot(self)
+    else
+        self.plottype = "heatmap"
+        create_heatmap_plot(self)
+    endif
+end function
+
+
+function void contour_plot (const matrix mat, bundle opts[null], scalar clevels[::8])
+    /* Create a contour plot: ensure clevels is set (default 8) and call heatmap().
+       Convenience public wrapper for heatmap(). */
+
+    bundle self = exists(opts) ? opts + default_opts() : default_opts()
+
+    if ok(clevels)
+        self.clevels = clevels
+    elif !inbundle(self, "clevels") || self.clevels == 0
+        self.clevels = 8
+    endif
+
+    heatmap(mat, self)
+end function
+
+
+function void heatmap_plot (const numeric Input, bundle opts[null])
+    /* Create a standard heatmap: accept matrix, series (time/panel) or a list of time-series;
+       force clevels=0 and call heatmap(). */
+
+    set skip_missing off
+
+    bundle self = exists(opts) ? opts + default_opts() : default_opts()
+    scalar self.clevels = 0
+    string self.input_type = typename(Input)
+    scalar data_type = $datatype
+    matrix mat = {}
+
+    if self.input_type == "matrix"
+        mat = Input
+    else  # series or list are passed
+        errorif(data_type == 1,
+                "Cross-sectional series are not supported for heatmap_plot()")
+
+        # If data_type is time-series (data_type=2): Accept series and list
+        if data_type == 2
+            errorif(nelem(Input) <= 1, "List must contain at least two time series")
+            mat = {Input}
+        else
+            # If data_type is of type panel (data_type=3): Accept series only
+            errorif(data_type == 3 && self.input_type != "series",
+                    "Panel data must be a series")
+            mat = {Input}
+
+            # panel series:
+            # Each column refers to a cross-sectional unit; row refers to time dim.
+            scalar num_periods = $pd
+            scalar n_units = $nobs / num_periods
+            mat = mshape({Input}, num_periods, n_units)
+        endif
+
+        matrix self.obsdate = $datatype == 2 ? {$obsdate} : values($obsdate)
+        mat = transp(mat)  # rows: cross-sectional unit, cols: time period
+    endif
+
+    # Retrieve variable names
+    if self.input_type == "list"
+        strings self.varnames = varnames(Input)
+    elif self.input_type == "matrix"
+        strings self.varnames = cnameget(Input)
+        if nelem(self.varnames) == 0
+            self.varnames = defarray(argname(Input))
+        endif
+    else
+        strings self.varnames = defarray(argname(Input))
+    endif
+
+    heatmap(mat, self)
+    set skip_missing on
+end function
+
+function void pm3d_plot (const numeric Input, bundle opts[null])
+    /* Public wrapper for pm3d plotting.
+       Accepts:
+         - a matrix representing a z-grid (cols != 3) => data_is_grid = TRUE
+         - a matrix with 3 columns => interpreted as x y z rows
+         - a list of three series => combined into Nx3 rows (x,y,z)
+    */
+
+    bundle self = exists(opts) ? opts + default_opts() : default_opts()
+    string self.input_type = typename(Input)
+    matrix mat = {}
+    scalar data_is_grid = FALSE
+    string self.plottype = "pm3d"
+
+    if exists(opts)
+        # default palette (jet) for pm3d
+        scalar self.native = !inbundle(opts, "native") ? TRUE : opts.native
+        scalar self.grid = !inbundle(opts, "grid") ? TRUE : opts.grid
+    else
+        scalar self.native = TRUE
+        scalar self.grid = TRUE
+    endif
+
+    # the contour option requires grid
+    self.grid = self.with_contour == TRUE ? TRUE : self.grid
+
+    if self.input_type == "matrix"
+        mat = Input
+        if cols(mat) != 3
+            data_is_grid = TRUE
+        endif
+
+    elif self.input_type == "list"
+        errorif(nelem(Input) != 3,
+                "pm3d_plot requires a list of three series when input is a list")
+        # pack list-of-three-series into Nx3 matrix (each series yields a column)
+        matrix mat = {Input}
+    else
+        errorif(TRUE, "pm3d_plot supports matrix or list-of-three-series inputs")
+    endif
+
+    if self.input_type == "list"
+        strings self.varnames = varnames(Input) # TODO: retrieve graph-names if specified
+    elif self.input_type == "matrix"
+        strings self.varnames = cnameget(Input)
+        if nelem(self.varnames) == 0
+            self.varnames = defarray(argname(Input))
+        endif
+    else
+        strings self.varnames = defarray(argname(Input))
+    endif
+    string self.name_mat = argname(Input)
+    string self.actual_title = set_title(self)
+
+    create_pm3d_plot(self, mat, data_is_grid)
+end function
+
 
 function void heatmap_func (string func,
                             scalar res[8::],
@@ -400,44 +1131,48 @@ function void heatmap_func (string func,
                             scalar y0,
                             scalar y1,
                             bundle xopts[null])
-    matrix M = mshape(NA, res, res)
-    dx = (x1 - x0)/(res-1)
-    dy = (y1 - y0)/(res-1)
+    /* This function produces a heatmap plot of a two-variable function,
+       with resolution given by the scalar res. */
 
-    opts = defbundle("do_labels", FALSE, "quiet", TRUE)
-    opts.native = 1
+    matrix mat = mshape(NA, res, res)
+    scalar dx = (x1 - x0)/(res-1)
+    scalar dy = (y1 - y0)/(res-1)
+    bundle self = defbundle("do_labels", FALSE, "quiet", TRUE)
+    scalar self.native = 1
+    scalar x = x0
+
     if exists(xopts)
-        opts = opts + xopts
+        self = self + xopts
         if inbundle (xopts, "native")
             # explicit takes precedence
-            opts.native = xopts.native
+            self.native = xopts.native
         endif
     endif
 
-    has_param = inbundle(opts, "fparam")
+   scalar has_param = inbundle(self, "fparam")
 
-    scalar x = x0
-    loop j = 1 .. res
+    loop j = 1..res
         scalar y = y1
-        loop i = 1 .. res
+        loop i = 1..res
             if has_param
-                M[i,j] = feval(func, x, y, opts.fparam)
+                mat[i,j] = feval(func, x, y, self.fparam)
             else
-                M[i,j] = feval(func, x, y)
+                mat[i,j] = feval(func, x, y)
             endif
             y -= dy
         endloop
         x += dx
     endloop
 
-    opts.xtics = tics(x0, x1, res)
-    opts.ytics = tics(y0, y1, res)
-    if !inbundle(opts, "title")
-        opts.title = func ~ "(x,y)"
+    self.xtics = tics(x0, x1, res)
+    self.ytics = tics(y0, y1, res)
+    if !inbundle(self, "title")
+        self.title = func ~ "(x,y)"
     endif
 
-    heatmap(M, opts)
+    heatmap(mat, self)
 end function
+
 
 function void heatmap_GUI (matrix mat "Matrix to plot",
                            string title[null] "Title",
@@ -445,50 +1180,181 @@ function void heatmap_GUI (matrix mat "Matrix to plot",
                            bool contour[0] "Contour plot",
                            int palette[1:4:1] "Palette" {"native", "zerowhite", "BW", "custom"},
                            string coldest[null] "Coldest color (for use with custom palette)",
-      string hottest[null] "Hottest color (for use with custom palette)",
-      scalar minimum[NA] "Lower limit for palette",
-      scalar maximum[NA] "Upper limit for palette",
-      bool pv[0] "Print values",
-      int dec[0:6:0] "Decimals")
-    bundle opts = defbundle("do_labels", do_labels)
+                           string hottest[null] "Hottest color (for use with custom palette)",
+                           scalar minimum[NA] "Lower limit for palette",
+                           scalar maximum[NA] "Upper limit for palette",
+                           bool pv[0] "Print values",
+                           int decimal_places[0:6:0] "Decimals")
+    /* GUI function */
+
+    bundle self = defbundle("do_labels", do_labels)
     if contour
-        opts.clevels = 8
+        scalar self.clevels = 8
     endif
 
-    opts.title = exists(title) ? title : "  "
-    opts.quiet = TRUE
-    opts.dest = "display"
+    string self.title = exists(title) ? title : "  "
+    scalar self.quiet = TRUE
+    string self.dest = "display"
 
     if ok(minimum) || ok(maximum)
-        opts.limits = {minimum, maximum}
+        self.limits = {minimum, maximum}
     endif
 
     # set up some sensible colour schemes
-
-    opts.native = FALSE
+    self.native = FALSE
     if palette == 1
-        opts.native = TRUE
+        self.native = TRUE
     elif palette == 2
-        opts.zerowhite = TRUE
+        self.zerowhite = TRUE
     elif palette == 3
-        opts.coldest="black"
-        opts.hottest="white"
+        self.coldest="black"
+        self.hottest="white"
     elif palette == 4
         if !(exists(coldest) && exists(hottest))
             print "With a custom color scheme you must specify the 'hot' and 'cold' colors\n"
             print "Reverting to the builtin palette\n"
-            opts.native = TRUE
+            self.native = TRUE
         else
             err = colchk(coldest, hottest)
             errorif(err == 1, "Color " ~ coldest ~ " is invalid")
             errorif(err == 2, "Color " ~ hottest ~ " is invalid")
-            opts = defbundle("coldest", coldest, "hottest", hottest) + opts
+            self = defbundle("coldest", coldest, "hottest", hottest) + self
         endif
     endif
 
     if pv
-        opts.printvals = dec
+        self.printvals = decimal_places
+        self.ticfs = 7
     endif
 
-    heatmap(mat, opts)
+    heatmap(mat, self)
+end function
+
+
+function void print_datetics (const matrix obsdate,
+                              const string axis,
+                              const bundle self)
+    /* Print gnuplot commands to set axis tics from an ISO8601 integer series.
+       axis: "x", "y", or "z"
+       fmt: optional format string using %Y, %m, %d. */
+
+    strings Dates = iso8601_to_period_labels(obsdate) # use calendar_utils pkg here
+    scalar ndates = nelem(Dates)
+
+    # choose at most ~max_date_tics labels to avoid clutter
+    scalar maxlabels = self.max_date_tics
+    scalar step = ndates > maxlabels ? ceil(ndates / maxlabels) : 1
+
+    printf "set %stics (", axis
+    scalar first = 1
+    loop i = 1..ndates
+        if i == 1 || ((i-1) % step == 0)
+            string date = Dates[i]
+            if first
+                printf("'%s' %d", date, i-1)
+                first = 0
+            else
+                printf(", '%s' %d", date, i-1)
+            endif
+        endif
+
+    endloop
+    printf ") out rotate by %g offset %g,%g font ',%g'\n",
+        self.date_rotate, self.date_offset_x, self.date_offset_y, self.ticfs
+end function
+
+
+function void print_gnuplot_time_axis (const bundle self)
+    /* NOT IN USE
+        Print gnuplot commands for date axis using timefmt and displayfmt.
+       obsaxis: "x", "y", or "z"
+       timefmt: format of the input data (e.g., "%Y%m%d")
+       date_format: format for axis labels (e.g., "%Y-%m")
+       rotate: optional, angle for label rotation
+       date_offset_x, date_offset_y: optional, label offset
+       ticfs: optional, font size for tics
+    */
+
+    printf "set %sdata time\n", self.obsaxis
+    printf "set timefmt \"%s\"\n", "%Y%m%d"  # natively ISO8601
+    printf "set format %s \"%s\"\n", self.obsaxis, self.date_format
+
+    string xtics_cmd = sprintf("set %stics nomirror", self.obsaxis)
+    if self.tics_out
+        xtics_cmd ~= " out nomirror"
+    endif
+    if ok(self.date_rotate)
+        xtics_cmd ~= sprintf(" rotate by %g", self.date_rotate)
+    endif
+    if ok(self.date_offset_x) || ok(self.date_offset_y)
+        xtics_cmd ~= sprintf(" offset %g,%g",
+            ok(self.date_offset_x) ? self.date_offset_x : 0,
+            ok(self.date_offset_y) ? self.date_offset_y : 0)
+    endif
+    if ok(self.ticfs)
+        xtics_cmd ~= sprintf(" font ',%g'", self.ticfs)
+    endif
+    print xtics_cmd
+end function
+
+
+function scalar gnuplot_version (void)
+    /* Retrieve installed gnuplot version as integer. */
+
+    # The gnuplot version is available in $sysinfo since gretl 2024a
+    scalar version = $version >= 20240 ? atof(strsub($sysinfo.gnuplot, ".", "")) : 500
+    return version
+end function
+
+
+function void check_string_utils_version (void)
+    /* Check for required string_utils package version. */
+    pkg query string_utils --quiet
+    bundle result = $result
+
+    errorif(!nelem(result), sprintf("The 'string_utils' package is required but not installed.\nPlease install it using the command:\npkg install string_utils"))
+
+    scalar version = result.version
+    if version < 0.7
+        string msg = sprintf("At least version 0.7 of the string_utils package is required.\n")
+        msg += sprintf("You have version %.1f installed.\n", version)
+        msg += sprintf("Please update the package using the command:\n")
+        msg += sprintf("pkg install string_utils\n")
+
+        errorif(version < 0.7, msg)
+    else
+        include string_utils.gfn
+    endif
+end function
+
+function strings iso8601_to_period_labels (const matrix obsdates)
+    /* Convert a matrix of ISO8601 dates (YYYYMMDD) to period labels.
+       If all months are in {1,4,7,10}, use quarterly labels YYYYqN,
+       otherwise use monthly labels YYYYmN.
+       Return a string array of labels.
+
+       Written by Allin. */
+
+    scalar nobs = rows(obsdates)
+    strings S = array(nobs)
+    matrix y = floor(obsdates/10000)
+    matrix p = floor((obsdates - 10000*y)/100)
+    scalar frequency = 1
+    if !isconst(p)
+        frequency = sumc(contains(p, {1,4,7,10})) == nobs ? 4 : 12
+    endif
+
+    loop i=1..nobs
+        if frequency == 1
+            S[i] = sprintf("%d", y[i])
+        elif frequency == 4
+            S[i] = sprintf("%dq%d", y[i], 1 + floor(p[i]/3))
+        elif frequency == 12
+            S[i] = sprintf("%dm%d", y[i], p[i])
+        else
+            S[i] = sprintf("%d", y[i])  # fallback
+        endif
+    endloop
+
+   return S
 end function

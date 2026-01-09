@@ -1,59 +1,46 @@
 # DESCRIPTION
 
-This package is intended for producing heatmap or contour plots:
-Heatmaps are 2-dimensional plots where you have a rectangular array of
-"tiles" whose colours carry the relevant information; contour plots
-draw lines where the information is displayed by joining points with
-the same value.
+This package produces heatmap, contour and 3D pm3d plots using gnuplot. Heatmaps display a rectangular array of tiles whose colours represent values; contour plots connect equal-value points with lines; pm3d plots render a coloured 3D surface using gnuplot's pm3d/splot features.
 
-The package offers 2 public functions; both feature a limited degree
-of customisability via an "options" bundle (discussed later).
+The package provides a small set of public wrappers and an options bundle to customise appearance and behaviour.
 
-Moreover, a menu entry can be added under the "View" menu, which
-offers a simplified interface to the "heatmap" function.
+Please ask questions and report bugs on the Gretl mailing list if possible. Alternatively, create an issue ticket on the github repo (see below).
+Source code and test script(s) can be found here: https://github.com/atecon/heatmap
 
 # AVAILABLE FUNCTIONS
 
 ## heatmap(X, opts)
 
 Arguments:
-- X: matrix, required
-- opts: bundle, optional (see below)
 
-This function produces a heatmap or contour plot of a matrix,
-depending on whether the "clevels" optional parameter is set (see
-below).
+- X: matrix, required
+- opts: bundle, optional (see OPTIONS)
+
+Produces a heatmap of matrix X. If `clevels` in opts is set (>0) a contour plot is produced instead.
 
 ## heatmap_func(func, res, x0, x1, y0, y1, opts)
 
 Arguments:
-- func: string
-- res: scalar
-- x0, x1: two scalars
-- y0, y1: two scalars
+
+- func: string (name of function to evaluate)
+- res: scalar (resolution)
+- x0, x1: scalars (x range)
+- y0, y1: scalars (y range)
 - opts: bundle, optional
 
-This function produces a heatmap plot of a two-variable function, with
-resolution given by the scalar res.
+This function produces a heatmap plot of a two-variable function, with resolution given by the scalar `res`.
 
-The function to plot is evaluated on a rectangular mesh where *x* goes
-from x0 to x1 and *y* goes from y0 to x1. Note: reasonable values for
-the "res" parameter go from 50 to 400, but it really depends on the
-context.
+The function to plot is evaluated on a rectangular mesh where *x* goes from `x0` to `x1` and *y* goes from `y0` to `y1`.
 
-The function must be passed via the argument "func", which should
-contain a string such that "func(x,y)" evaluates to a scalar. For
-example, the native function "atan2" should work OK. To plot the
-arc tangent function in the region x=±1, y=±1, use the line
+Note: reasonable values for the `res` parameter go from 50 to 400, but it really depends on the context.
+
+The function must be passed via the argument `func`, which should contain a string such that `func(x,y)` evaluates to a scalar. For example, the native function `atan2` should work OK. To plot the arc tangent function in the region x=±1, y=±1, use the line
 
 ```
 heatmap_func("atan2", 40, -1, 1, -1, 1)
 ```
 
-Optionally, a third parameter of matrix type can be passed to "func",
-by including it into the options bundle under the key "fparam". For
-example, the following code can be used for plotting the function
-z = x^2 + 2*y^2 - 3*x*y
+Optionally, a third parameter of matrix type can be passed to "func", by including it into the options bundle under the key `fparam`. For example, the following code can be used for plotting the function z = x^2 + 2*y^2 - 3*x*y
 
 ```
 function scalar myfunc(scalar x, scalar y, matrix a)
@@ -66,83 +53,106 @@ opts.fparam = {1,2,-3}
 heatmap_func("myfunc", 40, -1, 1, -1, 1, opts)
 ```
 
+
+## heatmap_plot(Input, opts[null])
+
+Arguments:
+
+- Input: numeric, required - accepts a matrix, a list of time-series, or a panel series
+- opts: bundle, optional
+
+Convenience wrapper that converts common Gretl data shapes to a matrix and calls `heatmap()`.
+
+**Note**: When working with a panel and markers are present, the string_utils package is required (at least version 0.7). Otherwise, an error will be raised.
+
+
+## contour_plot(X, opts[null])
+
+Arguments:
+
+- X: matrix, required
+- opts: bundle, optional
+
+Convenience wrapper that forces a contour plot by setting `clevels` and delegating to `heatmap()`.
+
+## pm3d_plot(Input, opts[null])
+
+Arguments:
+
+- Input: numeric, required — accepts:
+  - a matrix with cols != 3: interpreted as a z-grid (regular lattice)
+  - a matrix with 3 columns: interpreted as rows of (x y z)
+  - a matrix with 2 columns and an additional column for date values passed by `obsdate` in opts (see example)
+  - a list of three series: combined into an Nx3 (x,y,z) table
+- opts: bundle, optional
+
+Creates a 3D surface using gnuplot's pm3d and splot. Table-style inputs (x y z) may be interpolated with gnuplot's `dgrid3d` controlled by `grid_resolution`.
+
+*NOTE*: pm3d plotting is not currently exposed via the GUI menu in this version.
+
 # OPTIONS
 
-As for the options bundle, the active keys are:
+The functions accept a bundle of options. Common keys are listed here; only keys relevant to the user are shown.
 
-## general parameters
+# General parameters
 
-- dest: string, the output file name. The default value is "display",
-  which causes the plot to appear on screen
-- quiet: boolean, don't print a completion message (default = FALSE)
-- fparam: matrix, used in conjunction with the heatmap_func (see above)
-- clevels: scalar, max number of levels for contour plots (see below)
-- grid: boolean, plot a grid (white for heatmaps, see below for
-  contour plots)
+- `clevels`: scalar, max number of levels for contour plots (see below)
+- `dest`: string — output file name; default "display" (show on screen)
+- `fparam`: matrix, used in conjunction with the heatmap_func (see above)
+- `grid`: boolean — enable plotting grid / smoothing (varies by plot type) (default = FALSE but TRUE for pm3d plot)
+- `quiet`: boolean — suppress completion message (default = FALSE)
 
-## colours
 
-- native: boolean, use the native gnuplot palette; the default is
-  FALSE for heatmap and TRUE for heatmap_func
-- limits: matrix. A 2-element vector for controlling the minimum and
-  maximum values for the colour palette. If either is set to NA, the
-  min and max (respectively) of the input matrix will be used. This
-  can be useful, for example, when plotting correlation matrices.
-- coldest: string, colour for the minimum of the plotted values. This
-  setting is active if the 'native' option is 0. It has to be in a
-  format recognised by gnuplot, eg "black" or "#0000cc" (default =
-  "blue")
-- hottest: string, colour for the maximum of the plotted values. This
-  setting is active if the 'native' option is 0. It has to be in a
-  format recognised by gnuplot, eg "white" or "#aa88ed" (default =
-  "red")
-- zerowhite: boolean, useful for the cases when it is important to
-  separate positive and negative values: if enabled, will colour 0
-  entries as white (default = 0). This setting is active only if the
-  'native' option is 0.
+## Colours and palette
 
-## strings and labels
+- `native`: boolean — if TRUE use native palette; for pm3d the default is the MATLAB-like "jet" palette unless overridden
+- `limits`: matrix — {min, max} for the color scale; NA for automatic
+- `coldest`: string — color for minimum (when native = FALSE)
+- `hottest`: string — color for maximum (when native = FALSE)
+- `zerowhite`: boolean — paint zero values white (when native = FALSE)
 
-- title: string, the plot title
-- do_labels: boolean, decorate the plot with x and y labels (default:
-  false). If set to 1, the plot will use the row and column labels of
-  the matrix, if present.
-- printvals: an integer, controlling whether to print the matrix
-  values in the plot. If negative, nothing is printed. If positive, it
-  controls the number of decimals. (default = -1)
-- xlabel: string, optional x-axis title
-- ylabel: string, optional y-axis title
+## Labels, tics and fonts
 
-## font sizes
+- `title`, `xlabel`, `ylabel`, `zlabel`: strings for axis/title labels
+- `do_labels`: boolean — use matrix row/column names for axis tics
+- `printvals`: integer — print matrix values inside tiles (heatmap)
+- `tics_out`: boolean — draw tics outside the plot
+- `labelfs`, `ticfs`, `titlefs`, `valfs`: scalars — font sizes for labels, tics, title, printed values
 
-- labelfs: font size for the x- and y-titles (default = 14)
-- ticfs: font size fot the tic marks (default = 14)
-- titlefs: font size for the plot title (default = 14)
-- valfs: font size for the matrix values (default = 14)
+## Date-related options
+
+When passing time-series data or obsdate for an axis:
+
+- `date_format`: string (e.g. "%Y-%m")
+- `date_rotate`: scalar — rotation angle for date labels
+- `date_offset_x`, `date_offset_y`: scalar — offset for date labels
+- `max_date_tics`: scalar — max number of date tics to avoid clutter
+- `obsaxis`: string — which axis to use for obsdate ("x", "y", or "z")
+- `obsdate`: matrix — column vector of ISO8601 integers (YYYYMMDD or YYYYMM)
+
+## pm3d-specific options
+
+- `colorbox`: boolean — draw colorbox legend (pm3d only; default = TRUE)
+- `colorbox_size`: matrix {w,h} — user size for colorbox (pm3d only)
+- `colorbox_position`: matrix {x,y} — user position for colorbox (pm3d only)
+- `grid_resolution`: scalar — resolution for gnuplot dgrid3d interpolation when producing a grid from (x,y,z) tables (default 25). Set to 0 to disable dgrid3d.
+- `with_contour`: boolean — if TRUE, combine contour/hidden3d settings with pm3d rendering (useful for matrix inputs).
+- `view_x_axis`, `view_y_axis`: scalars — control rotation/view angles for `set view` (defaults commonly 50,35)
+- `xrange_min`, `xrange_max`, `yrange_min`, `yrange_max`, `zrange_min`, `zrange_max`: scalars — explicit axis ranges (NA for auto)
+
+These pm3d keys are present in the package default options bundle but are only used by `pm3d_plot()`.
 
 # CONTOUR PLOTS
 
-Starting from version 1.7, a contour plot can be produced instead of a
-heatmap. This happens if the "clevels" scalar in the option bundle is
-set to a value between 1 and 32. The number itself refers to the
-number of points on the z-axis that gnuplot will use for plotting the
-contour lines. Note that there is no predictable relationship between
-the "clevels" setting and the number of contour lines you're going to
-get, but in most cases, with higher numbers you should see more
-lines. With gretl 2023c or later, contour lines will be coloured from
-blue (lower z) to red (higher).
+Set `clevels` in the options bundle to produce contour plots from matrices. Typical values are between 1 and 32; the convenience wrapper `contour_plot()` defaults to 8. You may also pass `contour_levels` (vector) to set discrete contour levels and `isosamples` (2-element vector) to control sampling resolution.
 
-Some options have no effects with contour plots, namely: "do_labels",
-"printvals", "native", "limits", "coldest", "hottest" and
-"zerowhite".
+Some keys have no effect with contour plots: `do_labels`, `printvals`, `native`, `limits`, `coldest`, `hottest`, `zerowhite`.
 
-Conversely, the "clevels" setting is mandatory, for obvious reasons;
-the "grid" boolean key may be used for plotting a 2-dimensional dotted
-grid.
 
-# CHANGELOG
+# CHANGELOG (highlights)
 
-* 1.8 -> 1.9: introduce adjustable font sizes (see the "correlations" example for a demonstration).
+* 1.9 -> 2.0: add support for creating 3D-plot via `pm3d_plot()` function; add new wrapper functions `contour_plot()` and `heatmap_plot()`; Raise minimum Gretl version to 2023b.
+* 1.8 -> 1.9: adjustable font sizes, improved palettes
 * 1.7 -> 1.8: extend the "grid" switch to heatmaps. Also, amend the "correlations" example to show the new feature.
 * 1.6 -> 1.7: contour plots; "xlabel" and "ylabel" options.
 * 1.5 -> 1.6: introduce the "limits" option. Enable "hottest" and "coldest" settings with "zerowhite". Switch to markdown for help.

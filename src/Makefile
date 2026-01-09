@@ -9,6 +9,7 @@ $(PKG).zip : $(PKG).gfn examples
 
 install : $(PKG).zip
 	echo "install ./$(PKG).zip --local" | gretlcli -b -
+	cat $(PKG)_help.md | tee ../README.md
 
 clean :
 	rm -rf *~ $(PKG).gfn $(PKG).zip session.inp examples/*~

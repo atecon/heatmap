@@ -3,24 +3,96 @@ clear
 include heatmap.gfn
 set seed 20111158
 
-### random matrix
+# Choose example
+scalar EXAMPLE = 1  # 1: without dataset, 2: with dataset
 
-n = 32
-A = conv2d(ones(6,6), mnormal(n, n))
-heatmap(A)             # default heatmap plot
+if EXAMPLE == 1
+    ### random matrix
+    n = 32
+    A = conv2d(ones(6,6), mnormal(n, n))
 
-bundle opts = _(title="Matrix A with contour lines",
-  titlefs=18, quiet=1, clevels=4)
+    ##########
+    # Heatmap
+    ##########
+    # default heatmap plot
+    heatmap(A)
+    # Use alternatively the alias function
+    #heatmap_plot(A)
 
-heatmap(A, opts)      # contour plot with bigger title
+    # Tweak the plot with options
+    bundle opts = _(title="My heatmap title",
+                    titlefs=18, quiet=1)
+    heatmap_plot(A, opts)
 
-### function plot
 
-bundle opts = _(title="binomial coefficients",
-  xlabel="n", ylabel="k")
-heatmap_func("bincoeff", 50, 10, 16, 1, 10, opts)
+    #############
+    # Contour plot
+    #############
+    # Default version
+    contour_plot(A)
 
-# contour plot with a grid
+    # Contour plot with custom options
+    bundle opts = _(title="Matrix A with contour lines",
+                    titlefs=18, quiet=1, clevels=4)
+    contour_plot(A, opts)
 
-opts = opts + _(clevels=16, grid=1)
-heatmap_func("bincoeff", 50, 10, 16, 1, 10, opts)
+
+    ##################
+    ### Function plot
+    ##################
+    bundle opts = _(title="binomial coefficients",
+                    xlabel="n", ylabel="k")
+    heatmap_func("bincoeff", 50, 10, 16, 1, 10, opts)
+
+    # contour plot with a grid
+    opts = opts + _(clevels=16, grid=1)
+    heatmap_func("bincoeff", 50, 10, 16, 1, 10, opts)
+endif
+
+if EXAMPLE == 2
+
+    # Work with time-series - list of series must be passed (each plotted over time)
+    open denmark.gdt --quiet
+    ## list of series
+    list L = diff(dataset)
+    heatmap_plot(L, _(title="1st differences",
+                    titlefs=12))
+
+    # Work with panel data - single series only can be passed
+    # Values for each unit are plotted over time
+    open grunfeld.gdt --quiet
+    series y = ldiff(invest)
+    heatmap_plot(y, _(title="1st differences",
+                    titlefs=12))
+
+    ## Add markers for firms
+    ## NOTE: Running this example will fail if the package "string_utils"
+    ## (>=0.7) isn't installed
+    # markers --from-series=firmname
+    # heatmap_plot(y, _(title="1st differences",
+    #                 titlefs=12,
+    #                 ticfs=8))
+
+
+    ###########
+    # pm3d plot
+    ###########
+    open denmark.gdt --quiet
+    ## matrix use
+    matrix M = mnormal(30,15)
+    pm3d_plot(M)
+
+    # rotate view
+    bundle opts = _(with_contour=TRUE,
+                    grid=TRUE,
+                    view_x_axis=50, view_y_axis=35)
+    pm3d_plot(M, opts)
+
+    # 2D-matrix and vector of observation dates on y-axis
+    matrix X = {IBO, IDE}
+    bundle opts = _(obsdate={$obsdate}, obsaxis="y",
+                    date_format="%Y-%m",
+                    date_offset_y=0.1,
+                    date_offset_x=1.8)
+    pm3d_plot(X, opts)
+endif

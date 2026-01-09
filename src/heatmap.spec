@@ -1,10 +1,11 @@
-author = Riccardo "Jack" Lucchetti
-email = r.lucchetti@univpm.it
-version = 1.9
-date = 2025-02-08
-description = heatmap and contour plots
+author = Riccardo "Jack" Lucchetti and Artur Tarassow
+email = atecon@posteo.de
+version = 2.0
+date = 2025-10-10
+description = Heatmap, contour and 3D plots
 tags = C10
-min-version = 2021a
+min-version = 2023b
+public = heatmap heatmap_func heatmap_GUI heatmap_plot contour_plot pm3d_plot
 
 data-requirement = no-data-ok
 gui-main = heatmap_GUI
@@ -13,7 +14,6 @@ data-files = examples
 
 label = Heatmap
 menu-attachment = MAINWIN/View
-public = heatmap heatmap_func heatmap_GUI
 no-print = heatmap_func heatmap_GUI
 help = heatmap_help.md
 sample-script = heatmap_sample.inp
