@@ -1,7 +1,7 @@
 author = Riccardo "Jack" Lucchetti and Artur Tarassow
 email = atecon@posteo.de
-version = 2.0
-date = 2025-10-10
+version = 2.1
+date = 2026-01-09
 description = Heatmap, contour and 3D plots
 tags = C10
 min-version = 2023b
