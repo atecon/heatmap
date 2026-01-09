@@ -982,8 +982,8 @@ function void heatmap (const matrix mat,
     scalar self.ncols_mat = cols(self.mat)
     scalar self.nrows_mat = rows(self.mat)
     string self.actual_title = set_title(self)
-    strings self.column_names = array(0)  # not supported yet
-    strings self.row_names = array(0)     # not supported yet
+    strings self.column_names = cnameget(mat)
+    strings self.row_names = rnameget(mat)
 
     if self.do_contour == TRUE
         self.plottype = "contour"
