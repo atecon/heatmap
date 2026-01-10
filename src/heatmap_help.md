@@ -1,6 +1,6 @@
 # DESCRIPTION
 
-This package produces heatmap, contour and 3D plots using gnuplot. Heatmaps display a rectangular array of tiles whose colours represent values; contour plots connect equal-value points with lines; pm3d plots render a coloured 3D surface using gnuplot's pm3d/splot features.
+This package produces heatmap, contour and 3D plots using gnuplot. Heatmaps display a rectangular array of tiles whose colours represent values; contour plots connect equal-value points with lines; 3D plots render a coloured surface using gnuplot's pm3d/splot features.
 
 The package provides a small set of public wrappers and an options bundle to customise appearance and behaviour.
 
